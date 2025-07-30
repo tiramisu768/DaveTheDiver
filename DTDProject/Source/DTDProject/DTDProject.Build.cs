@@ -6,6 +6,8 @@ public class DTDProject : ModuleRules
 {
 	public DTDProject(ReadOnlyTargetRules Target) : base(Target)
 	{
+		PublicIncludePaths.AddRange(new string[] { "DTDProject" });
+
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });

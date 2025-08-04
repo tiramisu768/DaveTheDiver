@@ -3,14 +3,15 @@
 
 #include "GameModeBase/CharacterGameModeBase/CharacterGameModeBase.h"
 #include "CharacterGameModeBase.h"
-#include "MyCharacter/MyCharacter.h"
+#include  "MyRobo/MyRobo.h"
 #include "Controller/MyCharacterController/MyCharacterController.h"
 
 ACharacterGameModeBase::ACharacterGameModeBase()
 {
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/BluePrint/MyCharacter/BP_MyCharacter.BP_MyCharacter_C"));
-	if (PlayerPawnBPClass.Succeeded())
-		DefaultPawnClass = PlayerPawnBPClass.Class;
+	static ConstructorHelpers::FClassFinder<AMyRobo> MyRoboBPClass(TEXT("/Game/BluePrint/MyRobo/BP_MyRobo.BP_MyRobo_C"));
+	if (MyRoboBPClass.Succeeded())
+		DefaultPawnClass = MyRoboBPClass.Class;
 
 	PlayerControllerClass = AMyCharacterController::StaticClass();
+	//HUDClass = AMyHUD::StaticClass();
 }

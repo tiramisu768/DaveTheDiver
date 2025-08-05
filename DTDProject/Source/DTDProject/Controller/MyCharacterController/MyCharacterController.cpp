@@ -14,28 +14,28 @@
 
 AMyCharacterController::AMyCharacterController()
 {
-	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyCharacter/Input/IA_Move.IA_Move'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_Move.IA_Move'"));
 	if (MoveActionFinder.Succeeded())
 	{
 		MoveAction = MoveActionFinder.Object;
 	}
-	/*static ConstructorHelpers::FObjectFinder<UInputAction> EquipActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyCharacter/Input/IA_Equip_Ch.IA_Equip_Ch'"));
+	/*static ConstructorHelpers::FObjectFinder<UInputAction> EquipActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Equip_Ch.IA_Equip_Ch'"));
 	if (EquipActionFinder.Succeeded())
 	{
 		EquipAction = EquipActionFinder.Object;
 	}*/
-	/*static ConstructorHelpers::FObjectFinder<UInputAction> AttackActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyCharacter/Input/IA_Attack_Ch.IA_Attack_Ch'"));
+	/*static ConstructorHelpers::FObjectFinder<UInputAction> AttackActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Attack_Ch.IA_Attack_Ch'"));
 	if (AttackActionFinder.Succeeded())
 	{
 		AttackAction = AttackActionFinder.Object;
 	}*/
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextFinder(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/BluePrint/MyCharacter/Input/IMC_Character.IMC_Character'"));
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextFinder(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/BluePrint/MyRobo/Input/IMC_Character.IMC_Character'"));
 	if (InputMappingContextFinder.Succeeded())
 	{
 		MappingContext = InputMappingContextFinder.Object;
 	}
 
-	/*static ConstructorHelpers::FObjectFinder<UInputAction> InteractionActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyCharacter/Input/IA_Interaction_Ch.IA_Interaction_Ch'"));
+	/*static ConstructorHelpers::FObjectFinder<UInputAction> InteractionActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Interaction_Ch.IA_Interaction_Ch'"));
 	if (InteractionActionFinder.Succeeded())
 		InteractionAction = InteractionActionFinder.Object;*/
 

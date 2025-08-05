@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PhysicsVolume.h"
 
 // Sets default values
 AMyRobo::AMyRobo()
@@ -87,6 +88,8 @@ void AMyRobo::BeginPlay()
 	//	PlayerHPBarUI->SetHPBarPercent(StateComponent->GetHPPercent());
 	//}
 	//StateComponent->InitHP();
+
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
 }
 
 // Called every frame
@@ -111,6 +114,21 @@ void AMyRobo::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 
 
+}
+
+void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case EMovementMode::MOVE_Swimming:
+		GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = true;
+		break;
+	case EMovementMode::MOVE_Walking:
+		GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = false;
+		break;
+	}
 }
 
 #pragma region reference

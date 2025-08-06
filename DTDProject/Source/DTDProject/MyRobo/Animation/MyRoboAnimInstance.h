@@ -21,7 +21,7 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool isMove;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FVector MoveVelocity;
+	float MoveVelocity;
 	//UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	//bool isJump;
 	//UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

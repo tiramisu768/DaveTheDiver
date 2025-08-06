@@ -22,8 +22,8 @@ void UMyRoboAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (OwnerRobo)
 	{
 		isMove = MovementComponent->Velocity.Size() > 0.0f;
-		MoveVelocity = MovementComponent->Velocity;
-		//MoveVelocity = MovementComponent->Velocity.Size2D();
+		//MoveVelocity = MovementComponent->Velocity;
+		MoveVelocity = MovementComponent->Velocity.Size2D();
 		//isJump = OwnerRobo->GetMovementComponent()->IsFalling();
 		//isEquip = OwnerRobo->GetisEquip();
 		/*AMyCharacterController* OwnerController = Cast< AMyCharacterController>(OwnerCharacter->GetController());

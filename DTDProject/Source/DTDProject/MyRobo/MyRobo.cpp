@@ -44,6 +44,12 @@ AMyRobo::AMyRobo()
 	//bUseControllerRotationYaw = false;
 	//GetCharacterMovement()->bOrientRotationToMovement = true;
 
+	SpringArm->bUsePawnControlRotation = true;
+	bUseControllerRotationYaw = true;
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);  // 회전 속도
+
 	//static ConstructorHelpers::FObjectFinder<UAnimMontage> JumpMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/MyCharacter/Animation/AM_Jump.AM_Jump'"));
 	//if (JumpMontageFinder.Succeeded())
 	//{

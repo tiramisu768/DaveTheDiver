@@ -18,9 +18,9 @@ private:
 #pragma region Input
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> MoveAction; //SWIMMING
-	/*UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class UInputAction> LookAction;
 	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInputAction> LookAction;
+	/*UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> EquipAction;*/
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputMappingContext> MappingContext;
@@ -40,8 +40,8 @@ public:
 	void SetupInputComponent() override;
 	void MoveInput(const FInputActionValue& value);
 	void MoveEndInput(const FInputActionValue& value);
-	/*void LookInput(const FInputActionValue& value);
-	void EquipInput(const FInputActionValue& value);
+	void LookInput(const FInputActionValue& value);
+	/*void EquipInput(const FInputActionValue& value);
 	void AttackInput(const FInputActionValue& value);*/
 	void InteractionInput(const FInputActionValue& value);
 //	bool GetIsMoveInput() const { return isMoveInput; }

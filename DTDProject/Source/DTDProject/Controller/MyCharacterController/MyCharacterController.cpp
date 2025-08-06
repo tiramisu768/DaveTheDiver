@@ -100,10 +100,10 @@ void AMyCharacterController::MoveInput(const FInputActionValue& value)
 {
 	isMoveInput = true;
 	FVector2D MoveValue = value.Get<FVector2D>();
-	FVector Forward = GetTransformComponent()->GetForwardVector();
-	Forward.Z = 0.0;
-	Forward.Normalize();
-	ControlledRobo->AddMovementInput(Forward, MoveValue.X);
+	//FVector Forward = GetTransformComponent()->GetForwardVector();
+	//Forward.Z = 0.0;
+	//Forward.Normalize();
+	ControlledRobo->AddMovementInput(GetTransformComponent()->GetForwardVector(), MoveValue.X);
 	ControlledRobo->AddMovementInput(GetTransformComponent()->GetRightVector(), MoveValue.Y);
 }
 

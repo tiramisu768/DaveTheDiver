@@ -95,7 +95,7 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyCharacterController::MoveInput);
 		input->BindAction(MoveAction, ETriggerEvent::Completed, this, &AMyCharacterController::MoveEndInput);
 		input->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCharacterController::LookInput);
-		input->BindAction(DashAction, ETriggerEvent::Triggered, this, &AMyCharacterController::DashInput);
+		input->BindAction(DashAction, ETriggerEvent::Started, this, &AMyCharacterController::DashInput);
 		/*input->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);
 		input->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AMyCharacterController::AttackInput);*/
 		//input->BindAction(InteractionAction, ETriggerEvent::Started, this, &AMyCharacterController::InteractionInput);
@@ -128,7 +128,8 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 void AMyCharacterController::DashInput(const FInputActionValue& value)
 {
 	GEngine->AddOnScreenDebugMessage(-2, 0.0f, FColor::Red, FString::Printf(TEXT("isMove: %d")));
-	ControlledRobo->Jump();
+	ControlledRobo->LaunchCharacter(ControlledRobo->GetActorForwardVector() * 1500, true, true);
+	//좌우뒤 대쉬도 추가하려면 방향키에 대한 인풋값을 따로 저장해서 인풋키가 뭔지를 인지하고 거기에다가 벨로시티를 곱해주도록 수정해야한다
 }
  
 //void AMyCharacterController::EquipInput(const FInputActionValue& value)

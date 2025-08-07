@@ -24,6 +24,11 @@ AMyCharacterController::AMyCharacterController()
 	{
 		LookAction = LookActionFinder.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> DashActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_Dash.IA_Dash'"));
+	if (DashActionFinder.Succeeded())
+	{
+		DashAction = DashActionFinder.Object;
+	}
 	/*static ConstructorHelpers::FObjectFinder<UInputAction> EquipActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Equip_Ch.IA_Equip_Ch'"));
 	if (EquipActionFinder.Succeeded())
 	{
@@ -90,6 +95,7 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyCharacterController::MoveInput);
 		input->BindAction(MoveAction, ETriggerEvent::Completed, this, &AMyCharacterController::MoveEndInput);
 		input->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCharacterController::LookInput);
+		input->BindAction(DashAction, ETriggerEvent::Triggered, this, &AMyCharacterController::DashInput);
 		/*input->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);
 		input->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AMyCharacterController::AttackInput);*/
 		//input->BindAction(InteractionAction, ETriggerEvent::Started, this, &AMyCharacterController::InteractionInput);
@@ -117,6 +123,12 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 	FVector2D MoveValue = value.Get<FVector2D>();
 	AddYawInput(MoveValue.X);
 	AddPitchInput(MoveValue.Y);
+}
+
+void AMyCharacterController::DashInput(const FInputActionValue& value)
+{
+	GEngine->AddOnScreenDebugMessage(-2, 0.0f, FColor::Red, FString::Printf(TEXT("isMove: %d")));
+	ControlledRobo->Jump();
 }
  
 //void AMyCharacterController::EquipInput(const FInputActionValue& value)

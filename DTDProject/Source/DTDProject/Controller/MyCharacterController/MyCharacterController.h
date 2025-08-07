@@ -20,6 +20,8 @@ private:
 	TObjectPtr<class UInputAction> MoveAction; //SWIMMING
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> LookAction;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInputAction> DashAction;
 	/*UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> EquipAction;*/
 	UPROPERTY(VisibleAnywhere)
@@ -41,6 +43,7 @@ public:
 	void MoveInput(const FInputActionValue& value);
 	void MoveEndInput(const FInputActionValue& value);
 	void LookInput(const FInputActionValue& value);
+	void DashInput(const FInputActionValue& value);
 	/*void EquipInput(const FInputActionValue& value);
 	void AttackInput(const FInputActionValue& value);*/
 	void InteractionInput(const FInputActionValue& value);

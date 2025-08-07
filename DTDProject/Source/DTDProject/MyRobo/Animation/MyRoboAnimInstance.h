@@ -24,8 +24,8 @@ private:
 	float MoveVelocity;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool isSwimming;
-	//UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	//bool isJump;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool isDash;
 	//UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	//bool isMoveInput;
 	//UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

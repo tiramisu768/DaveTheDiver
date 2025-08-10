@@ -5,6 +5,7 @@
 #include "CharacterGameModeBase.h"
 #include  "MyRobo/MyRobo.h"
 #include "Controller/MyCharacterController/MyCharacterController.h"
+#include "HUD/MyHUD.h"
 
 ACharacterGameModeBase::ACharacterGameModeBase()
 {
@@ -13,5 +14,5 @@ ACharacterGameModeBase::ACharacterGameModeBase()
 		DefaultPawnClass = MyRoboBPClass.Class;
 
 	PlayerControllerClass = AMyCharacterController::StaticClass();
-	//HUDClass = AMyHUD::StaticClass();
+	HUDClass = AMyHUD::StaticClass();
 }

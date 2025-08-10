@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
+#include "HUD/MyHUD.h"
 
 // Sets default values
 AMyRobo::AMyRobo()
@@ -245,15 +246,15 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 //	StateComponent->TakeDamage(DamageAmount);
 //}
 //
-////controller 생성이후 호출되는 함수
-//void AMyCharacter::PossessedBy(AController* NewController)
-//{
-//	Super::PossessedBy(NewController);
-//	APlayerController* controller = Cast<APlayerController>(NewController);
-//	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
-//	StateComponent->OnTakeDamage.BindLambda([this, MyHUD](float value) {
-//		MyHUD->SetHPPercent(value);
-//		});
-//}
+//controller 생성이후 호출되는 함수
+void AMyRobo::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	APlayerController* controller = Cast<APlayerController>(NewController);
+	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
+	/*StateComponent->OnTakeDamage.BindLambda([this, MyHUD](float value) {
+		MyHUD->SetHPPercent(value);
+		});*/
+}
 #pragma endregion
 

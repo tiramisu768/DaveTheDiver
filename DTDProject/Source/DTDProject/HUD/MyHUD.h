@@ -15,7 +15,7 @@ class DTDPROJECT_API AMyHUD : public AHUD
 	GENERATED_BODY()
 private:
 	TSubclassOf<UUserWidget> HPBarWidget;
-	TObjectPtr<class URoboHPBarUI> RoboHPBar;
+	TObjectPtr<class URoboHPBarUI> RoboHPBarUIClass;
 
 public:
 	AMyHUD();

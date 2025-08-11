@@ -56,7 +56,7 @@ AMyRobo::AMyRobo()
 	//	InteractionWidgetClass = InteractionWidgetClassFinder.Class;
 	//InteractionWidget->SetWidgetClass(InteractionWidgetClass);
 
-	//StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
+	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	//RoboHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RoboHPBarWidget"));
 	//RoboHPBarWidget->SetupAttachment(GetRootComponent());
 	/*static ConstructorHelpers::FClassFinder<UUserWidget> RoboHPBarWidgetClassFinder(TEXT(""));
@@ -76,7 +76,7 @@ void AMyRobo::BeginPlay()
 	//{
 	//	//RoboHPBarUI->SetHPBarPercent(StateComponent->GetHPPercent());
 	//}
-	//StateComponent->InitHP();
+	StateComponent->InitHP();
 
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
 }

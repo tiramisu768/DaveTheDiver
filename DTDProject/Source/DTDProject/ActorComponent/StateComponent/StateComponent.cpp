@@ -37,10 +37,28 @@ void UStateComponent::TakeDamage(float DamageAmount)
 }
 
 
+void UStateComponent::StartDiving()
+{
+	bIsDiving = true;
+}
+
+void UStateComponent::StopDriving()
+{
+	bIsDiving = false;
+}
+
 // Called every frame
 void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	if (bIsDiving)
+	{
+		O2Timer += DeltaTime;
+		if (O2Timer >= O2DecreaseInterval)
+		{
+			HP = FMath::Max(0.f, HP - 1.f);
+			O2Timer = 0;
+		}
+	}
 }

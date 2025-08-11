@@ -25,19 +25,17 @@ private:
 	TObjectPtr<class UCameraComponent> Camera;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> WeaponComponent;
-
 #pragma endregion
 
 #pragma region Animation
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAnimMontage> MeleeAttackMontage;
 	bool isMeleeAttack{ false };
-	UPROPERTY(EditAnywhere, Category = "Montage")
 #pragma endregion
-	//UPROPERTY(VisibleAnywhere,Category = "State")
-	//TObjectPtr<class UStateComponent> StateComponent;
-	//UPROPERTY(VisibleAnywhere, Category = "UI")
-	//TObjectPtr<class UWidgetComponent> RoboHPBarWidget;
+	UPROPERTY(VisibleAnywhere,Category = "State")
+	TObjectPtr<class UStateComponent> StateComponent;
+	/*UPROPERTY(VisibleAnywhere, Category = "UI")
+	TObjectPtr<class UWidgetComponent> RoboHPBarWidget;*/
 public:
 	// Sets default values for this character's properties
 	AMyRobo();

@@ -7,7 +7,7 @@
 
 AMyHUD::AMyHUD()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("/Game/Blueprints/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("/Game/Blueprint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
 	if (WidgetClass.Succeeded())
 	{
 		HPBarWidget = WidgetClass.Class;
@@ -16,20 +16,18 @@ AMyHUD::AMyHUD()
 
 void AMyHUD::BeginPlay()
 {
-	GEngine->AddOnScreenDebugMessage(-3, 0.0f, FColor::Red, FString::Printf(TEXT("GetHUD: %d")));
 	Super::BeginPlay();
 	if (HPBarWidget)
 	{
-		RoboHPBar = CreateWidget<URoboHPBarUI>(GetWorld(), HPBarWidget);
-		if (RoboHPBar)
+		RoboHPBarUIClass = CreateWidget<URoboHPBarUI>(GetWorld(), HPBarWidget);
+		if (RoboHPBarUIClass)
 		{
-			GEngine->AddOnScreenDebugMessage(-3, 0.0f, FColor::Red, FString::Printf(TEXT("GetHUD: %d")));
-			RoboHPBar->AddToViewport();
+			RoboHPBarUIClass->AddToViewport();
 		}
 	}
 }
 
 void AMyHUD::SetHPPercent(float value)
 {
-	RoboHPBar->SetHPBarPercent(value);
+	RoboHPBarUIClass->SetHPBarPercent(value);
 }

@@ -29,6 +29,5 @@ void UMyRoboAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		/*AMyCharacterController* OwnerController = Cast< AMyCharacterController>(OwnerCharacter->GetController());
 		if (nullptr != OwnerController)
 			isMoveInput = OwnerController->GetIsMoveInput();*/
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString::Printf(TEXT("isMove: %d"), isMove));
 	}
 }

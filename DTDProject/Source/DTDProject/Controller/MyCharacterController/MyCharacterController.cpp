@@ -29,16 +29,27 @@ AMyCharacterController::AMyCharacterController()
 	{
 		DashAction = DashActionFinder.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> MeleeAttackActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_MeleeAttack.IA_MeleeAttack'"));
+	if (MeleeAttackActionFinder.Succeeded())
+	{
+		MeleeAttackAction = MeleeAttackActionFinder.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> RangedAttackActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_RangedAttack.IA_RangedAttack'"));
+	if (RangedAttackActionFinder.Succeeded())
+	{
+		RangedAttackAction = RangedAttackActionFinder.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> SwitchWeaponActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_SwitchWeapon.IA_SwitchWeapon'"));
+	if (SwitchWeaponActionFinder.Succeeded())
+	{
+		SwitchWeaponAction = SwitchWeaponActionFinder.Object;
+	}
 	/*static ConstructorHelpers::FObjectFinder<UInputAction> EquipActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Equip_Ch.IA_Equip_Ch'"));
 	if (EquipActionFinder.Succeeded())
 	{
 		EquipAction = EquipActionFinder.Object;
 	}*/
-	/*static ConstructorHelpers::FObjectFinder<UInputAction> AttackActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Attack_Ch.IA_Attack_Ch'"));
-	if (AttackActionFinder.Succeeded())
-	{
-		AttackAction = AttackActionFinder.Object;
-	}*/
+
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextFinder(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/BluePrint/MyRobo/Input/IMC_Character.IMC_Character'"));
 	if (InputMappingContextFinder.Succeeded())
 	{
@@ -96,8 +107,10 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(MoveAction, ETriggerEvent::Completed, this, &AMyCharacterController::MoveEndInput);
 		input->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCharacterController::LookInput);
 		input->BindAction(DashAction, ETriggerEvent::Started, this, &AMyCharacterController::DashInput);
-		/*input->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);
-		input->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AMyCharacterController::AttackInput);*/
+		input->BindAction(MeleeAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::MeleeAttackInput);
+		input->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::RangedAttackInput);
+		input->BindAction(SwitchWeaponAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchWeaponInput);
+		/*input->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);*/
 		//input->BindAction(InteractionAction, ETriggerEvent::Started, this, &AMyCharacterController::InteractionInput);
 	}
 }
@@ -127,19 +140,28 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 
 void AMyCharacterController::DashInput(const FInputActionValue& value)
 {
-	GEngine->AddOnScreenDebugMessage(-2, 0.0f, FColor::Red, FString::Printf(TEXT("isMove: %d")));
-	ControlledRobo->LaunchCharacter(ControlledRobo->GetActorForwardVector() * 1500, true, true);
+	ControlledRobo->LaunchCharacter(ControlledRobo->GetActorForwardVector() * 800, true, true);
 	//좌우뒤 대쉬도 추가하려면 방향키에 대한 인풋값을 따로 저장해서 인풋키가 뭔지를 인지하고 거기에다가 벨로시티를 곱해주도록 수정해야한다
+}
+
+void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
+{
+	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Red, FString::Printf(TEXT("MeleeAttackInput: %d")));
+}
+
+void AMyCharacterController::RangedAttackInput(const FInputActionValue& value)
+{
+	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Red, FString::Printf(TEXT("RangedAttackInput: %d")));
+}
+
+void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
+{
+	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Red, FString::Printf(TEXT("SwitchWeaponInput: %d")));
 }
  
 //void AMyCharacterController::EquipInput(const FInputActionValue& value)
 //{
 //	//ControlledCharacter->PlayEquipWeaponMontage();
-//}
-//
-//void AMyCharacterController::AttackInput(const FInputActionValue& value)
-//{
-//	//ControlledCharacter->PlayAttackMontage();
 //}
 
 void AMyCharacterController::InteractionInput(const FInputActionValue& value)

@@ -5,7 +5,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+
 #include "GameFramework/PhysicsVolume.h"
+#include "UI/RoboHPBarUI.h"		
 #include "HUD/MyHUD.h"
 
 // Sets default values
@@ -21,20 +24,6 @@ AMyRobo::AMyRobo()
 
 	BodyComponent = GetMesh();
 	BodyComponent->SetupAttachment(GetRootComponent());
-#pragma endregion
-
-	#pragma region	connect AnimMontage
-	//BodyComponent = GetMesh();
-	//HeadComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HeadComponent"));
-	//HeadComponent->SetupAttachment(BodyComponent);
-	//ArmComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmComponent"));
-	//ArmComponent->SetupAttachment(BodyComponent);
-	//LegComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("LegComponent"));
-	//LegComponent->SetupAttachment(BodyComponent);
-	//FootComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FootComponent"));
-	//FootComponent->SetupAttachment(BodyComponent);
-	//HairComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HairComponent"));
-	//HairComponent->SetupAttachment(HeadComponent);
 
 	//WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	//WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
@@ -50,22 +39,15 @@ AMyRobo::AMyRobo()
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);  // 회전 속도
+#pragma endregion
 
-	//static ConstructorHelpers::FObjectFinder<UAnimMontage> JumpMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/MyCharacter/Animation/AM_Jump.AM_Jump'"));
-	//if (JumpMontageFinder.Succeeded())
-	//{
-	//	JumpMontage = JumpMontageFinder.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UAnimMontage> EquipMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/MyCharacter/Animation/AM_Equip.AM_Equip'"));
-	//if (EquipMontageFinder.Succeeded())
-	//{
-	//	EquipMontage = EquipMontageFinder.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/Blueprints/MyCharacter/Animation/AM_Attack.AM_Attack'"));
-	//if (AttackMontageFinder.Succeeded())
-	//{
-	//	AttackMontage = AttackMontageFinder.Object;
-	//}
+#pragma region	connect AnimMontage
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageFinder(TEXT(""));
+	if (AttackMontageFinder.Succeeded())
+	{
+		MeleeAttackMontage = AttackMontageFinder.Object;
+	}
 
 	//InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
 	//InteractionWidget->SetupAttachment(GetRootComponent());
@@ -75,12 +57,12 @@ AMyRobo::AMyRobo()
 	//InteractionWidget->SetWidgetClass(InteractionWidgetClass);
 
 	//StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
-	//PlayerHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerHPBarWidget"));
-	////PlayerHPBarWidget->SetupAttachment(GetRootComponent());
-	//static ConstructorHelpers::FClassFinder<UUserWidget> PlayerHPBarWidgetClassFinder(TEXT("/Game/Blueprints/UI/BP_HPBar.BP_HPBar_C"));
-	//if (PlayerHPBarWidgetClassFinder.Succeeded())
-	//	PlayerHPBarWidget->SetWidgetClass(PlayerHPBarWidgetClassFinder.Class);
-	//PlayerHPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	//RoboHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RoboHPBarWidget"));
+	//RoboHPBarWidget->SetupAttachment(GetRootComponent());
+	/*static ConstructorHelpers::FClassFinder<UUserWidget> RoboHPBarWidgetClassFinder(TEXT(""));
+	if (RoboHPBarWidgetClassFinder.Succeeded())
+		RoboHPBarWidget->SetWidgetClass(RoboHPBarWidgetClassFinder.Class);
+	RoboHPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);*/
 #pragma endregion
 }
 
@@ -89,10 +71,10 @@ void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
 	//InteractionWidget->SetHiddenInGame(true);
-	//UPlayerHPBarUI* PlayerHPBarUI = Cast<UPlayerHPBarUI>(PlayerHPBarWidget->GetWidget());
-	//if (PlayerHPBarUI)
+	//URoboHPBarUI* RoboHPBarUI = Cast<URoboHPBarUI>(RoboHPBarWidget->GetWidget());
+	//if (RoboHPBarUI)
 	//{
-	//	PlayerHPBarUI->SetHPBarPercent(StateComponent->GetHPPercent());
+	//	//RoboHPBarUI->SetHPBarPercent(StateComponent->GetHPPercent());
 	//}
 	//StateComponent->InitHP();
 
@@ -138,37 +120,38 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 	}
 }
 
+//controller 생성이후 호출되는 함수
+void AMyRobo::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	APlayerController* controller = Cast<APlayerController>(NewController);
+	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
+	/*StateComponent->OnTakeDamage.BindLambda([this, MyHUD](float value) {
+		MyHUD->SetHPPercent(value);
+		});*/
+}
+void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
+{
+		if (Montage == nullptr) return;
+	BodyComponent->GetAnimInstance()->Montage_Play(Montage);
+
+	if (SectionName.IsNone() == false)
+	{
+		BodyComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
+	}
+}
+void AMyRobo::PlayMeleeAttackMontage()
+{
+	//	if (GetMovementComponent()->IsFalling() == true || nullptr == AttackMontage || isEquip == false
+	//		|| BodyComponent->GetAnimInstance()->Montage_IsPlaying(AttackMontage))
+	//		return;
+	//	PlayMontageFullBody(AttackMontage, AttackSectionNames[AttackIndex]);
+	//	++AttackIndex;
+	//	AttackIndex %= AttackSectionNames.Num();
+}
+
 #pragma region reference
-//void AMyCharacter::PlayJumpMontage()
-//{
-//	//nullptr != JumpMontage 왜 이렇게 쓰는거지
-//	if (GetMovementComponent()->IsFalling() == false && nullptr != JumpMontage &&
-//		BodyComponent->GetAnimInstance()->Montage_IsPlaying(JumpMontage) == false)
-//	{
-//		PlayMontageFullBody(JumpMontage);
-//	}
-//}
-//
-//void AMyCharacter::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
-//{
-//	if (Montage == nullptr) return;
-//	BodyComponent->GetAnimInstance()->Montage_Play(Montage);
-//	HeadComponent->GetAnimInstance()->Montage_Play(Montage);
-//	ArmComponent->GetAnimInstance()->Montage_Play(Montage);
-//	LegComponent->GetAnimInstance()->Montage_Play(Montage);
-//	FootComponent->GetAnimInstance()->Montage_Play(Montage);
-//	HairComponent->GetAnimInstance()->Montage_Play(Montage);
-//	if (SectionName.IsNone() == false)
-//	{
-//		BodyComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
-//		HeadComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
-//		ArmComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
-//		LegComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
-//		FootComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
-//		HairComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
-//	}
-//}
-//
+
 //void AMyCharacter::PlayEquipWeaponMontage()
 //{
 //	if (GetMovementComponent()->IsFalling() == true || nullptr == EquipMontage ||
@@ -180,16 +163,6 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 //		PlayMontageFullBody(EquipMontage, "Equip");
 //	else
 //		PlayMontageFullBody(EquipMontage, "UnEquip");
-//}
-//
-//void AMyCharacter::PlayAttackMontage()
-//{
-//	if (GetMovementComponent()->IsFalling() == true || nullptr == AttackMontage || isEquip == false
-//		|| BodyComponent->GetAnimInstance()->Montage_IsPlaying(AttackMontage))
-//		return;
-//	PlayMontageFullBody(AttackMontage, AttackSectionNames[AttackIndex]);
-//	++AttackIndex;
-//	AttackIndex %= AttackSectionNames.Num();
 //}
 //
 //void AMyCharacter::WeaponEquip()
@@ -246,15 +219,7 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 //	StateComponent->TakeDamage(DamageAmount);
 //}
 //
-//controller 생성이후 호출되는 함수
-void AMyRobo::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-	APlayerController* controller = Cast<APlayerController>(NewController);
-	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
-	/*StateComponent->OnTakeDamage.BindLambda([this, MyHUD](float value) {
-		MyHUD->SetHPPercent(value);
-		});*/
-}
+
+
 #pragma endregion
 

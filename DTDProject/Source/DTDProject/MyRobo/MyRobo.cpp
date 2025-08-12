@@ -5,8 +5,6 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
-
 #include "GameFramework/PhysicsVolume.h"
 #include "UI/RoboHPBarUI.h"		
 #include "HUD/MyHUD.h"
@@ -16,7 +14,7 @@ AMyRobo::AMyRobo()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-#pragma region Init
+#pragma region Component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -24,6 +22,8 @@ AMyRobo::AMyRobo()
 
 	BodyComponent = GetMesh();
 	BodyComponent->SetupAttachment(GetRootComponent());
+
+
 
 	//WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	//WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
@@ -48,7 +48,9 @@ AMyRobo::AMyRobo()
 	{
 		MeleeAttackMontage = AttackMontageFinder.Object;
 	}
+#pragma endregion
 
+	RoboComponent = CreateDefaultSubobject<URoboComponent>(TEXT("RoboComponent"));
 	//InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
 	//InteractionWidget->SetupAttachment(GetRootComponent());
 	//static ConstructorHelpers::FClassFinder<UUserWidget> InteractionWidgetClassFinder(TEXT("/Game/Blueprints/UI/BP_InteractionUI.BP_InteractionUI_C"));
@@ -56,27 +58,23 @@ AMyRobo::AMyRobo()
 	//	InteractionWidgetClass = InteractionWidgetClassFinder.Class;
 	//InteractionWidget->SetWidgetClass(InteractionWidgetClass);
 
-	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
-	//RoboHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RoboHPBarWidget"));
-	//RoboHPBarWidget->SetupAttachment(GetRootComponent());
-	/*static ConstructorHelpers::FClassFinder<UUserWidget> RoboHPBarWidgetClassFinder(TEXT(""));
+	RoboHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RoboHPBarWidget"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> RoboHPBarWidgetClassFinder(TEXT("/Game/Blueprint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
 	if (RoboHPBarWidgetClassFinder.Succeeded())
 		RoboHPBarWidget->SetWidgetClass(RoboHPBarWidgetClassFinder.Class);
-	RoboHPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);*/
-#pragma endregion
+
 }
 
 // Called when the game starts or when spawned
 void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
-	//InteractionWidget->SetHiddenInGame(true);
-	//URoboHPBarUI* RoboHPBarUI = Cast<URoboHPBarUI>(RoboHPBarWidget->GetWidget());
-	//if (RoboHPBarUI)
-	//{
-	//	//RoboHPBarUI->SetHPBarPercent(StateComponent->GetHPPercent());
-	//}
-	StateComponent->InitHP();
+	URoboHPBarUI* RoboHPBarUI = Cast<URoboHPBarUI>(RoboHPBarWidget->GetWidget());
+	if (RoboHPBarUI)
+	{
+		RoboHPBarUI->SetHPBarPercent(150.f);
+	}
+	RoboComponent->InitO2();
 
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
 }
@@ -100,9 +98,6 @@ void AMyRobo::Tick(float DeltaTime)
 void AMyRobo::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-
-
 }
 
 void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
@@ -124,9 +119,10 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 void AMyRobo::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	APlayerController* controller = Cast<APlayerController>(NewController);
+	/*APlayerController* controller = Cast<APlayerController>(NewController);
 	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
-	/*StateComponent->OnTakeDamage.BindLambda([this, MyHUD](float value) {
+	MyHUD->SetHPPercent(RoboComponent->GetHPPercent());*/
+	/*RoboComponent->OnTakeDamage.BindLambda([this, MyHUD](float value) {
 		MyHUD->SetHPPercent(value);
 		});*/
 }

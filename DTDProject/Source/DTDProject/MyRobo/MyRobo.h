@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "ActorComponent/StateComponent/StateComponent.h"
+#include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
 //#include "Interface/AttackTraceNotify/AttackTraceNotify.h"
@@ -25,6 +25,10 @@ private:
 	TObjectPtr<class UCameraComponent> Camera;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> WeaponComponent;
+	UPROPERTY(VisibleAnywhere, Category = "State")
+	TObjectPtr<class URoboComponent> RoboComponent;
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	TObjectPtr<class UWidgetComponent> RoboHPBarWidget;
 #pragma endregion
 
 #pragma region Animation
@@ -32,10 +36,7 @@ private:
 	TObjectPtr<UAnimMontage> MeleeAttackMontage;
 	bool isMeleeAttack{ false };
 #pragma endregion
-	UPROPERTY(VisibleAnywhere,Category = "State")
-	TObjectPtr<class UStateComponent> StateComponent;
-	/*UPROPERTY(VisibleAnywhere, Category = "UI")
-	TObjectPtr<class UWidgetComponent> RoboHPBarWidget;*/
+
 public:
 	// Sets default values for this character's properties
 	AMyRobo();

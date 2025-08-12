@@ -20,15 +20,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "State")
 	float Damage{ 10.0f };
 
-	UPROPERTY(EditAnywhere, Category = "O2")
-	float CurrentO2{ 100.0f };
-	UPROPERTY(EditAnywhere, Category = "O2")
-	float MaxO2{ 100.0f };
-	UPROPERTY(EditAnywhere, Category = "O2")
-	float O2DecreaseInterval = 3.0f;
-	float O2Timer = 0.0f;
-	bool bIsDiving = true; // 수면체크하게 되면 false로 바꾸기
-
 public:
 	// Sets default values for this component's properties
 	UStateComponent();
@@ -44,12 +35,6 @@ public:
 	float GetDamage() const { return Damage; }
 	float GetHP() const { return HP; }
 	void SetDamage(float NewDamage) { Damage = NewDamage; }
-	void InitHP()
-	{
-		HP = MaxHP;
-		if (HP < 0.0f) HP = 0.0f;
-		OnTakeDamage.ExecuteIfBound(GetHPPercent());
-	}
 	void SetHP(float NewHP)
 	{
 		HP = MaxHP = NewHP;
@@ -58,8 +43,6 @@ public:
 	}
 	float GetHPPercent() const { return HP / MaxHP; }
 	bool isDead() const { return HP <= 0.0f; }
-	void StartDiving();
-	void StopDriving();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 		

@@ -8,6 +8,7 @@
 #include "GameFramework/PhysicsVolume.h"
 #include "UI/RoboHPBarUI.h"		
 #include "HUD/MyHUD.h"
+#include "BuoyancyComponent.h"
 
 // Sets default values
 AMyRobo::AMyRobo()
@@ -23,7 +24,7 @@ AMyRobo::AMyRobo()
 	BodyComponent = GetMesh();
 	BodyComponent->SetupAttachment(GetRootComponent());
 
-
+	BuoyancyComponent = CreateDefaultSubobject<UBuoyancyComponent>(TEXT("BuoyancyComponent"));
 
 	//WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	//WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
@@ -82,6 +83,13 @@ void AMyRobo::Tick(float DeltaTime)
 	//}
 	//else
 	//	InteractionWidget->SetHiddenInGame(true);
+
+	if (BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty())
+	{
+		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("Out Sea"));
+	}
+	else
+		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("In Sea"));
 }
 
 // Called to bind functionality to input

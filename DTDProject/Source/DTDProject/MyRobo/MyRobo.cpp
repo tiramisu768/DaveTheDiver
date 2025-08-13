@@ -57,24 +57,14 @@ AMyRobo::AMyRobo()
 	//if (InteractionWidgetClassFinder.Succeeded())
 	//	InteractionWidgetClass = InteractionWidgetClassFinder.Class;
 	//InteractionWidget->SetWidgetClass(InteractionWidgetClass);
-
-	RoboHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RoboHPBarWidget"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> RoboHPBarWidgetClassFinder(TEXT("/Game/Blueprint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
-	if (RoboHPBarWidgetClassFinder.Succeeded())
-		RoboHPBarWidget->SetWidgetClass(RoboHPBarWidgetClassFinder.Class);
-
 }
 
 // Called when the game starts or when spawned
 void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
-	URoboHPBarUI* RoboHPBarUI = Cast<URoboHPBarUI>(RoboHPBarWidget->GetWidget());
-	if (RoboHPBarUI)
-	{
-		RoboHPBarUI->SetHPBarPercent(150.f);
-	}
-	RoboComponent->InitO2();
+
+	RoboComponent->InitRoboUIStatement();
 
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
 }
@@ -119,12 +109,12 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 void AMyRobo::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	/*APlayerController* controller = Cast<APlayerController>(NewController);
+
+	APlayerController* controller = Cast<APlayerController>(NewController);
 	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
-	MyHUD->SetHPPercent(RoboComponent->GetHPPercent());*/
-	/*RoboComponent->OnTakeDamage.BindLambda([this, MyHUD](float value) {
+	RoboComponent->OnO2Changed.BindLambda([this, MyHUD](float value) {
 		MyHUD->SetHPPercent(value);
-		});*/
+		});
 }
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
 {

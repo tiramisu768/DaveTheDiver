@@ -10,6 +10,8 @@
 /**
  * 
  */
+//UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+DECLARE_DELEGATE_OneParam(FOnO2Changed, float);
 UCLASS()
 class DTDPROJECT_API URoboComponent : public UStateComponent
 {
@@ -27,14 +29,13 @@ private:
 	UWidgetComponent* RoboHPBarWidget;
 
 public:
+	FOnO2Changed OnO2Changed;
+
+public:
 	void StartDiving();
 	void StopDriving();
-	void UpdateO2ProgressBar();
-	void InitO2()
-	{
-		CurrentO2 = MaxO2;
-		if (CurrentO2 < 0.0f) CurrentO2 = 0.0f;
-		//OnTakeDamage.ExecuteIfBound(GetHPPercent());
-	}
+	void UpdateRoboUIStatement();
+	void InitRoboUIStatement();
+	float GetO2Percent() const { return CurrentO2 / MaxO2; }
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 };

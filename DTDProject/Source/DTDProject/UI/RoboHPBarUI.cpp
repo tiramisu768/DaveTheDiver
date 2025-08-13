@@ -10,4 +10,8 @@ void URoboHPBarUI::SetHPBarPercent(float Percent)
 	{
 		RoboProgressBar->SetPercent(Percent);
 	}
+	if (RoboHPText)
+	{
+		//RoboHPText->SetText(FText::FromString(FString::Printf(TEXT("HP: %.0f%%"), Percent * 100.0f)));
+	}
 }

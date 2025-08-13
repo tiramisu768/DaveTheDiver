@@ -27,8 +27,6 @@ private:
 	TObjectPtr<USkeletalMeshComponent> WeaponComponent;
 	UPROPERTY(VisibleAnywhere, Category = "State")
 	TObjectPtr<class URoboComponent> RoboComponent;
-	UPROPERTY(VisibleAnywhere, Category = "UI")
-	TObjectPtr<class UWidgetComponent> RoboHPBarWidget;
 #pragma endregion
 
 #pragma region Animation

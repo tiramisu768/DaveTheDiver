@@ -7,10 +7,10 @@
 
 AMyHUD::AMyHUD()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("/Game/Blueprint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
-	if (WidgetClass.Succeeded())
+	static ConstructorHelpers::FClassFinder<UUserWidget> HPBarWidgetClassFinder(TEXT("/Game/Blueprint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
+	if (HPBarWidgetClassFinder.Succeeded())
 	{
-		HPBarWidget = WidgetClass.Class;
+		HPBarWidget = HPBarWidgetClassFinder.Class;
 	}
 }
 

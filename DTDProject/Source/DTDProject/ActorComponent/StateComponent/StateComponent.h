@@ -12,7 +12,7 @@ class DTDPROJECT_API UStateComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-private:
+protected:
 	UPROPERTY(EditAnywhere, Category = "State")
 	float HP{ 100.0f };
 	UPROPERTY(EditAnywhere, Category = "State")

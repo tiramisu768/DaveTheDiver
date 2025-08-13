@@ -15,7 +15,8 @@ class DTDPROJECT_API URoboHPBarUI : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UProgressBar> RoboProgressBar;
+	TObjectPtr<class UProgressBar> RoboHPBar;
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> RoboHPText;
 public:
 	void SetHPBarPercent(float Percent);

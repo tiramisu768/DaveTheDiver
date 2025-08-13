@@ -17,13 +17,11 @@ class DTDPROJECT_API URoboComponent : public UStateComponent
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(EditAnywhere, Category = "State")
-	float CurrentO2{ 100.0f };
-	UPROPERTY(EditAnywhere, Category = "State")
-	float MaxO2{ 100.0f };
+	//timehandler쓰기
 	UPROPERTY(EditAnywhere, Category = "State")
 	float O2DecreaseInterval = 3.0f;
 	float O2Timer = 0.0f;
+
 	bool bIsDiving = true; // 수면체크하게 되면 false로 바꾸기
 	UPROPERTY(EditAnywhere, Category = "State")
 	UWidgetComponent* RoboHPBarWidget;
@@ -34,8 +32,7 @@ public:
 public:
 	void StartDiving();
 	void StopDriving();
-	void UpdateRoboUIStatement();
 	void InitRoboUIStatement();
-	float GetO2Percent() const { return CurrentO2 / MaxO2; }
+	float GetO2Percent() const { return HP / MaxHP; }
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 };

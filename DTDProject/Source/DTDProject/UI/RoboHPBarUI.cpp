@@ -3,15 +3,16 @@
 
 #include "UI/RoboHPBarUI.h"
 #include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 
 void URoboHPBarUI::SetHPBarPercent(float Percent)
 {
-	if (RoboProgressBar)
+	if (RoboHPBar)
 	{
-		RoboProgressBar->SetPercent(Percent);
+		RoboHPBar->SetPercent(Percent);
 	}
 	if (RoboHPText)
 	{
-		//RoboHPText->SetText(FText::FromString(FString::Printf(TEXT("HP: %.0f%%"), Percent * 100.0f)));
+		RoboHPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%"), Percent * 100.0f)));
 	}
 }

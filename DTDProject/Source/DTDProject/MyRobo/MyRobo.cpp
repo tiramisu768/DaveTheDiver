@@ -112,6 +112,7 @@ void AMyRobo::PossessedBy(AController* NewController)
 
 	APlayerController* controller = Cast<APlayerController>(NewController);
 	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
+	//델리게이트 등록
 	RoboComponent->OnO2Changed.BindLambda([this, MyHUD](float value) {
 		MyHUD->SetHPPercent(value);
 		});

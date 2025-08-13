@@ -17,31 +17,15 @@ void URoboComponent::StopDriving()
 void URoboComponent::InitRoboUIStatement()
 {
 	//산소량 초기화
-	CurrentO2 = MaxO2;
-	if (CurrentO2 < 0.0f) CurrentO2 = 0.0f;
-	OnO2Changed.ExecuteIfBound(GetO2Percent());
+	HP = MaxHP;
+	if (HP < 0.0f) HP = 0.0f;
+	OnO2Changed.ExecuteIfBound(GetO2Percent()); //델리게이트 실행
 
-	//근접무기 초기화
+	//근접무기 초기화 - 로봇에서 관리
 
-	//원거리무기 초기화
+	//원거리무기 초기화 - 로봇에서 관리
 
-	//포획상자 초기화
-}
-
-void URoboComponent::UpdateRoboUIStatement()
-{
-	if (APawn* PawnOwner = Cast<APawn>(GetOwner()))
-	{
-		if (AMyCharacterController* MyController = Cast<AMyCharacterController>(PawnOwner->GetController()))
-		{
-			if (AMyHUD* MyHUD = Cast<AMyHUD>(MyController->GetHUD()))
-			{
-				float Percent = CurrentO2 / MaxO2;
-				MyHUD->SetHPPercent(Percent);
-			}
-		}
-	}
-
+	//포획가방 초기화 - 포획가방 컴포넌트 따로 제작해서 관리
 }
 
 // Called every frame
@@ -54,11 +38,11 @@ void URoboComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		O2Timer += DeltaTime;
 		if (O2Timer >= O2DecreaseInterval)
 		{
-			GEngine->AddOnScreenDebugMessage(-3, 2.0f, FColor::Red, FString::Printf(TEXT("CurrentO2: %f"),CurrentO2));
-			CurrentO2 = FMath::Max(0.f, CurrentO2 - 1.f);
+			GEngine->AddOnScreenDebugMessage(-3, 2.0f, FColor::Red, FString::Printf(TEXT("HP: %f"), HP));
+			HP = FMath::Max(0.f, HP - 1.f);
 			O2Timer = 0;
 
-			UpdateRoboUIStatement();
+			OnO2Changed.ExecuteIfBound(GetO2Percent());
 		}
 	}
 }

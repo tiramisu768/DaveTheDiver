@@ -18,6 +18,8 @@ private:
 	TObjectPtr<class UProgressBar> RoboHPBar;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> RoboHPText;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> RoboDepthText;
 public:
 	void SetHPBarPercent(float Percent);
 };

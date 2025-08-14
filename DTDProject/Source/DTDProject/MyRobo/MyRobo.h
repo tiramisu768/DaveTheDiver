@@ -37,6 +37,10 @@ private:
 	bool isMeleeAttack{ false };
 #pragma endregion
 
+#pragma region Water
+	float DepthBelowSurface = 0.f; // +면 수면 아래, -면 수면 위
+#pragma endregion
+
 public:
 	// Sets default values for this character's properties
 	AMyRobo();
@@ -59,4 +63,6 @@ public:
 	void PlayMontageFullBody(TObjectPtr<UAnimMontage>Montage, FName SectionName = "");
 
 	void PlayMeleeAttackMontage();
+
+	float GetDepthBelowSurface() const;
 };

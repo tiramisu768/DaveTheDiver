@@ -12,7 +12,7 @@ void UMyRoboAnimInstance::NativeInitializeAnimation()
 	if (OwnerRobo)
 	{
 		//MovementComponent = OwnerRobo->GetCharacterMovement();
-		MovementComponent = OwnerRobo->FindComponentByClass<UCharacterMovementComponent>();
+		MovementComponent = OwnerRobo->FindComponentByClass<UCharacterMovementComponent>();//actor에 등록된 component를 찾아서 반환
 	}
 
 }

@@ -15,4 +15,8 @@ void URoboHPBarUI::SetHPBarPercent(float Percent)
 	{
 		RoboHPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%"), Percent * 100.0f)));
 	}
+	if (RoboDepthText)
+	{
+		RoboDepthText->SetText(FText::FromString(FString::Printf(TEXT("%00.0fm%")))); //잠수깊이를 매개변수로 받아야할까?
+	}
 }

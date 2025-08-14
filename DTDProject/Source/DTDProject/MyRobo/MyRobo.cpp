@@ -9,6 +9,7 @@
 #include "UI/RoboHPBarUI.h"		
 #include "HUD/MyHUD.h"
 #include "BuoyancyComponent.h"
+#include "WaterBodyComponent.h"
 
 // Sets default values
 AMyRobo::AMyRobo()
@@ -166,6 +167,29 @@ void AMyRobo::PlayMeleeAttackMontage()
 	//	PlayMontageFullBody(AttackMontage, AttackSectionNames[AttackIndex]);
 	//	++AttackIndex;
 	//	AttackIndex %= AttackSectionNames.Num();
+}
+
+float AMyRobo::GetDepthBelowSurface() const
+{
+	//if (!BuoyancyComponent) return 0.0f;
+
+	//// 현재 캐릭터의 위치
+	//FVector ActorLocation = BuoyancyComponent->GetOwner()->GetActorLocation();
+
+	//// BuoyancyComponent가 인식 중인 WaterBody 목록 가져오기
+	//const TArray<UWaterBodyComponent*>& WaterBodies = BuoyancyComponent->GetCurrentWaterBodyComponents();
+
+	//if (WaterBodies.Num() > 0 && WaterBodies[0])
+	//{
+	//	// 현재 위치의 수면 높이 구하기
+	//	float WaterSurfaceZ = WaterBodies[0]->GetWaterSurfaceHeightAtLocation(ActorLocation);
+
+	//	// 수면에서 아래로 얼마나 잠겨있는지 계산
+	//	float Depth = WaterSurfaceZ - ActorLocation.Z;
+	//	return Depth; // 양수면 수면 아래, 음수면 수면 위
+	//}
+
+	//return 0.0f; // 물에 없음
 }
 
 #pragma region reference

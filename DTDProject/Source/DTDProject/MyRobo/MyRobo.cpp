@@ -87,9 +87,32 @@ void AMyRobo::Tick(float DeltaTime)
 	if (BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty())
 	{
 		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("Out Sea"));
+		
 	}
 	else
+	{
 		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("In Sea"));
+	}
+
+
+	bool bInWater = !BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty();
+
+	if (bInWater)
+	{
+		if (GetCharacterMovement()->MovementMode != MOVE_Swimming)
+		{
+			GetCharacterMovement()->SetMovementMode(MOVE_Swimming);
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Swimming"));
+		}
+	}
+	else
+	{
+		if (GetCharacterMovement()->MovementMode != MOVE_Walking)
+		{
+			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("Walking"));
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -105,7 +128,7 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 	switch (GetCharacterMovement()->MovementMode)
 	{
 	case EMovementMode::MOVE_Swimming:
-		GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = true;
+		GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = true; 
 		break;
 	case EMovementMode::MOVE_Walking:
 		GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = false;

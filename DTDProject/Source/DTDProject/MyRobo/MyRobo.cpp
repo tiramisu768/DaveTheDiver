@@ -68,7 +68,7 @@ void AMyRobo::BeginPlay()
 
 	RoboComponent->InitRoboUIStatement();
 
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
+	//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
 }
 
 // Called every frame
@@ -85,6 +85,8 @@ void AMyRobo::Tick(float DeltaTime)
 	//else
 	//	InteractionWidget->SetHiddenInGame(true);
 
+	//DepthBelowSurface = GetDepthBelowSurface();
+
 	if (BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty())
 	{
 		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("Out Sea"));
@@ -97,6 +99,7 @@ void AMyRobo::Tick(float DeltaTime)
 
 
 	bool bInWater = !BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty();
+	//const bool bInWater = DepthBelowSurface > 0.f;
 
 	if (bInWater)
 	{
@@ -171,25 +174,28 @@ void AMyRobo::PlayMeleeAttackMontage()
 
 float AMyRobo::GetDepthBelowSurface() const
 {
-	//if (!BuoyancyComponent) return 0.0f;
+	if (!BuoyancyComponent) return 0.0f;
 
-	//// 현재 캐릭터의 위치
+	// 현재 캐릭터의 위치
 	//FVector ActorLocation = BuoyancyComponent->GetOwner()->GetActorLocation();
 
-	//// BuoyancyComponent가 인식 중인 WaterBody 목록 가져오기
-	//const TArray<UWaterBodyComponent*>& WaterBodies = BuoyancyComponent->GetCurrentWaterBodyComponents();
+	// BuoyancyComponent가 인식 중인 WaterBody 목록 가져오기
+	const auto& WaterBodies = BuoyancyComponent->GetCurrentWaterBodyComponents();
 
-	//if (WaterBodies.Num() > 0 && WaterBodies[0])
-	//{
-	//	// 현재 위치의 수면 높이 구하기
-	//	float WaterSurfaceZ = WaterBodies[0]->GetWaterSurfaceHeightAtLocation(ActorLocation);
+	if (UWaterBodyComponent* Water = WaterBodies[0].Get())    // .Get()로 유효 포인터 획득
+	{
+		const FVector Loc = GetActorLocation();
+		FVector SurfLoc, SurfNormal, SurfVelocity;
+		float OutDepth = 0.f;
 
-	//	// 수면에서 아래로 얼마나 잠겨있는지 계산
-	//	float Depth = WaterSurfaceZ - ActorLocation.Z;
-	//	return Depth; // 양수면 수면 아래, 음수면 수면 위
-	//}
+		Water->GetWaterSurfaceInfoAtLocation(
+			Loc, SurfLoc, SurfNormal, SurfVelocity, OutDepth, /*bIncludeDepth=*/true);
 
-	//return 0.0f; // 물에 없음
+		// 수면 기준 잠수 깊이(+면 수면 아래)
+		return SurfLoc.Z - Loc.Z;
+	}
+
+	return 0.0f; // 물에 없음
 }
 
 #pragma region reference

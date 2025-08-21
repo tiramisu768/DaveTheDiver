@@ -43,7 +43,7 @@ AMyRobo::AMyRobo()
 
 #pragma region	connect AnimMontage
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> MeleeAttackMontageFinder(TEXT("/Script/Engine.AnimSequence'/Game/BluePrint/MyRobo/Animation/Stabbing__1_.Stabbing__1_'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MeleeAttackMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/MyRobo/Animation/AM_MeleeAttack.AM_MeleeAttack'"));
 	if (MeleeAttackMontageFinder.Succeeded())
 	{
 		MeleeAttackMontage = MeleeAttackMontageFinder.Object;
@@ -166,10 +166,14 @@ void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName Sectio
 }
 void AMyRobo::PlayMeleeAttackMontage()
 {
-		if (GetMovementComponent()->IsFalling() == true || nullptr == MeleeAttackMontage || isMeleeAttack == false
+	if (nullptr != MeleeAttackMontage)
+	{
+		PlayMontageFullBody(MeleeAttackMontage);
+	}
+		/*if (GetMovementComponent()->IsFalling() == true || nullptr == MeleeAttackMontage || isMeleeAttack == false
 			|| BodyComponent->GetAnimInstance()->Montage_IsPlaying(MeleeAttackMontage))
 			return;
-		PlayMontageFullBody(MeleeAttackMontage);
+		PlayMontageFullBody(MeleeAttackMontage);*/
 		/*PlayMontageFullBody(MeleeAttackMontage, AttackSectionNames[AttackIndex]);
 		++AttackIndex;
 		AttackIndex %= AttackSectionNames.Num();*/

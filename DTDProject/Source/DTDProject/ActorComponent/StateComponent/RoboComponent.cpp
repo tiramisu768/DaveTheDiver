@@ -19,7 +19,7 @@ void URoboComponent::InitRoboUIStatement()
 	//산소량 초기화
 	HP = MaxHP;
 	if (HP < 0.0f) HP = 0.0f;
-	OnO2Changed.ExecuteIfBound(GetO2Percent()); //델리게이트 실행
+	OnHPChanged.ExecuteIfBound(GetHPPercent()); //델리게이트 실행
 
 	//근접무기 초기화 - 로봇에서 관리
 
@@ -42,7 +42,7 @@ void URoboComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 			HP = FMath::Max(0.f, HP - 1.f);
 			O2Timer = 0;
 
-			OnO2Changed.ExecuteIfBound(GetO2Percent());
+			OnHPChanged.ExecuteIfBound(GetHPPercent());
 		}
 	}
 }

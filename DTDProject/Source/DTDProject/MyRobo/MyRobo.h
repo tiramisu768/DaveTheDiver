@@ -35,6 +35,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAnimMontage> MeleeAttackMontage;
 	bool isMeleeAttack{ false };
+	bool isEquip{ false };
 #pragma endregion
 
 #pragma region Water
@@ -63,6 +64,10 @@ public:
 	void PlayMontageFullBody(TObjectPtr<UAnimMontage>Montage, FName SectionName = "");
 
 	void PlayMeleeAttackMontage();
+
+	void WeaponActive();
+
+	void WeaponInactive();
 
 	float GetDepthBelowSurface() const;
 };

@@ -146,7 +146,7 @@ void AMyCharacterController::DashInput(const FInputActionValue& value)
 
 void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 {
-	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Red, FString::Printf(TEXT("MeleeAttackInput: %d")));
+	ControlledRobo->PlayMeleeAttackMontage();
 }
 
 void AMyCharacterController::RangedAttackInput(const FInputActionValue& value)

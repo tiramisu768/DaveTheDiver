@@ -27,10 +27,8 @@ AMyRobo::AMyRobo()
 
 	BuoyancyComponent = CreateDefaultSubobject<UBuoyancyComponent>(TEXT("BuoyancyComponent"));
 
-	//WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
-	//WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
-	//WeaponCoverComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponHand"));
-	//WeaponCoverComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
+	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
+	WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
 
 	//SpringArm->bUsePawnControlRotation = true;
 	//bUseControllerRotationYaw = false;
@@ -45,10 +43,10 @@ AMyRobo::AMyRobo()
 
 #pragma region	connect AnimMontage
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageFinder(TEXT(""));
-	if (AttackMontageFinder.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MeleeAttackMontageFinder(TEXT("/Script/Engine.AnimSequence'/Game/BluePrint/MyRobo/Animation/Stabbing__1_.Stabbing__1_'"));
+	if (MeleeAttackMontageFinder.Succeeded())
 	{
-		MeleeAttackMontage = AttackMontageFinder.Object;
+		MeleeAttackMontage = MeleeAttackMontageFinder.Object;
 	}
 #pragma endregion
 
@@ -117,6 +115,7 @@ void AMyRobo::Tick(float DeltaTime)
 			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("Walking"));
 		}
 	}
+
 }
 
 // Called to bind functionality to input
@@ -148,13 +147,16 @@ void AMyRobo::PossessedBy(AController* NewController)
 	APlayerController* controller = Cast<APlayerController>(NewController);
 	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
 	//델리게이트 등록
-	RoboComponent->OnO2Changed.BindLambda([this, MyHUD](float value) {
+	RoboComponent->OnHPChanged.BindLambda([this, MyHUD](float value) {
 		MyHUD->SetHPPercent(value);
+		});
+	RoboComponent->OnDepthChanged.BindLambda([this, MyHUD](float value) {
+		MyHUD->SetMeters(value);
 		});
 }
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
 {
-		if (Montage == nullptr) return;
+	if (Montage == nullptr) return;
 	BodyComponent->GetAnimInstance()->Montage_Play(Montage);
 
 	if (SectionName.IsNone() == false)
@@ -164,13 +166,29 @@ void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName Sectio
 }
 void AMyRobo::PlayMeleeAttackMontage()
 {
-	//	if (GetMovementComponent()->IsFalling() == true || nullptr == AttackMontage || isEquip == false
-	//		|| BodyComponent->GetAnimInstance()->Montage_IsPlaying(AttackMontage))
-	//		return;
-	//	PlayMontageFullBody(AttackMontage, AttackSectionNames[AttackIndex]);
-	//	++AttackIndex;
-	//	AttackIndex %= AttackSectionNames.Num();
+		if (GetMovementComponent()->IsFalling() == true || nullptr == MeleeAttackMontage || isMeleeAttack == false
+			|| BodyComponent->GetAnimInstance()->Montage_IsPlaying(MeleeAttackMontage))
+			return;
+		PlayMontageFullBody(MeleeAttackMontage);
+		/*PlayMontageFullBody(MeleeAttackMontage, AttackSectionNames[AttackIndex]);
+		++AttackIndex;
+		AttackIndex %= AttackSectionNames.Num();*/
 }
+
+void AMyRobo::WeaponActive()
+{
+	isEquip = true;
+	WeaponComponent->AttachToComponent(BodyComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
+	FName(TEXT("Weapon")));
+}
+
+void AMyRobo::WeaponInactive()
+{
+	//	isEquip = false;
+	//	WeaponComponent->AttachToComponent(BodyComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
+	//		FName(TEXT("Weapon")));
+}
+
 
 float AMyRobo::GetDepthBelowSurface() const
 {
@@ -200,33 +218,7 @@ float AMyRobo::GetDepthBelowSurface() const
 
 #pragma region reference
 
-//void AMyCharacter::PlayEquipWeaponMontage()
-//{
-//	if (GetMovementComponent()->IsFalling() == true || nullptr == EquipMontage ||
-//		BodyComponent->GetAnimInstance()->Montage_IsPlaying(EquipMontage) == true ||
-//		BodyComponent->GetAnimInstance()->Montage_IsPlaying(AttackMontage) == true)
-//		return;
-//
-//	if (isEquip == false)
-//		PlayMontageFullBody(EquipMontage, "Equip");
-//	else
-//		PlayMontageFullBody(EquipMontage, "UnEquip");
-//}
-//
-//void AMyCharacter::WeaponEquip()
-//{
-//	isEquip = true;
-//	WeaponComponent->AttachToComponent(BodyComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
-//		FName(TEXT("WeaponHand")));
-//}
-//
-//void AMyCharacter::WeaponUnEquip()
-//{
-//	isEquip = false;
-//	WeaponComponent->AttachToComponent(BodyComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
-//		FName(TEXT("Weapon")));
-//}
-//
+
 //void AMyCharacter::InteractionAction()
 //{
 //	if (InteractionObject)

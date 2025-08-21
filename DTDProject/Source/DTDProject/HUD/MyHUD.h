@@ -20,5 +20,7 @@ private:
 public:
 	AMyHUD();
 	void BeginPlay() override;
-	void SetHPPercent(float value);
+	void SetHPPercent(float Percent);
+	void SetMeters(float Meter);
+	void SetWeights(float Current, float Max);
 };

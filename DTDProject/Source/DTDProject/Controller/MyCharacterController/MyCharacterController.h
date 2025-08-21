@@ -52,8 +52,7 @@ public:
 	void MeleeAttackInput(const FInputActionValue& value);
 	void RangedAttackInput(const FInputActionValue& value);
 	void SwitchWeaponInput(const FInputActionValue& value);
-	/*void EquipInput(const FInputActionValue& value);
-	void AttackInput(const FInputActionValue& value);*/
+	/*void EquipInput(const FInputActionValue& value);*/
 	void InteractionInput(const FInputActionValue& value);
 //	bool GetIsMoveInput() const { return isMoveInput; }
 };

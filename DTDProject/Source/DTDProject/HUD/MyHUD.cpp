@@ -31,3 +31,13 @@ void AMyHUD::SetHPPercent(float value)
 {
 	RoboHPBarUIClass->SetHPBarPercent(value);
 }
+
+void AMyHUD::SetMeters(float value)
+{
+	RoboHPBarUIClass->SetCurrentDepthMeters(value);
+}
+
+void AMyHUD::SetWeights(float Current, float Max)
+{
+	RoboHPBarUIClass->SetCurrentAndMaxWeight(Current, Max);
+}

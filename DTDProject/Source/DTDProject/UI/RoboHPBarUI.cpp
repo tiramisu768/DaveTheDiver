@@ -15,13 +15,28 @@ void URoboHPBarUI::SetHPBarPercent(float Percent)
 	{
 		RoboHPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%"), Percent * 100.0f)));
 	}
+}
+
+void URoboHPBarUI::SetCurrentDepthMeters(float Meter)
+{
+	//if (RoboDepthTitleText)
+	//{
+	//	RoboDepthTitleText->SetText(FText::FromString(FString::Printf(TEXT("Normal Depth")))); 
+	//}
 	if (RoboDepthText)
 	{
-		RoboDepthText->SetText(FText::FromString(FString::Printf(TEXT("%00.0fm%")))); //잠수깊이를 매개변수로 받아야할까?
+		RoboDepthText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm%"), Meter)));
 	}
-	if (RoboDepthTitleText)
-	{
-		RoboDepthTitleText->SetText(FText::FromString(FString::Printf(TEXT("%")))); 
-	}
+}
 
+void URoboHPBarUI::SetCurrentAndMaxWeight(float Current, float Max)
+{
+	if (RoboCurrentWeightText)
+	{
+		RoboCurrentWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm%"), Current)));
+	}
+	if (RoboMaxWeightText)
+	{
+		RoboMaxWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm%"), Max)));
+	}
 }

@@ -20,8 +20,14 @@ private:
 	TObjectPtr<class UTextBlock> RoboHPText;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> RoboDepthText;
+	/*UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> RoboDepthTitleText;*/
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> RoboDepthTitleText;
+	TObjectPtr<class UTextBlock> RoboCurrentWeightText;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> RoboMaxWeightText;
 public:
 	void SetHPBarPercent(float Percent);
+	void SetCurrentDepthMeters(float Meter);
+	void SetCurrentAndMaxWeight(float Current, float Max);
 };

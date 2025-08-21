@@ -7,11 +7,11 @@
 #include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
-//#include "Interface/AttackTraceNotify/AttackTraceNotify.h"
+#include "Interface/AttackTraceNotify/AttackTraceNotify.h"
 #include "MyRobo.generated.h"
 
 UCLASS()
-class DTDPROJECT_API AMyRobo : public ACharacter
+class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify
 {
 	GENERATED_BODY()
 
@@ -70,4 +70,6 @@ public:
 	void WeaponInactive();
 
 	float GetDepthBelowSurface() const;
+
+	void AttackTrace() override;
 };

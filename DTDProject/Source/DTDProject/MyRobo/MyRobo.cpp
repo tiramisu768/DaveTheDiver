@@ -243,11 +243,12 @@ void AMyRobo::AttackTrace()
 		for (const FHitResult& result : HitResult)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Orange, FString::Printf(TEXT("Hit Actor: %s"), *result.GetActor()->GetName()));
-			/*ASeaCreature* SeaCreature = Cast<ASeaCreature>(result.GetActor());
+			ASeaCreature* SeaCreature = Cast<ASeaCreature>(result.GetActor());
 			if (SeaCreature != nullptr)
 			{
-				SeaCreature->HitBy(StateComponent->GetDamage(), result);
-			}*/
+				//SeaCreature->HitBy(RoboComponent->GetDamage(), result);
+				SeaCreature->HitBy(10.f);
+			}
 		}
 	}
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "ActorComponent/StateComponent/StateComponent.h"
 #include "Components/WidgetComponent.h"
+#include "TimerManager.h"
 #include "RoboComponent.generated.h"
 
 /**
@@ -19,7 +20,7 @@ class DTDPROJECT_API URoboComponent : public UStateComponent
 {
 	GENERATED_BODY()
 private:
-	//timehandler¾²±â
+	FTimerHandle O2TimerHandle;
 	UPROPERTY(EditAnywhere, Category = "State")
 	float O2DecreaseInterval = 3.0f;
 	float O2Timer = 0.0f;
@@ -34,9 +35,11 @@ public:
 	FOnWeightChanged OnWeightChanged;
 
 public:
+	void BeginPlay() override;
 	void StartDiving();
 	void StopDriving();
 	void InitRoboUIStatement();
 	float GetHPPercent() const { return HP / MaxHP; }
+	void DecreaseO2();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 };

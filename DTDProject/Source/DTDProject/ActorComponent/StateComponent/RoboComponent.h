@@ -21,9 +21,6 @@ class DTDPROJECT_API URoboComponent : public UStateComponent
 	GENERATED_BODY()
 private:
 	FTimerHandle O2TimerHandle;
-	UPROPERTY(EditAnywhere, Category = "State")
-	float O2DecreaseInterval = 3.0f;
-	float O2Timer = 0.0f;
 
 	bool bIsDiving = true; // 수면체크하게 되면 false로 바꾸기
 	UPROPERTY(EditAnywhere, Category = "State")

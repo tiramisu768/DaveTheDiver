@@ -9,8 +9,11 @@
 void URoboComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorld()->GetTimerManager().SetTimer(
-		O2TimerHandle, this, &URoboComponent::DecreaseO2, O2DecreaseInterval, true
+	GetWorld()->GetTimerManager().SetTimer(O2TimerHandle, [this]()
+		{
+			DecreaseO2();
+		}
+		,3.0f,true
 	);
 }
 

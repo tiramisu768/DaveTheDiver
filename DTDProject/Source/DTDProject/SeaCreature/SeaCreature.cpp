@@ -3,6 +3,8 @@
 
 #include "SeaCreature/SeaCreature.h"
 #include "ActorComponent/StateComponent/StateComponent.h"
+#include "Components/WidgetComponent.h"
+#include "UI/SimpleDamageUI.h"
 
 // Sets default values
 ASeaCreature::ASeaCreature()
@@ -10,6 +12,12 @@ ASeaCreature::ASeaCreature()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
+	SimpleDamageWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("SimpleDamageWidget"));
+	SimpleDamageWidget->SetupAttachment(GetRootComponent());
+	static ConstructorHelpers::FClassFinder<UUserWidget> SimpleDamageWidgetClassFinder(TEXT("/Game/BluePrint/SeaCreature/UI/BP_SimpleDamageUI.BP_SimpleDamageUI_C"));
+	if (SimpleDamageWidgetClassFinder.Succeeded())
+		SimpleDamageWidget->SetWidgetClass(SimpleDamageWidgetClassFinder.Class);
+	SimpleDamageWidget->SetWidgetSpace(EWidgetSpace::Screen);
 }
 
 // Called when the game starts or when spawned
@@ -18,12 +26,11 @@ void ASeaCreature::BeginPlay()
 	Super::BeginPlay();
 	StateComponent->OnTakeDamage.BindLambda([this](float Percent)
 		{
-			GEngine->AddOnScreenDebugMessage(-4, 5.f, FColor::Orange, FString::Printf(TEXT("HP Percent: %f"), Percent));
-			//UHPBarUI* HPBarUI = Cast<UHPBarUI>(HPBarWidget->GetWidget());
-			//if (HPBarUI)
-			//{
-			//	HPBarUI->SetHPBarPercent(Percent);
-			//}
+			USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(SimpleDamageWidget->GetWidget());
+			if (SimpleDamageUI)
+			{
+				SimpleDamageUI->SetDamageText(StateComponent->GetDamage());
+			}
 		}
 	);
 }
@@ -45,9 +52,9 @@ void ASeaCreature::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void ASeaCreature::HitBy(float DamageAmount)
 {
 	/*if (StateComponent->isDead() || HitbyMontage == nullptr)
-		return;
+		return;*/
 	StateComponent->TakeDamage(DamageAmount);
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
+	/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
 		HitResult.Normal.Rotation(), true);
 	if (StateComponent->isDead())
 	{

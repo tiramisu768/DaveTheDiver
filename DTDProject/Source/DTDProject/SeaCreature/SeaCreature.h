@@ -13,6 +13,8 @@ class DTDPROJECT_API ASeaCreature : public ACharacter
 private:
 	UPROPERTY(VisibleAnywhere,Category = "State")
 	TObjectPtr<class UStateComponent> StateComponent;
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	TObjectPtr<class UWidgetComponent> SimpleDamageWidget;
 
 public:
 	// Sets default values for this character's properties

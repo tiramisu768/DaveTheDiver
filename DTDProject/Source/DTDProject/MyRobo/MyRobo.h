@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "ActorComponent/StateComponent/RoboComponent.h"
-#include "Components/WidgetComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
 #include "MyRobo.generated.h"
 

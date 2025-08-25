@@ -53,18 +53,32 @@ void ASeaCreature::HitBy(float DamageAmount)
 {
 	/*if (StateComponent->isDead() || HitbyMontage == nullptr)
 		return;*/
+	if (StateComponent->isDead()) return;
 	StateComponent->TakeDamage(DamageAmount);
 	/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
-		HitResult.Normal.Rotation(), true);
+		HitResult.Normal.Rotation(), true);*/
 	if (StateComponent->isDead())
 	{
-		PlayAnimMontage(DeathMontage);
+		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("isDead")));
+		/*PlayAnimMontage(DeathMontage);
 		GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [this]()
 			{
 				Destroy();
-			}, 3.0f, false);
+			}, 3.0f, false);*/
 	}
 	else
-		PlayAnimMontage(HitbyMontage);*/
+	{
+		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("Not isDead")));
+		//PlayAnimMontage(HitbyMontage);
+	}
+
+
+}
+
+void ASeaCreature::SpawnSimpleDamageUI()
+{
+	/*AMonster* monster = GetWorld()->SpawnActor<AMonster>(SpawnMonsterClass, GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
+	if (nullptr == monster) return;
+	monster->InitStat(*Data);*/
 }
 

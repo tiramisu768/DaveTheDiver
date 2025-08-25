@@ -8,10 +8,14 @@
 #include "GameFramework/PhysicsVolume.h"
 #include "UI/RoboHPBarUI.h"		
 #include "HUD/MyHUD.h"
+#include "ActorComponent/StateComponent/RoboComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "BuoyancyComponent.h"
 #include "WaterBodyComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "SeaCreature/SeaCreature.h"
+
 
 // Sets default values
 AMyRobo::AMyRobo()
@@ -247,7 +251,7 @@ void AMyRobo::AttackTrace()
 			if (SeaCreature != nullptr)
 			{
 				//SeaCreature->HitBy(RoboComponent->GetDamage(), result);
-				SeaCreature->HitBy(10.f);
+				SeaCreature->HitBy(RoboComponent->GetDamage());
 			}
 		}
 	}

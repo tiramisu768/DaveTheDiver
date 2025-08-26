@@ -23,13 +23,33 @@ void UStateComponent::BeginPlay()
 
 }
 
+//피격
 void UStateComponent::TakeDamage(float DamageAmount)
 {
-	if (DamageAmount <= 0.0f || HP <= 0.0f)
+	if (DamageAmount <= 0.0f || CurrentHP <= 0.0f)
 		return;
-	HP -= DamageAmount;
-	if (HP < 0.0f)
-		HP = 0.0f;
+	CurrentHP -= DamageAmount;
+	if (CurrentHP < 0.0f)
+		CurrentHP = 0.0f;
+	if (OnTakeDamage.IsBound())
+	{
+		OnTakeDamage.Execute(GetHPPercent());
+	}
+
+	//if (CurrentHP <= 0.f)
+	//{
+	//	Die();
+	//}
+}
+
+//회복
+void UStateComponent::Heal(float HealAmount)
+{
+	if (HealAmount <= 0.0f || CurrentHP <= 0.0f)
+		return;
+	CurrentHP += HealAmount;
+	if (CurrentHP > MaxHP)
+		CurrentHP = MaxHP;
 	if (OnTakeDamage.IsBound())
 	{
 		OnTakeDamage.Execute(GetHPPercent());

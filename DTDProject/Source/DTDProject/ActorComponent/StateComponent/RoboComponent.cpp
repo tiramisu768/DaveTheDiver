@@ -6,6 +6,10 @@
 
 #include "Engine/World.h"
 
+URoboComponent::URoboComponent()
+{
+}
+
 void URoboComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -30,8 +34,8 @@ void URoboComponent::StopDriving()
 void URoboComponent::InitRoboUIStatement()
 {
 	//산소량 초기화
-	HP = MaxHP;
-	if (HP < 0.0f) HP = 0.0f;
+	CurrentHP = MaxHP;
+	if (CurrentHP < 0.0f) CurrentHP = 0.0f;
 	OnHPChanged.ExecuteIfBound(GetHPPercent()); //델리게이트 실행
 
 	//근접무기 초기화 - 로봇에서 관리
@@ -45,11 +49,21 @@ void URoboComponent::DecreaseO2()
 {
 	if (bIsDiving)
 	{
-		GEngine->AddOnScreenDebugMessage(-3, 2.0f, FColor::Red, FString::Printf(TEXT("HP: %f"), HP));
-		HP = FMath::Max(0.f, HP - 1.f);
+		GEngine->AddOnScreenDebugMessage(-3, 2.0f, FColor::Red, FString::Printf(TEXT("HP: %f"), CurrentHP));
+		CurrentHP = FMath::Max(0.f, CurrentHP - 1.f);
 
 		OnHPChanged.ExecuteIfBound(GetHPPercent());
 	}
+}
+
+void URoboComponent::TakeDamage(float DamageAmount)
+{
+	Super::TakeDamage(DamageAmount);
+}
+
+void URoboComponent::Heal(float HealAmount)
+{
+	Super::Heal(HealAmount);
 }
 
 // Called every frame

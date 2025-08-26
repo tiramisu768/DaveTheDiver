@@ -12,13 +12,15 @@
  * 
  */
 //UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-DECLARE_DELEGATE_OneParam(FOnHPChanged, float);
+
 DECLARE_DELEGATE_OneParam(FOnDepthChanged, float);
 DECLARE_DELEGATE_TwoParams(FOnWeightChanged, float, float);
 UCLASS()
 class DTDPROJECT_API URoboComponent : public UStateComponent
 {
 	GENERATED_BODY()
+public:
+	URoboComponent();
 private:
 	FTimerHandle O2TimerHandle;
 
@@ -27,7 +29,6 @@ private:
 	UWidgetComponent* RoboHPBarWidget;
 
 public:
-	FOnHPChanged OnHPChanged;
 	FOnDepthChanged OnDepthChanged;
 	FOnWeightChanged OnWeightChanged;
 
@@ -36,7 +37,9 @@ public:
 	void StartDiving();
 	void StopDriving();
 	void InitRoboUIStatement();
-	float GetHPPercent() const { return HP / MaxHP; }
+	//float GetHPPercent() const { return CurrentHP / MaxHP; }
 	void DecreaseO2();
+	virtual void TakeDamage(float DamageAmount) override;
+	virtual void Heal(float HealAmount) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 };

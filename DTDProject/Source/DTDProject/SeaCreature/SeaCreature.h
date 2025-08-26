@@ -12,9 +12,11 @@ class DTDPROJECT_API ASeaCreature : public ACharacter
 	GENERATED_BODY()
 private:
 	UPROPERTY(VisibleAnywhere,Category = "State")
-	TObjectPtr<class UStateComponent> StateComponent;
+	TObjectPtr<class UFishStateComponent> FishStateComponent;
 	UPROPERTY(VisibleAnywhere, Category = "UI")
-	TObjectPtr<class UWidgetComponent> SimpleDamageWidget;
+	TObjectPtr<class UWidgetComponent> FishHPBarWidget;
+	UPROPERTY(EditAnywhere, Category = "Spawn", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class ADamagePopup> SpawnDamagePopupClass;
 
 public:
 	// Sets default values for this character's properties
@@ -31,5 +33,5 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void HitBy(float DamageAmount);
-	void SpawnSimpleDamageUI();
+	void SpawnDamagePopup();
 };

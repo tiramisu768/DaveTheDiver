@@ -2,35 +2,37 @@
 
 
 #include "SeaCreature/SeaCreature.h"
-#include "ActorComponent/StateComponent/StateComponent.h"
+#include "ActorComponent/StateComponent/FishStateComponent.h"
 #include "Components/WidgetComponent.h"
 #include "UI/SimpleDamageUI.h"
+#include "Object/ObjectUI/DamagePopup.h"
 
 // Sets default values
 ASeaCreature::ASeaCreature()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
-	SimpleDamageWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("SimpleDamageWidget"));
-	SimpleDamageWidget->SetupAttachment(GetRootComponent());
-	static ConstructorHelpers::FClassFinder<UUserWidget> SimpleDamageWidgetClassFinder(TEXT("/Game/BluePrint/SeaCreature/UI/BP_SimpleDamageUI.BP_SimpleDamageUI_C"));
-	if (SimpleDamageWidgetClassFinder.Succeeded())
-		SimpleDamageWidget->SetWidgetClass(SimpleDamageWidgetClassFinder.Class);
-	SimpleDamageWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	FishStateComponent = CreateDefaultSubobject<UFishStateComponent>(TEXT("FishStateComponent"));
+	FishHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FishHPBarWidget"));
+	FishHPBarWidget->SetupAttachment(GetRootComponent());
+	static ConstructorHelpers::FClassFinder<UUserWidget> FishHPBarWidgetClassFinder(TEXT(""));
+	if (FishHPBarWidgetClassFinder.Succeeded())
+		FishHPBarWidget->SetWidgetClass(FishHPBarWidgetClassFinder.Class);
+	FishHPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 }
 
 // Called when the game starts or when spawned
 void ASeaCreature::BeginPlay()
 {
 	Super::BeginPlay();
-	StateComponent->OnTakeDamage.BindLambda([this](float Percent)
+	FishStateComponent->OnTakeDamage.BindLambda([this](float Percent)
 		{
-			USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(SimpleDamageWidget->GetWidget());
-			if (SimpleDamageUI)
+			////////다시하기///////////
+			/*UFishHPBar* FishHPBarUI = Cast<UFishHPBar>(FishHPBarWidget->GetWidget());
+			if (FishHPBarUI)
 			{
-				SimpleDamageUI->SetDamageText(StateComponent->GetDamage());
-			}
+				FishHPBarUI->SetDamageText(FishStateComponent->GetDamage());
+			}*/
 		}
 	);
 }
@@ -53,11 +55,12 @@ void ASeaCreature::HitBy(float DamageAmount)
 {
 	/*if (StateComponent->isDead() || HitbyMontage == nullptr)
 		return;*/
-	if (StateComponent->isDead()) return;
-	StateComponent->TakeDamage(DamageAmount);
+	if (FishStateComponent->isDead()) return;
+	FishStateComponent->TakeDamage(DamageAmount);
+	SpawnDamagePopup();
 	/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
 		HitResult.Normal.Rotation(), true);*/
-	if (StateComponent->isDead())
+	if (FishStateComponent->isDead())
 	{
 		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("isDead")));
 		/*PlayAnimMontage(DeathMontage);
@@ -75,10 +78,13 @@ void ASeaCreature::HitBy(float DamageAmount)
 
 }
 
-void ASeaCreature::SpawnSimpleDamageUI()
+void ASeaCreature::SpawnDamagePopup()
 {
-	/*AMonster* monster = GetWorld()->SpawnActor<AMonster>(SpawnMonsterClass, GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
-	if (nullptr == monster) return;
-	monster->InitStat(*Data);*/
+	GEngine->AddOnScreenDebugMessage(-6, 5.0f, FColor::Red, FString::Printf(TEXT("SpawnDamagePopup")));
+	ADamagePopup* damagePopup = GetWorld()->SpawnActor<ADamagePopup>(SpawnDamagePopupClass, GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
+	if (nullptr == damagePopup) return;
+	//damagePopup->InitStat(*Data);
+
+	//GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AMonsterSpawner::SpawnMonster, SpawnInterval, true);
 }
 

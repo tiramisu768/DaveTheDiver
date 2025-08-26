@@ -24,7 +24,7 @@ private:
 	TObjectPtr<USkeletalMeshComponent> WeaponComponent;
 	UPROPERTY(VisibleAnywhere, Category = "State")
 	TObjectPtr<class URoboComponent> RoboComponent;
-	UPROPERTY(VisibleAnywhere, Category = "State")
+	UPROPERTY(VisibleAnywhere, Category = "Buoyancy")
 	TObjectPtr<class UBuoyancyComponent> BuoyancyComponent;
 #pragma endregion
 

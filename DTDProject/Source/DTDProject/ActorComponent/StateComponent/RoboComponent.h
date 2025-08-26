@@ -25,7 +25,7 @@ private:
 	FTimerHandle O2TimerHandle;
 
 	bool bIsDiving = true; // 수면체크하게 되면 false로 바꾸기
-	UPROPERTY(EditAnywhere, Category = "State")
+	UPROPERTY(EditAnywhere, Category = "State | Robo")
 	UWidgetComponent* RoboHPBarWidget;
 
 public:

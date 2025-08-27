@@ -250,8 +250,7 @@ void AMyRobo::AttackTrace()
 			ASeaCreature* SeaCreature = Cast<ASeaCreature>(result.GetActor());
 			if (SeaCreature != nullptr)
 			{
-				//SeaCreature->HitBy(RoboComponent->GetDamage(), result);
-				SeaCreature->HitBy(RoboComponent->GetDamage());
+				SeaCreature->HitBy(RoboComponent->GetDamage(),result);
 			}
 		}
 	}

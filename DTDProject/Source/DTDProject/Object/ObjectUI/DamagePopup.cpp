@@ -23,6 +23,7 @@ ADamagePopup::ADamagePopup()
 void ADamagePopup::BeginPlay()
 {
 	Super::BeginPlay();
+
 	
 }
 
@@ -32,5 +33,26 @@ void ADamagePopup::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+void ADamagePopup::HideDamagePopup()
+{
+	GetWorld()->GetTimerManager().SetTimer(HideTimerHandle, this, &ADamagePopup::HidePopup, HideInterval, true);
+}
+
+void ADamagePopup::HidePopup()
+{
+	SetActorHiddenInGame(true);
+}
+
+void ADamagePopup::GetDamage()
+{
+	USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(SimpleDamageWidget->GetWidget());
+	if (SimpleDamageUI)
+	{
+		//SimpleDamageUI->SetDamageText(FishStateComponent->GetDamage());
+	}
+}
+
+
 
 

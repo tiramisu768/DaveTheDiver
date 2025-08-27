@@ -17,6 +17,8 @@ private:
 	TObjectPtr<class UWidgetComponent> FishHPBarWidget;
 	UPROPERTY(EditAnywhere, Category = "Spawn", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ADamagePopup> SpawnDamagePopupClass;
+	UPROPERTY(EditAnywhere, Category = "Particle")
+	TObjectPtr<class UParticleSystem> HitParticle;
 
 public:
 	// Sets default values for this character's properties
@@ -32,6 +34,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void HitBy(float DamageAmount);
+	void HitBy(float DamageAmount, const FHitResult& HitResult);
 	void SpawnDamagePopup();
 };

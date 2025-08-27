@@ -11,12 +11,14 @@ class DTDPROJECT_API ADamagePopup : public AActor
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(VisibleAnywhere, Category = "UI")
-	TObjectPtr<class UWidgetComponent> SimpleDamageWidget;
+	UPROPERTY(EditAnywhere, Category = "Hide", meta = (AllowPrivateAccess = "true"))
+	float HideInterval=3.0f;
+	FTimerHandle HideTimerHandle;
 public:	
 	// Sets default values for this actor's properties
 	ADamagePopup();
-
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	TObjectPtr<class UWidgetComponent> SimpleDamageWidget;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -24,4 +26,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void HideDamagePopup();
+	void HidePopup();
+	void GetDamage();
 };

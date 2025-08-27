@@ -6,6 +6,8 @@
 #include "Components/WidgetComponent.h"
 #include "UI/SimpleDamageUI.h"
 #include "Object/ObjectUI/DamagePopup.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASeaCreature::ASeaCreature()
@@ -33,6 +35,12 @@ void ASeaCreature::BeginPlay()
 			{
 				FishHPBarUI->SetDamageText(FishStateComponent->GetDamage());
 			}*/
+
+			/*USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(SpawnDamagePopupClass-> SimpleDamageWidget->GetWidget());
+			if (SimpleDamageUI)
+			{
+				SimpleDamageUI->SetDamageText(FishStateComponent->GetDamage());
+			}*/
 		}
 	);
 }
@@ -51,15 +59,15 @@ void ASeaCreature::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
-void ASeaCreature::HitBy(float DamageAmount)
+void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 {
 	/*if (StateComponent->isDead() || HitbyMontage == nullptr)
 		return;*/
 	if (FishStateComponent->isDead()) return;
 	FishStateComponent->TakeDamage(DamageAmount);
 	SpawnDamagePopup();
-	/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
-		HitResult.Normal.Rotation(), true);*/
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
+		HitResult.Normal.Rotation(), true);
 	if (FishStateComponent->isDead())
 	{
 		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("isDead")));
@@ -80,11 +88,13 @@ void ASeaCreature::HitBy(float DamageAmount)
 
 void ASeaCreature::SpawnDamagePopup()
 {
-	GEngine->AddOnScreenDebugMessage(-6, 5.0f, FColor::Red, FString::Printf(TEXT("SpawnDamagePopup")));
+	/*float HeightOffset = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 0.3f;
+	FVector SpawnLoc = GetActorLocation() + FVector(0.f, 0.f, HeightOffset);*/
 	ADamagePopup* damagePopup = GetWorld()->SpawnActor<ADamagePopup>(SpawnDamagePopupClass, GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
 	if (nullptr == damagePopup) return;
-	//damagePopup->InitStat(*Data);
+	//////////////추후 오브젝트풀링으로 수정/////////////////
+	damagePopup->HideDamagePopup();
 
-	//GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AMonsterSpawner::SpawnMonster, SpawnInterval, true);
+	
 }
 

@@ -44,14 +44,6 @@ void ADamagePopup::HidePopup()
 	SetActorHiddenInGame(true);
 }
 
-void ADamagePopup::GetDamage()
-{
-	USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(SimpleDamageWidget->GetWidget());
-	if (SimpleDamageUI)
-	{
-		//SimpleDamageUI->SetDamageText(FishStateComponent->GetDamage());
-	}
-}
 
 
 

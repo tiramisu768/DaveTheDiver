@@ -28,5 +28,4 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void HideDamagePopup();
 	void HidePopup();
-	void GetDamage();
 };

@@ -35,12 +35,6 @@ void ASeaCreature::BeginPlay()
 			{
 				FishHPBarUI->SetDamageText(FishStateComponent->GetDamage());
 			}*/
-
-			/*USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(SpawnDamagePopupClass-> SimpleDamageWidget->GetWidget());
-			if (SimpleDamageUI)
-			{
-				SimpleDamageUI->SetDamageText(FishStateComponent->GetDamage());
-			}*/
 		}
 	);
 }
@@ -65,7 +59,7 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 		return;*/
 	if (FishStateComponent->isDead()) return;
 	FishStateComponent->TakeDamage(DamageAmount);
-	SpawnDamagePopup();
+	SpawnDamagePopup(DamageAmount);
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
 		HitResult.Normal.Rotation(), true);
 	if (FishStateComponent->isDead())
@@ -86,12 +80,18 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 
 }
 
-void ASeaCreature::SpawnDamagePopup()
+void ASeaCreature::SpawnDamagePopup(float DamageAmount)
 {
 	/*float HeightOffset = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 0.3f;
 	FVector SpawnLoc = GetActorLocation() + FVector(0.f, 0.f, HeightOffset);*/
 	ADamagePopup* damagePopup = GetWorld()->SpawnActor<ADamagePopup>(SpawnDamagePopupClass, GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
 	if (nullptr == damagePopup) return;
+
+	USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(damagePopup-> SimpleDamageWidget->GetWidget());
+	if (SimpleDamageUI)
+	{
+		SimpleDamageUI->SetDamageText(FishStateComponent->GetDamage());
+	}
 	//////////////추후 오브젝트풀링으로 수정/////////////////
 	damagePopup->HideDamagePopup();
 

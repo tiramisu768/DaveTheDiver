@@ -21,6 +21,24 @@ ASeaCreature::ASeaCreature()
 	if (FishHPBarWidgetClassFinder.Succeeded())
 		FishHPBarWidget->SetWidgetClass(FishHPBarWidgetClassFinder.Class);
 	FishHPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>HitbyMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Hitby.AM_Hitby'"));
+	if (HitbyMontageObjectFinder.Succeeded())
+		HitbyMontage = HitbyMontageObjectFinder.Object;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>DeathMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Death.AM_Death'"));
+	if (DeathMontageObjectFinder.Succeeded())
+		DeathMontage = DeathMontageObjectFinder.Object;
+	//AIControllerClass = AMonsterAIController::StaticClass();
+	////EAutoPossessAI
+	////Disabled, //AIController사용안함
+	////PlacedInWorld.//게임 시작시 배치되어있는 pawn은 AIController를 소유함
+	////Spawned, //Spawn된 Pawn은 AIController를 소유함
+	////PlacedInWorldOrSpawned, //게임 시작시 배치되어있는 Pawn과 Spawn된 Pawn은 AIController를 소유함
+	//AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT(""));
+	if (AttackMontageObjectFinder.Succeeded())
+		AttackMontage = AttackMontageObjectFinder.Object;
 }
 
 // Called when the game starts or when spawned
@@ -44,7 +62,7 @@ void ASeaCreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//if (!StateComponent->isDead())
+	if (!FishStateComponent->isDead())
 		AddMovementInput(Forward);
 }
 
@@ -57,9 +75,9 @@ void ASeaCreature::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 {
-	/*if (StateComponent->isDead() || HitbyMontage == nullptr)
-		return;*/
-	if (FishStateComponent->isDead()) return;
+	if (FishStateComponent->isDead() || HitbyMontage == nullptr)
+		return;
+
 	FishStateComponent->TakeDamage(DamageAmount);
 	SpawnDamagePopup(DamageAmount);
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
@@ -67,19 +85,38 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 	if (FishStateComponent->isDead())
 	{
 		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("isDead")));
-		/*PlayAnimMontage(DeathMontage);
+		PlayAnimMontage(DeathMontage);
+		////////20초 후 자동삭제로 하고 20초 내에 로보가 물고기에 부딪히면 수확 및 삭제////////
 		GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [this]()
 			{
 				Destroy();
-			}, 3.0f, false);*/
+			}, 3.0f, false);
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("Not isDead")));
-		//PlayAnimMontage(HitbyMontage);
+		PlayAnimMontage(HitbyMontage);
 	}
 
 
+}
+
+bool ASeaCreature::isDead()
+{
+	return FishStateComponent->isDead();
+}
+
+void ASeaCreature::Attack(AMyRobo* Target)
+{
+	////GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Monster Attack!"));
+	//if (FishStateComponent->isDead() || AttackMontage == nullptr || Target == nullptr)
+	//	return;
+	//if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackMontage))
+	//	return;
+	//FVector TargetDirection = Target->GetActorLocation() - GetActorLocation();
+	//FRotator LookAtRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
+	//SetActorRotation(LookAtRotation);
+	//PlayAnimMontage(AttackMontage);
 }
 
 void ASeaCreature::SpawnDamagePopup(float DamageAmount)

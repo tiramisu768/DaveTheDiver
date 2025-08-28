@@ -19,6 +19,6 @@ void USeaCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		Speed = OwningCharacter->GetVelocity().Size();
 		GEngine->AddOnScreenDebugMessage(-6, 2.0f, FColor::Black, FString::Printf(TEXT("Speed: %f"), Speed));
-		//isDead = OwningCharacter->isDead();
+		isDead = OwningCharacter->isDead();
 	}
 }

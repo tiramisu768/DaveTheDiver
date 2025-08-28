@@ -20,6 +20,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Particle")
 	TObjectPtr<class UParticleSystem> HitParticle;
 	FVector Forward = { 0.1f,0.0f,0.0f };
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UAnimMontage> HitbyMontage;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UAnimMontage> DeathMontage;
+	FTimerHandle DeathTimerHandle;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UAnimMontage> AttackMontage;
 
 public:
 	// Sets default values for this character's properties
@@ -36,5 +43,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void HitBy(float DamageAmount, const FHitResult& HitResult);
+	bool isDead();
+	virtual void Attack(class AMyRobo* Target);
 	void SpawnDamagePopup(float DamageAmount);
 };

@@ -19,6 +19,7 @@ private:
 	TSubclassOf<class ADamagePopup> SpawnDamagePopupClass;
 	UPROPERTY(EditAnywhere, Category = "Particle")
 	TObjectPtr<class UParticleSystem> HitParticle;
+	FVector Forward = { 0.1f,0.0f,0.0f };
 
 public:
 	// Sets default values for this character's properties

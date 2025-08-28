@@ -44,6 +44,8 @@ void ASeaCreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//if (!StateComponent->isDead())
+		AddMovementInput(Forward);
 }
 
 // Called to bind functionality to input

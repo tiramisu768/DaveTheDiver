@@ -2,15 +2,18 @@
 
 
 #include "SeaCreature/SeaCreature.h"
+#include "MyRobo/MyRobo.h"
 #include "ActorComponent/StateComponent/FishStateComponent.h"
 #include "Components/WidgetComponent.h"
 #include "UI/SimpleDamageUI.h"
 #include "Object/ObjectUI/DamagePopup.h"
 #include "Components/CapsuleComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "Components/skeletalMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/PrimitiveComponent.h"
-#include "Kismet/GameplayStatics.h"
+//#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASeaCreature::ASeaCreature()
@@ -32,6 +35,8 @@ ASeaCreature::ASeaCreature()
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>DeathFlapMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Death.AM_Death'"));
 	if (DeathFlapMontageObjectFinder.Succeeded())
 		DeathFlapMontage = DeathFlapMontageObjectFinder.Object;
+	CollectSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectSphere"));
+	CollectSphere->SetupAttachment(RootComponent);
 	//AIControllerClass = AMonsterAIController::StaticClass();
 	////EAutoPossessAI
 	////Disabled, //AIController사용안함
@@ -59,14 +64,13 @@ void ASeaCreature::BeginPlay()
 		}
 	);
 
-//	CollectSphere->OnComponentBeginOverlap.AddDynamic(this, &ASeaCreature::OnCollectOverlap);
+	CollectSphere->OnComponentBeginOverlap.AddDynamic(this, &ASeaCreature::OnCollectOverlap);
 }
 
 // Called every frame
 void ASeaCreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 
 	///////AI 하면 사라질 부분////////
 	if (!FishStateComponent->isDead())
@@ -87,10 +91,23 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 
 	FishStateComponent->TakeDamage(DamageAmount);
 	SpawnDamagePopup(DamageAmount);
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
-		HitResult.Normal.Rotation(), true);
+	/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
+		HitResult.Normal.Rotation(), true);*/
+
+	//if (HitEffect)
+	//{
+	//	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+	//		GetWorld(),
+	//		HitEffect,
+	//		HitResult.Location,
+	//		HitResult.Normal.Rotation(),   // 방향
+	//		FVector(1.0f),                 // 스케일
+	//		true                           // AutoDestroy
+	//	);
+	//}
+
 	if (FishStateComponent->isDead())
-	{
+	{	
 		Die();
 	}
 	else
@@ -107,29 +124,30 @@ void ASeaCreature::Die()
 	//사망직전 파닥파닥 애님
 	PlayAnimMontage(DeathFlapMontage);
 
-	//USkeletalMeshComponent* M = GetMesh();
-	//// 현재 프레임 고정
-	//M->bPauseAnims = true;
-	//M->SetComponentTickEnabled(false);
+	USkeletalMeshComponent* M = GetMesh();
+	// 현재 프레임 고정
+	M->bPauseAnims = true;
+	M->SetComponentTickEnabled(false);
 
-	////캡슐끄고, 메쉬의 콜리전을 Ragdoll로 설정
-	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//M->SetCollisionProfileName(TEXT("Ragdoll"));
-	//M->SetAllBodiesSimulatePhysics(false);
-	//M->SetSimulatePhysics(false);
+	//캡슐끄고, 메쉬의 콜리전을 Ragdoll로 설정
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	M->SetCollisionProfileName(TEXT("Ragdoll"));
+	M->SetAllBodiesSimulatePhysics(false);
+	M->SetSimulatePhysics(false);
+	M->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
-	//M->SetAllBodiesBelowSimulatePhysics(FName("Spine_006_077"), true, true);
-	//M->SetAllBodiesBelowPhysicsBlendWeight(FName("Spine_006_077"), 0.5f);
+	M->SetAllBodiesBelowSimulatePhysics(FName("Spine_006_077"), true, true);
+	M->SetAllBodiesBelowPhysicsBlendWeight(FName("Spine_006_077"), 0.5f);
 
-	//// 물속 감쇠로 덜 출렁이게
-	//M->SetLinearDamping(2.5f);
-	//M->SetAngularDamping(3.5f);
+	// 물속 감쇠로 덜 출렁이게
+	M->SetLinearDamping(2.5f);
+	M->SetAngularDamping(3.5f);
 
-	//GetWorld()->GetTimerManager().SetTimer(DeathRotateTimerHandle, [this]()
-	//	{
-	//		RotateToDeadPose(0.01f);
-	//	}, 0.01f, true
-	//);
+	GetWorld()->GetTimerManager().SetTimer(DeathRotateTimerHandle, [this]()
+		{
+			RotateToDeadPose(0.01f);
+		}, 0.01f, true
+	);
 	//////////10초 후 자동삭제로 하고 20초 내에 로보가 물고기에 부딪히면 수확 및 삭제////////
 	//GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [this]()
 	//	{
@@ -145,7 +163,7 @@ bool ASeaCreature::isDead()
 
 void ASeaCreature::RotateToDeadPose(float DeltaTime)
 {
-	//서서히 0→Roll ~-90도 보간
+	//서서히 0→Roll ~90도 보간
 	const FRotator Target = FRotator(0.f, GetActorRotation().Yaw, 90.f);
 	SetActorRotation(FMath::RInterpTo(GetActorRotation(), Target, DeltaTime, 0.5f));
 }

@@ -17,8 +17,8 @@ private:
 	TObjectPtr<class UWidgetComponent> FishHPBarWidget;
 	UPROPERTY(EditAnywhere, Category = "Spawn", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ADamagePopup> SpawnDamagePopupClass;
-	UPROPERTY(EditAnywhere, Category = "Particle")
-	TObjectPtr<class UParticleSystem> HitParticle;
+	UPROPERTY(EditAnywhere, Category = "FX")
+	TObjectPtr<class UNiagaraSystem> HitEffect;
 	FVector Forward = { 0.1f,0.0f,0.0f };
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAnimMontage> HitbyMontage;

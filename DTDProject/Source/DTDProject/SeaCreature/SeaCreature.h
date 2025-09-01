@@ -22,9 +22,15 @@ private:
 	FVector Forward = { 0.1f,0.0f,0.0f };
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAnimMontage> HitbyMontage;
+
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAnimMontage> DeathMontage;
+	TObjectPtr<UAnimMontage> DeathFlapMontage;
 	FTimerHandle DeathTimerHandle;
+	FTimerHandle DeathRotateTimerHandle;
+	UPROPERTY(VisibleAnywhere) 
+	class USphereComponent* CollectSphere;
+	FTimerHandle CollectHintTimer;
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAnimMontage> AttackMontage;
 
@@ -43,7 +49,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void HitBy(float DamageAmount, const FHitResult& HitResult);
+	void Die();
 	bool isDead();
+	void RotateToDeadPose(float DeltaTime);
+	void EnableCollectTrigger(bool isEnable);
+	UFUNCTION()
+	void OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void CollectSeaCreature();
 	virtual void Attack(class AMyRobo* Target);
 	void SpawnDamagePopup(float DamageAmount);
 };

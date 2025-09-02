@@ -14,6 +14,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/PrimitiveComponent.h"
 //#include "Kismet/GameplayStatics.h"
+#include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
 
 // Sets default values
 ASeaCreature::ASeaCreature()
@@ -37,16 +38,17 @@ ASeaCreature::ASeaCreature()
 		DeathFlapMontage = DeathFlapMontageObjectFinder.Object;
 	CollectSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectSphere"));
 	CollectSphere->SetupAttachment(RootComponent);
-	//AIControllerClass = AMonsterAIController::StaticClass();
-	////EAutoPossessAI
-	////Disabled, //AIController사용안함
-	////PlacedInWorld.//게임 시작시 배치되어있는 pawn은 AIController를 소유함
-	////Spawned, //Spawn된 Pawn은 AIController를 소유함
-	////PlacedInWorldOrSpawned, //게임 시작시 배치되어있는 Pawn과 Spawn된 Pawn은 AIController를 소유함
-	//AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT(""));
 	if (AttackMontageObjectFinder.Succeeded())
 		AttackMontage = AttackMontageObjectFinder.Object;
+
+	AIControllerClass = ASeaCreatureAIController::StaticClass();
+	//EAutoPossessAI
+	//Disabled, //AIController사용안함
+	//PlacedInWorld.//게임 시작시 배치되어있는 pawn은 AIController를 소유함
+	//Spawned, //Spawn된 Pawn은 AIController를 소유함
+	//PlacedInWorldOrSpawned, //게임 시작시 배치되어있는 Pawn과 Spawn된 Pawn은 AIController를 소유함
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 // Called when the game starts or when spawned
@@ -73,8 +75,8 @@ void ASeaCreature::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	///////AI 하면 사라질 부분////////
-	if (!FishStateComponent->isDead())
-		AddMovementInput(Forward);
+	/*if (!FishStateComponent->isDead())
+		AddMovementInput(Forward);*/
 }
 
 // Called to bind functionality to input

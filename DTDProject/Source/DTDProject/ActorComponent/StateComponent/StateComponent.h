@@ -47,7 +47,7 @@ public:
 
 	virtual void TakeDamage(float DamageAmount);
 	virtual void Heal(float HealAmount);
-	bool isDead() const { return CurrentHP <= 0.0f; }
+	bool IsDead() const { return CurrentHP <= 0.0f; }
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 		

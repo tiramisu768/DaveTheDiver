@@ -15,12 +15,18 @@
 #include "Components/PrimitiveComponent.h"
 //#include "Kismet/GameplayStatics.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ASeaCreature::ASeaCreature()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	GetCharacterMovement()->NavAgentProps.bCanSwim = false;
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	GetCharacterMovement()->GravityScale = 0.f;
+
 	FishStateComponent = CreateDefaultSubobject<UFishStateComponent>(TEXT("FishStateComponent"));
 	FishHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FishHPBarWidget"));
 	FishHPBarWidget->SetupAttachment(GetRootComponent());
@@ -75,8 +81,8 @@ void ASeaCreature::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	///////AI 하면 사라질 부분////////
-	/*if (!FishStateComponent->isDead())
-		AddMovementInput(Forward);*/
+	if (!FishStateComponent->IsDead())
+		AddMovementInput(Forward);
 }
 
 // Called to bind functionality to input
@@ -88,7 +94,7 @@ void ASeaCreature::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 {
-	if (FishStateComponent->isDead() || HitbyMontage == nullptr)
+	if (FishStateComponent->IsDead() || HitbyMontage == nullptr)
 		return;
 
 	FishStateComponent->TakeDamage(DamageAmount);
@@ -108,7 +114,7 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 	//	);
 	//}
 
-	if (FishStateComponent->isDead())
+	if (FishStateComponent->IsDead())
 	{	
 		Die();
 	}
@@ -125,6 +131,9 @@ void ASeaCreature::Die()
 {
 	//사망직전 파닥파닥 애님
 	PlayAnimMontage(DeathFlapMontage);
+
+	auto* CM = GetCharacterMovement();
+	CM->SetMovementMode(MOVE_None);
 
 	USkeletalMeshComponent* M = GetMesh();
 	// 현재 프레임 고정
@@ -160,7 +169,7 @@ void ASeaCreature::Die()
 
 bool ASeaCreature::isDead()
 {
-	return FishStateComponent->isDead();
+	return FishStateComponent->IsDead();
 }
 
 void ASeaCreature::RotateToDeadPose(float DeltaTime)
@@ -180,7 +189,7 @@ void ASeaCreature::EnableCollectTrigger(bool isEnable)
 
 void ASeaCreature::OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!FishStateComponent->isDead()) return;
+	if (!FishStateComponent->IsDead()) return;
 	if (AMyRobo* robo = Cast<AMyRobo>(OtherActor))
 	{
 		CollectSeaCreature();

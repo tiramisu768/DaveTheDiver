@@ -38,6 +38,9 @@ public:
 	// Sets default values for this character's properties
 	ASeaCreature();
 
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class USeaCreatureSteeringComponent* SteeringComp;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

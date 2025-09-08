@@ -14,15 +14,22 @@ class DTDPROJECT_API ASeaCreatureAIController : public AAIController
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Category = "AI")
 	TObjectPtr<class UBehaviorTree> BehaviorTreeAsset;
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Category = "AI")
 	TObjectPtr<class UBlackboardData> BlackboardAsset;
+
 
 public:
 	ASeaCreatureAIController();
 	void PlayBehaviorTree();
 
 protected:
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UAIPerceptionComponent* PerceptionComp;
+	UPROPERTY()
+	class UAISenseConfig_Sight* SightConfig;
+	/*UFUNCTION()
+	void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);*/
 	void OnPossess(APawn* InPawn) override;
 };

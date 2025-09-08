@@ -4,9 +4,13 @@
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AIPerceptionSystem.h"
 
 ASeaCreatureAIController::ASeaCreatureAIController()
 {
+	//BehviorTree
 	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BehaviorTreeFinder(TEXT("/Script/AIModule.BehaviorTree'/Game/BluePrint/SeaCreature/AI/BT_SeaCreature.BT_SeaCreature'"));
 	if (BehaviorTreeFinder.Succeeded())
 		BehaviorTreeAsset = BehaviorTreeFinder.Object;
@@ -14,6 +18,21 @@ ASeaCreatureAIController::ASeaCreatureAIController()
 	static ConstructorHelpers::FObjectFinder<UBlackboardData> BlackboardFinder(TEXT("/Script/AIModule.BlackboardData'/Game/BluePrint/SeaCreature/AI/BB_SeaCreature.BB_SeaCreature'"));
 	if (BlackboardFinder.Succeeded())
 		BlackboardAsset = BlackboardFinder.Object;
+
+	//Perception
+	PerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+
+	SightConfig->SightRadius = 2000.f;
+	SightConfig->LoseSightRadius = 2400.f;
+	SightConfig->PeripheralVisionAngleDegrees = 150.f;
+	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+
+	PerceptionComp->ConfigureSense(*SightConfig);
+	PerceptionComp->SetDominantSense(SightConfig->GetSenseImplementation());
+	//PerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this, &ASeaCreatureAIController::OnPerceptionUpdated);
 
 }
 
@@ -27,8 +46,22 @@ void ASeaCreatureAIController::PlayBehaviorTree()
 	}
 }
 
+//void ASeaCreatureAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
+//{
+//	if (Stimulus.WasSuccessfullySensed())
+//	{
+//		BlackboardComp->SetValueAsObject("TargetActor", Actor);
+//	}
+//	else
+//	{
+//		BlackboardComp->ClearValue("TargetActor");
+//	}
+//}
+
 void ASeaCreatureAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	PlayBehaviorTree();
 }
+
+

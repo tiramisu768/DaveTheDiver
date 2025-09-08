@@ -16,6 +16,7 @@
 //#include "Kismet/GameplayStatics.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
 
 // Sets default values
 ASeaCreature::ASeaCreature()
@@ -55,6 +56,8 @@ ASeaCreature::ASeaCreature()
 	//Spawned, //Spawn된 Pawn은 AIController를 소유함
 	//PlacedInWorldOrSpawned, //게임 시작시 배치되어있는 Pawn과 Spawn된 Pawn은 AIController를 소유함
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	SteeringComp = CreateDefaultSubobject<USeaCreatureSteeringComponent>(TEXT("SteeringComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -236,4 +239,6 @@ void ASeaCreature::SpawnDamagePopup(float DamageAmount)
 
 	
 }
+
+
 

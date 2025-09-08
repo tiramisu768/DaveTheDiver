@@ -46,21 +46,25 @@ void USeaCreatureSteeringComponent::BeginPlay()
 
 FVector USeaCreatureSteeringComponent::Seek(const FVector& Target) const
 {
+	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("Seek"));
 	return FVector();
 }
 
 FVector USeaCreatureSteeringComponent::Flee(const FVector& FromLocation) const
 {
+	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("Flee"));
 	return FVector();
 }
 
 FVector USeaCreatureSteeringComponent::Wander(float DeltaTime)
 {
+	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("Wander"));
 	return FVector();
 }
 
 FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 {
+	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("ObstacleAvoidance"));
 	return FVector();
 }
 

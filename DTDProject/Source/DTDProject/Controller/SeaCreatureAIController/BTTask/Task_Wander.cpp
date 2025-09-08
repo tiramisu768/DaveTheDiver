@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Controller/SeaCreatureAIController/BTTask/Task_Seek.h"
+#include "Controller/SeaCreatureAIController/BTTask/Task_Wander.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
 
-void UTask_Seek::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	AAIController* Owner = OwnerComp.GetAIOwner();
 	ASeaCreature* SeaCreature = nullptr;
@@ -26,5 +26,5 @@ void UTask_Seek::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 		return;
 	}
 
-	FVector dir = SeaCreature->SteeringComp->ComputeSeekDir(Target->GetActorLocation());
+	FVector dir = SeaCreature->SteeringComp->ComputeWanderDir(DeltaSeconds);
 }

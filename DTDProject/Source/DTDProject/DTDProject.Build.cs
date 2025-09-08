@@ -10,7 +10,7 @@ public class DTDProject : ModuleRules
 
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" ,"Water", "Niagara","GameplayTasks" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" ,"Water", "Niagara","GameplayTasks","AIModule" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

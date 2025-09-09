@@ -27,4 +27,6 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	}
 
 	FVector dir = SeaCreature->SteeringComp->ComputeFleeDir(Target->GetActorLocation());
+	dir = SeaCreature->SteeringComp->ComputeAvoidanceDir();
+	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal());
 }

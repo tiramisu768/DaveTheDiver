@@ -10,21 +10,5 @@
 
 void UTask_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	AAIController* Owner = OwnerComp.GetAIOwner();
-	ASeaCreature* SeaCreature = nullptr;
 
-	if (nullptr != Owner)
-		SeaCreature = Cast<ASeaCreature>(Owner->GetPawn());
-
-	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
-
-	AActor* Target = Cast<AActor>(BlackboardComponent->GetValueAsObject("MoveTarget"));
-
-	if (nullptr == SeaCreature || nullptr == Target)
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-		return;
-	}
-
-	//FVector dir = SeaCreature->SteeringComp->ComputeFleeDir(Target->GetActorLocation());
 }

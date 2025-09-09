@@ -29,9 +29,7 @@ protected:
 	class UAIPerceptionComponent* PerceptionComp;
 	UPROPERTY()
 	class UAISenseConfig_Sight* SightConfig;
-	UPROPERTY() 
-	AActor* Robo = nullptr;
 	UFUNCTION()
-	void OnPerceptionUpdated(AActor* Robo, FAIStimulus Stimulus);
+	void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	void OnPossess(APawn* InPawn) override;
 };

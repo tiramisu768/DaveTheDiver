@@ -7,6 +7,7 @@
 //#include "Components/SphereComponent.h"
 #include "SeaCreatureSteeringComponent.generated.h"
 
+class ASeaCreature;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DTDPROJECT_API USeaCreatureSteeringComponent : public UActorComponent
@@ -21,6 +22,7 @@ public:
 	FVector ComputeFleeDir(const FVector& FromLocation) const;
 	FVector ComputeWanderDir(float DeltaTime);
 	FVector ComputeAvoidanceDir() const;
+	void ComputeApplyMoveInput(const FVector& Dir);
 
 	void SetHome(const FVector& Location) { Home = Location; }
 
@@ -33,6 +35,8 @@ private:
 	FVector CurrentWanderTarget;
 	float WanderRadius = 800.f;
 	float SlowRadius = 300.f;
+	float MaxSpeed = 200.f;
+	ASeaCreature* SeaCreatureOwner = nullptr;
 	//UPROPERTY(VisibleAnywhere, Category = "AI|Home")
 	//USphereComponent* HomeSphere;
 

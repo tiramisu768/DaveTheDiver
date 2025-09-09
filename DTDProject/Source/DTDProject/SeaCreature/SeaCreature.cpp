@@ -84,8 +84,8 @@ void ASeaCreature::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	///////AI 하면 사라질 부분////////
-	if (!FishStateComponent->IsDead())
-		AddMovementInput(Forward);
+	/*if (!FishStateComponent->IsDead())
+		AddMovementInput(Forward);*/
 }
 
 // Called to bind functionality to input

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+//#include "Components/SphereComponent.h"
 #include "SeaCreatureSteeringComponent.generated.h"
 
 
@@ -32,11 +33,16 @@ private:
 	FVector CurrentWanderTarget;
 	float WanderRadius = 800.f;
 	float SlowRadius = 300.f;
+	//UPROPERTY(VisibleAnywhere, Category = "AI|Home")
+	//USphereComponent* HomeSphere;
 
-	FVector Seek(const FVector& TargetLocation) const;
+	FVector Seek(const FVector& Target) const;
+	FVector Arrive(const FVector& Target) const;
 	FVector Flee(const FVector& FromLocation) const;
 	FVector Wander(float DeltaTime);
 	FVector ObstacleAvoidance() const;
+
+	void ApplyMoveInput(const FVector& Dir);
 
 public:	
 	// Called every frame

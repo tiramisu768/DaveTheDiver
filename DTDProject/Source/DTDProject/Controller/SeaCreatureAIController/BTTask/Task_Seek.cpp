@@ -27,4 +27,5 @@ void UTask_Seek::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	}
 
 	FVector dir = SeaCreature->SteeringComp->ComputeSeekDir(Target->GetActorLocation());
+	//SeaCreature->ApplyMoveInput(dir.GetSafeNormal());
 }

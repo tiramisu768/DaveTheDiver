@@ -7,6 +7,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AIPerceptionSystem.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 ASeaCreatureAIController::ASeaCreatureAIController()
 {
@@ -46,17 +47,40 @@ void ASeaCreatureAIController::PlayBehaviorTree()
 	}
 }
 
-//void ASeaCreatureAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
-//{
-//	if (Stimulus.WasSuccessfullySensed())
-//	{
-//		BlackboardComp->SetValueAsObject("TargetActor", Actor);
-//	}
-//	else
-//	{
-//		BlackboardComp->ClearValue("TargetActor");
-//	}
-//}
+void ASeaCreatureAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
+{
+	UBlackboardComponent* BlackboardComponent = Blackboard.Get();
+	if (!BlackboardComponent) return;
+	if (!IsValid(Actor))  return;
+
+	// 자기 자신은 무시
+	if (Actor == GetPawn()) return;
+
+	// (선택) 플레이어만 타깃으로 삼고 싶다면:
+	// if (!Actor->IsA(AYourPlayerCharacter::StaticClass())) return;
+
+	static const FName Key_Target(TEXT("TargetActor"));
+	static const FName Key_LastKnown(TEXT("LastKnownLocation")); // Vector key (선택)
+
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		// 감지되면 타깃으로 설정
+		BlackboardComponent->SetValueAsObject(Key_Target, Actor);
+		// 최신 위치 갱신(선택)
+		BlackboardComponent->SetValueAsVector(Key_LastKnown, Actor->GetActorLocation());
+	}
+	else
+	{
+		// 시야에서 잃었을 때: 현재 저장된 타깃이 이 Actor라면 해제
+		UObject* Cur = BlackboardComponent->GetValueAsObject(Key_Target);
+		if (Cur == Actor)
+		{
+			// 마지막으로 감지된 위치만 남겨두고 타깃 해제(선택)
+			BlackboardComponent->SetValueAsVector(Key_LastKnown, Stimulus.StimulusLocation);
+			BlackboardComponent->ClearValue(Key_Target);
+		}
+	}
+}
 
 void ASeaCreatureAIController::OnPossess(APawn* InPawn)
 {

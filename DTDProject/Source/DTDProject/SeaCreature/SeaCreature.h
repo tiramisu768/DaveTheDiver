@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "SeaCreature.generated.h"
 
+UENUM(BlueprintType)
+enum class ESeaDisposition : uint8{Passive, Aggressive};
+
 UCLASS()
 class DTDPROJECT_API ASeaCreature : public ACharacter
 {
@@ -37,9 +40,20 @@ private:
 public:
 	// Sets default values for this character's properties
 	ASeaCreature();
+	//DataTable
+	/*UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "AI")
+	FName SpeciesId;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category ="AI")
+	class UDataTable* SpeciesTable = nullptr;*/
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class USeaCreatureSteeringComponent* SteeringComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	ESeaDisposition Disposition = ESeaDisposition::Aggressive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	TObjectPtr<class UBehaviorTree> OverrideBT = nullptr;
 
 protected:
 	// Called when the game starts or when spawned

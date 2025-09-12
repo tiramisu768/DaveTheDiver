@@ -24,8 +24,9 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	if (!BlackboardComp) return;
 
 	UAIPerceptionComponent* PerceptionComp = AIController->FindComponentByClass<UAIPerceptionComponent>();
-	if (PerceptionComp) return;
+	if (!PerceptionComp) return;
 
+	//로봇 갱신
 	TArray<AActor*> Sensed;
 	PerceptionComp->GetCurrentlyPerceivedActors(nullptr, Sensed);
 
@@ -55,4 +56,8 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		BlackboardComp->SetValueAsFloat(TEXT("DistanceToTarget"), -1.f);
 	}
 
+	//Home 갱신
+	FVector Home = BlackboardComp->GetValueAsVector(TEXT("HomeLocation"));
+	float DistHome = FVector::Dist(Pawn->GetActorLocation(), Home);
+	BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"), DistHome);
 }

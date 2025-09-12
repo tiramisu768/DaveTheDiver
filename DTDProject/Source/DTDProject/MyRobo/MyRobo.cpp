@@ -91,7 +91,7 @@ void AMyRobo::Tick(float DeltaTime)
 
 	//DepthBelowSurface = GetDepthBelowSurface();
 
-	if (BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty())
+	/*if (BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty())
 	{
 		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("Out Sea"));
 		
@@ -99,7 +99,7 @@ void AMyRobo::Tick(float DeltaTime)
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("In Sea"));
-	}
+	}*/
 
 
 	bool bInWater = !BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty();
@@ -110,7 +110,7 @@ void AMyRobo::Tick(float DeltaTime)
 		if (GetCharacterMovement()->MovementMode != MOVE_Swimming)
 		{
 			GetCharacterMovement()->SetMovementMode(MOVE_Swimming);
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Swimming"));
+			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Swimming"));
 		}
 	}
 	else
@@ -118,7 +118,7 @@ void AMyRobo::Tick(float DeltaTime)
 		if (GetCharacterMovement()->MovementMode != MOVE_Walking)
 		{
 			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("Walking"));
+			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("Walking"));
 		}
 	}
 

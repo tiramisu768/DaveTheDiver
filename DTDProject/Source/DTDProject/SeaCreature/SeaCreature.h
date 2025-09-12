@@ -50,7 +50,7 @@ public:
 	class USeaCreatureSteeringComponent* SteeringComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
-	ESeaDisposition Disposition = ESeaDisposition::Aggressive;
+	ESeaDisposition Disposition = ESeaDisposition::Passive;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<class UBehaviorTree> OverrideBT = nullptr;

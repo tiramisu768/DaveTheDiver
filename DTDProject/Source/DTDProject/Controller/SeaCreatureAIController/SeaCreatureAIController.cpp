@@ -13,10 +13,10 @@
 ASeaCreatureAIController::ASeaCreatureAIController()
 {
 	//BehviorTree
-	static ConstructorHelpers::FObjectFinder<UBehaviorTree> AggressiveBTFinder(TEXT("/Script/AIModule.BehaviorTree'/Game/BluePrint/SeaCreature/AI/BT_SeaCreature.BT_Aggressive'"));
+	static ConstructorHelpers::FObjectFinder<UBehaviorTree> AggressiveBTFinder(TEXT("/Script/AIModule.BehaviorTree'/Game/BluePrint/SeaCreature/AI/BT_Aggressive.BT_Aggressive'"));
 	if (AggressiveBTFinder.Succeeded())
 		AggressiveBT = AggressiveBTFinder.Object;
-	static ConstructorHelpers::FObjectFinder<UBehaviorTree> PassiveBTFinder(TEXT("/Script/AIModule.BehaviorTree'/Game/BluePrint/SeaCreature/AI/BT_SeaCreature.BT_Passive'"));
+	static ConstructorHelpers::FObjectFinder<UBehaviorTree> PassiveBTFinder(TEXT("/Script/AIModule.BehaviorTree'/Game/BluePrint/SeaCreature/AI/BT_Passive.BT_Passive'"));
 	if (PassiveBTFinder.Succeeded())
 		PassiveBT = PassiveBTFinder.Object;
 

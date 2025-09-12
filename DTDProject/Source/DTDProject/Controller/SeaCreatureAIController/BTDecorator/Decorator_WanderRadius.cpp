@@ -7,18 +7,17 @@
 
 UDecorator_WanderRadius::UDecorator_WanderRadius()
 {
-	NodeName = TEXT("Wander Radius");
+	NodeName = TEXT("Wander Radius (DistanceFromHome <= HomeReturnDist)");
 }
 
 bool UDecorator_WanderRadius::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-	APawn* OwnerPawn = OwnerComp.GetAIOwner()->GetPawn();
-	if (OwnerPawn == nullptr) return false;
-	APawn* TargetPawn = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TEXT("TargetObject")));
-	if (TargetPawn == nullptr) return false;
-	float Distance = OwnerPawn->GetDistanceTo(TargetPawn);
-	//Distance = FVector::Dist(OwnerPawn->GetActorLocation(), TargetPawn->GetActorLocation());
-	if (Distance <= 300.f) return true;
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+	if (!BlackboardComp) return false;
 
-	return false;
+	const float DistFromHome = BlackboardComp->GetValueAsFloat(TEXT("DistanceFromHome"));
+	const float HomeReturnDist = BlackboardComp->GetValueAsFloat(TEXT("HomeReturnDist"));
+
+	//Home에서 충분히 가까울 때 Wander로 전환
+	return DistFromHome <= HomeReturnDist;
 }

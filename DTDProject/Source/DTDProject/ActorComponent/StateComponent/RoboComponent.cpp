@@ -49,7 +49,7 @@ void URoboComponent::DecreaseO2()
 {
 	if (bIsDiving)
 	{
-		GEngine->AddOnScreenDebugMessage(-3, 2.0f, FColor::Red, FString::Printf(TEXT("HP: %f"), CurrentHP));
+		//GEngine->AddOnScreenDebugMessage(-3, 2.0f, FColor::Red, FString::Printf(TEXT("HP: %f"), CurrentHP));
 		CurrentHP = FMath::Max(0.f, CurrentHP - 1.f);
 
 		OnHPChanged.ExecuteIfBound(GetHPPercent());

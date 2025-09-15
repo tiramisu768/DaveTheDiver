@@ -58,6 +58,14 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 
 	//Home °»½Å
 	FVector Home = BlackboardComp->GetValueAsVector(TEXT("HomeLocation"));
+
+	const FVector Loc = Pawn->GetActorLocation();
+
+	UE_LOG(LogTemp, Warning, TEXT("Home=%s  Loc=%s"), *Home.ToString(), *Loc.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Home NaN? %d  Loc NaN? %d"),
+		Home.ContainsNaN(), Loc.ContainsNaN());
+
+
 	float DistHome = FVector::Dist(Pawn->GetActorLocation(), Home);
 	BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"), DistHome);
 }

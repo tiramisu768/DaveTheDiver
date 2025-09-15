@@ -53,7 +53,7 @@ void USeaCreatureSteeringComponent::BeginPlay()
 	SeaCreatureOwner = Cast<ASeaCreature>(GetOwner());
 
 	Home = GetOwner()->GetActorLocation();
-	
+	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, Home.ToString());
 }
 
 FVector USeaCreatureSteeringComponent::Seek(const FVector& Target) const
@@ -74,8 +74,9 @@ FVector USeaCreatureSteeringComponent::Arrive(const FVector& Target) const
 
 FVector USeaCreatureSteeringComponent::Flee(const FVector& FromLocation) const
 {
-	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("Flee"));
-	return (SeaCreatureOwner->GetActorLocation() - FromLocation).GetSafeNormal();
+	FVector v = SeaCreatureOwner->GetActorLocation()-FromLocation;
+	v.Z = 0.0f;
+	return v.GetSafeNormal();
 }
 
 FVector USeaCreatureSteeringComponent::Wander(float DeltaTime)

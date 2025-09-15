@@ -49,7 +49,7 @@ private:
 	void ApplyMoveInput(const FVector& Dir);
 
 public:	
-	// Called every frame
+	FVector GetHome() { FVector home; return home = Home; }
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 		

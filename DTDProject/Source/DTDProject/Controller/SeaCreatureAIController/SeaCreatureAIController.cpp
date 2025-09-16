@@ -52,8 +52,7 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 	UBlackboardData* BB = BT->BlackboardAsset ? BT->BlackboardAsset : BlackboardAsset;
 	if (!BB) return;
 	if (!UseBlackboard(BB, BlackboardComp)) return;	//UseBlackboard : 원하는 Blackboard를 사용하기 위해 초기화
-	//BlackboardComp->SetValueAsObject(TEXT("SelfActor"), SeaCreature);
-	BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), SeaCreature->SteeringComp->GetHome());
+	BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), SeaCreature->GetActorLocation());
 	ensure(RunBehaviorTree(BT));   //RunBehaviorTree : 원하는 BehaviorTree를 실행
 	//ensure : 실행이 실패할 경우 Error Log를 발생시키지만 실행은 지속된다
 }

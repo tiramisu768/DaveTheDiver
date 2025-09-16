@@ -33,7 +33,7 @@ protected:
 private:
 	FVector Home;
 	FVector CurrentWanderTarget;
-	float WanderRadius = 800.f;
+	float WanderRadius = 300.f;
 	float SlowRadius = 300.f;
 	float MaxSpeed = 200.f;
 	ASeaCreature* SeaCreatureOwner = nullptr;
@@ -49,7 +49,6 @@ private:
 	void ApplyMoveInput(const FVector& Dir);
 
 public:	
-	FVector GetHome() { FVector home; return home = Home; }
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 		

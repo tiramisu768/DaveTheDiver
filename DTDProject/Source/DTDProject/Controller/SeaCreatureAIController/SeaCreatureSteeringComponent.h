@@ -31,22 +31,22 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	FVector Home;
-	FVector CurrentWanderTarget;
-	float WanderRadius = 300.f;
-	float SlowRadius = 300.f;
-	float MaxSpeed = 200.f;
+	FVector Home; //물고기 스폰위치
+	FVector CurrentWanderTarget; //RandWanderPoint(홈 중심 구형 범위 내 랜덤 포인트)
+	float WanderRadius = 300.f; //물고기 배회범위
+	float SlowRadius = 300.f; //물고기 배회범위 clamp
+	float MaxSpeed = 200.f; //물고기 최고속도
 	ASeaCreature* SeaCreatureOwner = nullptr;
 	//UPROPERTY(VisibleAnywhere, Category = "AI|Home")
 	//USphereComponent* HomeSphere;
 
-	FVector Seek(const FVector& Target) const;
-	FVector Arrive(const FVector& Target) const;
-	FVector Flee(const FVector& FromLocation) const;
-	FVector Wander(float DeltaTime);
-	FVector ObstacleAvoidance() const;
+	FVector Seek(const FVector& Target) const; //로봇 쫓아가기
+	FVector Arrive(const FVector& RandWanderPoint) const; //랜덤배회 위치로 도달
+	FVector Flee(const FVector& FromLocation) const; //로봇으로부터 도망가기
+	FVector Wander(float DeltaTime); //래덤위치로 배회
+	FVector ObstacleAvoidance() const; //장애물인지 후 피하기
 
-	void ApplyMoveInput(const FVector& Dir);
+	void ApplyMoveInput(const FVector& Dir); //물고기 이동
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

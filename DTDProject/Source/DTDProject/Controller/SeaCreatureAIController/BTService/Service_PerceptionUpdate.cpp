@@ -32,6 +32,7 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 
 	AMyRobo* Robo = nullptr;
 	float Dist = -1.f;
+	
 
 	for (AActor* Actor : Sensed)
 	{
@@ -45,12 +46,25 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 
 	if (Robo)
 	{
-		BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Robo);
-		BlackboardComp->SetValueAsBool(TEXT("HasThreat"), true);
-		BlackboardComp->SetValueAsFloat(TEXT("DistanceToTarget"), Dist);
+		float LoseTargetDist = BlackboardComp->GetValueAsFloat(TEXT("LoseTargetDist"));
+		if(LoseTargetDist >0.f && Dist > LoseTargetDist)
+		{
+			//타겟 놓침
+			BlackboardComp->ClearValue(TEXT("TargetActor"));
+			BlackboardComp->SetValueAsBool(TEXT("HasThreat"), false);
+			BlackboardComp->SetValueAsFloat(TEXT("DistanceToTarget"), -1.f);
+		}
+		else
+		{
+			//타겟 유지
+			BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Robo);
+			BlackboardComp->SetValueAsBool(TEXT("HasThreat"), true);
+			BlackboardComp->SetValueAsFloat(TEXT("DistanceToTarget"), Dist);
+		}
 	}
 	else
 	{
+		//perception 전혀 못 함
 		BlackboardComp->ClearValue(TEXT("TargetActor"));
 		BlackboardComp->SetValueAsBool(TEXT("HasThreat"), false);
 		BlackboardComp->SetValueAsFloat(TEXT("DistanceToTarget"), -1.f);

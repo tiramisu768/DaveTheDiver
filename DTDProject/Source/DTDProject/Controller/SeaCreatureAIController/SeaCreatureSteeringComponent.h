@@ -19,7 +19,7 @@ public:
 	USeaCreatureSteeringComponent();
 
 	FVector ComputeSeekDir(const FVector& TargetLocation) const;
-	FVector ComputeFleeDir(const FVector& FromLocation) const;
+	FVector ComputeFleeDir(const FVector& TargetLocation) const;
 	FVector ComputeWanderDir(float DeltaTime);
 	FVector ComputeAvoidanceDir() const;
 	void ComputeApplyMoveInput(const FVector& Dir);
@@ -42,7 +42,7 @@ private:
 
 	FVector Seek(const FVector& Target) const; //로봇 쫓아가기
 	FVector Arrive(const FVector& RandWanderPoint) const; //랜덤배회 위치로 도달
-	FVector Flee(const FVector& FromLocation) const; //로봇으로부터 도망가기
+	FVector Flee(const FVector& TargetLocation) const; //로봇으로부터 도망가기
 	FVector Wander(float DeltaTime); //래덤위치로 배회
 	FVector ObstacleAvoidance() const; //장애물인지 후 피하기
 

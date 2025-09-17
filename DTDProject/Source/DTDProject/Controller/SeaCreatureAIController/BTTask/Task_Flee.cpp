@@ -18,15 +18,17 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 
-	AActor* Target = Cast<AActor>(BlackboardComponent->GetValueAsObject("MoveTarget"));
+	AActor* Target = Cast<AActor>(BlackboardComponent->GetValueAsObject("TargetActor"));
 
-	if (nullptr == SeaCreature || nullptr == Target)
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-		return;
-	}
+	//µµ¸Á¼º°ø Á¶°Ç : Å¸°ÙÀ» ÀÒ¾î¹ö¸², °Å¸®°¡ ¸Ö¾îÁü fleedist? losetargetdist?
+	//if (nullptr == SeaCreature || nullptr == Target)
+	//{
+	//	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	//	return;
+	//}
 
 	FVector dir = SeaCreature->SteeringComp->ComputeFleeDir(Target->GetActorLocation());
-	dir = SeaCreature->SteeringComp->ComputeAvoidanceDir();
+	dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
+	dir.Z = 0.f;
 	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal());
 }

@@ -29,9 +29,9 @@ ASeaCreatureAIController::ASeaCreatureAIController()
 	PerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 
-	SightConfig->SightRadius = 2000.f; //기본 감지 반경
-	SightConfig->LoseSightRadius = 2400.f; //잃는 반경 (버퍼)
-	SightConfig->PeripheralVisionAngleDegrees = 150.f; //시야각
+	SightConfig->SightRadius = 800.f; //기본 감지 반경
+	SightConfig->LoseSightRadius = 960.f; //잃는 반경 (버퍼)
+	SightConfig->PeripheralVisionAngleDegrees = 120.f; //시야각 (전방)
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;

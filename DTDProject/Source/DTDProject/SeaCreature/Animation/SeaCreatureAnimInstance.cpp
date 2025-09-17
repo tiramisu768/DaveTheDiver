@@ -18,7 +18,7 @@ void USeaCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (ASeaCreature* OwningCharacter = Cast<ASeaCreature>(TryGetPawnOwner()))
 	{
 		Speed = OwningCharacter->GetVelocity().Size();
-		GEngine->AddOnScreenDebugMessage(-6, 2.0f, FColor::Black, FString::Printf(TEXT("Speed: %f"), Speed));
+		//GEngine->AddOnScreenDebugMessage(-6, 2.0f, FColor::Black, FString::Printf(TEXT("Speed: %f"), Speed));
 		isDead = OwningCharacter->isDead();
 	}
 }

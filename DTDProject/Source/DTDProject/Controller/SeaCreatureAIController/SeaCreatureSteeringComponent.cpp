@@ -72,9 +72,9 @@ FVector USeaCreatureSteeringComponent::Arrive(const FVector& RandWanderPoint) co
 	return to * (1.f / FMath::Max(d, 1.f)) * scale;
 }
 
-FVector USeaCreatureSteeringComponent::Flee(const FVector& FromLocation) const
+FVector USeaCreatureSteeringComponent::Flee(const FVector& TargetLocation) const
 {
-	FVector v = SeaCreatureOwner->GetActorLocation()-FromLocation;
+	FVector v = SeaCreatureOwner->GetActorLocation()- TargetLocation;
 	v.Z = 0.0f;
 	return v.GetSafeNormal();
 }
@@ -94,7 +94,7 @@ FVector USeaCreatureSteeringComponent::Wander(float DeltaTime)
 
 FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 {
-	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("ObstacleAvoidance"));
+	//GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("ObstacleAvoidance"));
 	const float Probe = 300.f, Radius = 50.f;
 	const FVector P = SeaCreatureOwner->GetActorLocation();
 	const FVector Fwd = SeaCreatureOwner->GetVelocity().IsNearlyZero() ? SeaCreatureOwner->GetActorForwardVector() : SeaCreatureOwner->GetVelocity().GetSafeNormal();

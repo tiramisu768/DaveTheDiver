@@ -39,9 +39,9 @@ FVector USeaCreatureSteeringComponent::ComputeAvoidanceDir() const
 	return ObstacleAvoidance();
 }
 
-void USeaCreatureSteeringComponent::ComputeApplyMoveInput(const FVector& Dir)
+void USeaCreatureSteeringComponent::ComputeApplyMoveInput(const FVector& Dir, ESeaCreatureState State)
 {
-	ApplyMoveInput(Dir);
+	ApplyMoveInput(Dir, State);
 }
 
 
@@ -120,13 +120,24 @@ FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 	return FVector::ZeroVector;
 }
 
-void USeaCreatureSteeringComponent::ApplyMoveInput(const FVector& Dir)
+void USeaCreatureSteeringComponent::ApplyMoveInput(const FVector& Dir, ESeaCreatureState State)
 {
+	float Speed = WanderSpeed;
+
+	switch (State)
+	{
+	case ESeaCreatureState::Wander: Speed = 50.f; break;
+	case ESeaCreatureState::Flee: Speed = 100.f; break;
+	case ESeaCreatureState::Attack: Speed = 100.f; break;
+	case ESeaCreatureState::Seek: Speed = 80.f; break;
+	case ESeaCreatureState::ReturnHome: Speed = 50.f; break;
+	}
+
 	if (!Dir.IsNearlyZero())
 	{
-		SeaCreatureOwner->AddMovementInput(Dir, 1.f);
-		SeaCreatureOwner->GetCharacterMovement()->MaxFlySpeed = MaxSpeed;
+		SeaCreatureOwner->AddMovementInput(Dir, Speed);
 	}
+	GEngine->AddOnScreenDebugMessage(-2,2.0f,FColor::Black,FString::Printf(TEXT("Speed:%s"),))
 }
 
 

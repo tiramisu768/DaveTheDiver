@@ -7,6 +7,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
+#include "SeaCreature/SeaCreatureStateType.h"
 
 void UTask_Seek::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
@@ -37,5 +38,5 @@ void UTask_Seek::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	//ObjectAvoidance 부르기
 	dir = SeaCreature->SteeringComp->ComputeAvoidanceDir();
 	//MoveSeaCreature 부르기
-	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal());
+	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), ESeaCreatureState::Seek);
 }

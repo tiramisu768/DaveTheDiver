@@ -7,6 +7,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
+#include "SeaCreature/SeaCreatureStateType.h"
 
 void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
@@ -20,5 +21,5 @@ void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 
 	FVector dir = SeaCreature->SteeringComp->ComputeWanderDir(DeltaSeconds);
 	dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
-	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal());
+	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), ESeaCreatureState::Wander);
 }

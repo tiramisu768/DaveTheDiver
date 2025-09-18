@@ -7,6 +7,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
+#include "SeaCreature/SeaCreatureStateType.h"
 
 void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
@@ -19,7 +20,7 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 
     const FVector Home = BlackboardComponent->GetValueAsVector("HomeLocation");
     const FVector dir = (Steer->ComputeSeekDir(Home) + Steer->ComputeAvoidanceDir()).GetSafeNormal();
-    SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal());
+    SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), ESeaCreatureState::ReturnHome);
 
     const float tol = BlackboardComponent->GetValueAsFloat("HomeArriveTolerance"); // ¿¹: 150.f
     const float d = FVector::Dist(SeaCreature->GetActorLocation(), Home);

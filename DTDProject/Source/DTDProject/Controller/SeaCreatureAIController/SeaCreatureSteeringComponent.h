@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 //#include "Components/SphereComponent.h"
+#include "SeaCreature/SeaCreatureStateType.h"
 #include "SeaCreatureSteeringComponent.generated.h"
 
 class ASeaCreature;
@@ -22,7 +23,7 @@ public:
 	FVector ComputeFleeDir(const FVector& TargetLocation) const;
 	FVector ComputeWanderDir(float DeltaTime);
 	FVector ComputeAvoidanceDir() const;
-	void ComputeApplyMoveInput(const FVector& Dir);
+	void ComputeApplyMoveInput(const FVector& Dir, ESeaCreatureState State);
 
 	void SetHome(const FVector& Location) { Home = Location; }
 
@@ -35,7 +36,7 @@ private:
 	FVector CurrentWanderTarget; //RandWanderPoint(홈 중심 구형 범위 내 랜덤 포인트)
 	float WanderRadius = 300.f; //물고기 배회범위
 	float SlowRadius = 300.f; //물고기 배회범위 clamp
-	float MaxSpeed = 200.f; //물고기 최고속도
+	float WanderSpeed = 50.f; //물고기 최고속도
 	ASeaCreature* SeaCreatureOwner = nullptr;
 	//UPROPERTY(VisibleAnywhere, Category = "AI|Home")
 	//USphereComponent* HomeSphere;
@@ -46,7 +47,7 @@ private:
 	FVector Wander(float DeltaTime); //래덤위치로 배회
 	FVector ObstacleAvoidance() const; //장애물인지 후 피하기
 
-	void ApplyMoveInput(const FVector& Dir); //물고기 이동
+	void ApplyMoveInput(const FVector& Dir, ESeaCreatureState State); //물고기 이동
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

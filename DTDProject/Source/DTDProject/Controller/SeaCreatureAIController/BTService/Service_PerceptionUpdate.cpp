@@ -72,14 +72,18 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 
 	//Home 갱신
 	FVector Home = BlackboardComp->GetValueAsVector(TEXT("HomeLocation"));
+	const FVector Target = Pawn->GetActorLocation();
 
-	const FVector Loc = Pawn->GetActorLocation();
+	// Home이 아직 유효하게 세팅되지 않았다면(보통 FLT_MAX 벡터)
+	if (!FAISystem::IsValidLocation(Home))
+	{
+		// 첫 틱에 보정: 현재 위치를 Home으로 세팅
+		BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), Target);
+		BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"), 0.f);
+		return;
+	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Home=%s  Loc=%s"), *Home.ToString(), *Loc.ToString());
-	UE_LOG(LogTemp, Warning, TEXT("Home NaN? %d  Loc NaN? %d"),
-		Home.ContainsNaN(), Loc.ContainsNaN());
-
-
-	float DistHome = FVector::Dist(Pawn->GetActorLocation(), Home);
-	BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"), DistHome);
+	// 거리 계산 + 무한대/NaN 가드
+	const float DistHome = FVector::Dist(Target, Home);
+	BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"),FMath::IsFinite(DistHome) ? DistHome : 0.f);
 }

@@ -127,17 +127,18 @@ void USeaCreatureSteeringComponent::ApplyMoveInput(const FVector& Dir, ESeaCreat
 	switch (State)
 	{
 	case ESeaCreatureState::Wander: Speed = 50.f; break;
-	case ESeaCreatureState::Flee: Speed = 100.f; break;
+	case ESeaCreatureState::Flee: Speed = 150.f; break;
 	case ESeaCreatureState::Attack: Speed = 100.f; break;
 	case ESeaCreatureState::Seek: Speed = 80.f; break;
-	case ESeaCreatureState::ReturnHome: Speed = 50.f; break;
+	case ESeaCreatureState::ReturnHome: Speed = 70.f; break;
 	}
 
 	if (!Dir.IsNearlyZero())
 	{
 		SeaCreatureOwner->AddMovementInput(Dir, Speed);
 	}
-	GEngine->AddOnScreenDebugMessage(-2,2.0f,FColor::Black,FString::Printf(TEXT("Speed:%s"),))
+	//어떤 물고기의 스피드냐
+	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Black, FString::Printf(TEXT("Speed:%f"), Speed));
 }
 
 

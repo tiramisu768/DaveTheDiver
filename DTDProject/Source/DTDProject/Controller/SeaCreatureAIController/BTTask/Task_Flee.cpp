@@ -22,11 +22,11 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	AActor* Target = Cast<AActor>(BlackboardComponent->GetValueAsObject("TargetActor"));
 
 	//µµ¸Á¼º°ø Á¶°Ç : Å¸°ÙÀ» ÀÒ¾î¹ö¸², °Å¸®°¡ ¸Ö¾îÁü fleedist? losetargetdist?
-	//if (nullptr == SeaCreature || nullptr == Target)
-	//{
-	//	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-	//	return;
-	//}
+	if (nullptr == SeaCreature || nullptr == Target)
+	{
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		return;
+	}
 
 	FVector dir = SeaCreature->SteeringComp->ComputeFleeDir(Target->GetActorLocation());
 	dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();

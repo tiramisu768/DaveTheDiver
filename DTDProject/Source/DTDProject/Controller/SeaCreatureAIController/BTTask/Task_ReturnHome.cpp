@@ -22,10 +22,10 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
     const FVector dir = (Steer->ComputeSeekDir(Home) + Steer->ComputeAvoidanceDir()).GetSafeNormal();
     SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), ESeaCreatureState::ReturnHome);
 
-    const float tol = BlackboardComponent->GetValueAsFloat("HomeArriveTolerance"); // 예: 150.f
-    const float d = FVector::Dist(SeaCreature->GetActorLocation(), Home);
-    if (d <= tol) 
-    {
-        FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded); // → Selector가 Wander로 폴백
-    }
+    //const float tol = BlackboardComponent->GetValueAsFloat("HomeArriveTolerance"); // 예: 150.f
+    //const float d = FVector::Dist(SeaCreature->GetActorLocation(), Home);
+    //if (d <= tol) 
+    //{
+    //    FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded); // → Selector가 Wander로 폴백
+    //}
 }

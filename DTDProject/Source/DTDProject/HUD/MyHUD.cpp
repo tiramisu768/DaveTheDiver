@@ -12,6 +12,34 @@ AMyHUD::AMyHUD()
 	{
 		HPBarWidget = HPBarWidgetClassFinder.Class;
 	}
+
+	//static ConstructorHelpers::FClassFinder<UUserWidget> MeleeWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Melee.BP_Melee_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> MeleeWidgetClassFinder(TEXT(""));
+	if (MeleeWidgetClassFinder.Succeeded())
+	{
+		MeleeWidget = MeleeWidgetClassFinder.Class;
+	}
+
+	//static ConstructorHelpers::FClassFinder<UUserWidget> ToolWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Tool.BP_Tool_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> ToolWidgetClassFinder(TEXT(""));
+	if (ToolWidgetClassFinder.Succeeded())
+	{
+		ToolWidget = ToolWidgetClassFinder.Class;
+	}
+
+	//static ConstructorHelpers::FClassFinder<UUserWidget> RangedWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Ranged.BP_Ranged_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> RangedWidgetClassFinder(TEXT(""));
+	if (RangedWidgetClassFinder.Succeeded())
+	{
+		RangedWidget = RangedWidgetClassFinder.Class;
+	}
+
+	//static ConstructorHelpers::FClassFinder<UUserWidget> RankWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Rank2.BP_Rank2_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> RankWidgetClassFinder(TEXT(""));
+	if (RankWidgetClassFinder.Succeeded())
+	{
+		RankWidget = RankWidgetClassFinder.Class;
+	}
 }
 
 void AMyHUD::BeginPlay()
@@ -23,6 +51,42 @@ void AMyHUD::BeginPlay()
 		if (RoboHPBarUIClass)
 		{
 			RoboHPBarUIClass->AddToViewport();
+		}
+	}
+
+	if (MeleeWidget)
+	{
+		UUserWidget* UWMelee = CreateWidget<UUserWidget>(GetWorld(), MeleeWidget);
+		if (UWMelee)
+		{
+			UWMelee->AddToViewport();
+		}
+	}
+
+	if (ToolWidget)
+	{
+		UUserWidget* UWTool = CreateWidget<UUserWidget>(GetWorld(), ToolWidget);
+		if (UWTool)
+		{
+			UWTool->AddToViewport();
+		}
+	}
+
+	if (RangedWidget)
+	{
+		UUserWidget* UWRanged = CreateWidget<UUserWidget>(GetWorld(), RangedWidget);
+		if (UWRanged)
+		{
+			UWRanged->AddToViewport();
+		}
+	}
+
+	if (RankWidget)
+	{
+		UUserWidget* UWRank = CreateWidget<UUserWidget>(GetWorld(), RankWidget);
+		if (UWRank)
+		{
+			UWRank->AddToViewport();
 		}
 	}
 }

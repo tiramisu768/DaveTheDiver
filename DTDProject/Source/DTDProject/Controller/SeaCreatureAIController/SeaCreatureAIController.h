@@ -20,8 +20,6 @@ private:
 	TObjectPtr<class UBehaviorTree> AggressiveBT;
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<class UBlackboardData> BlackboardAsset;
-	UPROPERTY(VisibleAnywhere, Category = "AI")
-	class UBlackboardComponent* BlackboardComp;
 
 public:
 	ASeaCreatureAIController();

@@ -7,8 +7,22 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
+#include "MyRobo/MyRobo.h"
 
-void UTask_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+UTask_Attack::UTask_Attack()
 {
+}
 
+EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::ExecuteTask(OwnerComp, NodeMemory);
+	ASeaCreature* Owner = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
+	if (Owner == nullptr) return EBTNodeResult::Failed;
+
+	AMyRobo* Target = Cast<AMyRobo>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TEXT("TargetActor")));
+	if (Target == nullptr) return EBTNodeResult::Failed;
+
+	Owner->Attack(Target);
+
+	return EBTNodeResult::InProgress;
 }

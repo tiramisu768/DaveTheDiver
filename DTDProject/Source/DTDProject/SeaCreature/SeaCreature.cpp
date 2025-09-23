@@ -211,7 +211,7 @@ void ASeaCreature::CollectSeaCreature()
 
 void ASeaCreature::Attack(AMyRobo* Target)
 {
-	////GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Monster Attack!"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Monster Attack!"));
 	//if (FishStateComponent->isDead() || AttackMontage == nullptr || Target == nullptr)
 	//	return;
 	//if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackMontage))

@@ -6,9 +6,6 @@
 #include "GameFramework/Character.h"
 #include "SeaCreature.generated.h"
 
-UENUM(BlueprintType)
-enum class ESeaDisposition : uint8{Passive, Aggressive};
-
 UCLASS()
 class DTDPROJECT_API ASeaCreature : public ACharacter
 {
@@ -48,9 +45,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class USeaCreatureSteeringComponent* SteeringComp;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
-	ESeaDisposition Disposition = ESeaDisposition::Passive;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<class UBehaviorTree> OverrideBT = nullptr;

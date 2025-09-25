@@ -34,7 +34,7 @@ protected:
 private:
 	FVector Home; //물고기 스폰위치
 	FVector CurrentWanderTarget; //RandWanderPoint(홈 중심 구형 범위 내 랜덤 포인트)
-	float WanderRadius = 300.f; //물고기 배회범위
+	float WanderRadius = 900.f; //물고기 배회범위
 	float SlowRadius = 300.f; //물고기 배회범위 clamp
 	float WanderSpeed = 50.f; //물고기 최고속도
 	ASeaCreature* SeaCreatureOwner = nullptr;

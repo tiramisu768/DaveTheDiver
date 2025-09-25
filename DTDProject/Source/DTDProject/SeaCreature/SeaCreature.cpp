@@ -45,7 +45,7 @@ ASeaCreature::ASeaCreature()
 		DeathFlapMontage = DeathFlapMontageObjectFinder.Object;
 	CollectSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectSphere"));
 	CollectSphere->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT(""));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_AttackPinkShark.AM_AttackPinkShark'"));
 	if (AttackMontageObjectFinder.Succeeded())
 		AttackMontage = AttackMontageObjectFinder.Object;
 
@@ -212,14 +212,14 @@ void ASeaCreature::CollectSeaCreature()
 void ASeaCreature::Attack(AMyRobo* Target)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Monster Attack!"));
-	//if (FishStateComponent->isDead() || AttackMontage == nullptr || Target == nullptr)
-	//	return;
-	//if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackMontage))
-	//	return;
-	//FVector TargetDirection = Target->GetActorLocation() - GetActorLocation();
-	//FRotator LookAtRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
-	//SetActorRotation(LookAtRotation);
-	//PlayAnimMontage(AttackMontage);
+	if (FishStateComponent->IsDead() || AttackMontage == nullptr || Target == nullptr)
+		return;
+	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackMontage))
+		return;
+	FVector TargetDirection = Target->GetActorLocation() - GetActorLocation();
+	FRotator LookAtRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
+	SetActorRotation(LookAtRotation);
+	PlayAnimMontage(AttackMontage);
 }
 
 void ASeaCreature::SpawnDamagePopup(float DamageAmount)

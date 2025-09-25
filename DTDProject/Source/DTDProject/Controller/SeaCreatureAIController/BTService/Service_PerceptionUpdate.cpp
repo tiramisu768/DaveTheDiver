@@ -48,9 +48,9 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		Dist = FVector::Dist(SeaCreature->GetActorLocation(), Robo->GetActorLocation());
 		BlackboardComp->SetValueAsFloat(TEXT("DistanceToTarget"), Dist);
 
-		const float Enter = BlackboardComp->GetValueAsFloat(TEXT("FleeEnterDist"));
-		const float Exit = BlackboardComp->GetValueAsFloat(TEXT("FleeExitDist"));
-
+		const float Enter = BlackboardComp->GetValueAsFloat(TEXT("FleeEnterDist")); //800
+		const float Exit = BlackboardComp->GetValueAsFloat(TEXT("FleeExitDist")); //900
+		//공격물고기가 attack준비를 해야되는 곳?
 		bool bThreat = bHadThreat;
 
 		if (!bHadThreat)

@@ -24,6 +24,10 @@ ASeaCreature::ASeaCreature()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	static ConstructorHelpers::FObjectFinder<UDataTable> SeaCreatureDataTableFinder(TEXT("/Script/Engine.DataTable'Game/BluePrint/SeaCreature/Data/DT_SeaCreatureData'"));
+	if (SeaCreatureDataTableFinder.Succeeded())
+		SeaCreatureDataTable = SeaCreatureDataTableFinder.Object;
+
 	GetCharacterMovement()->NavAgentProps.bCanSwim = false;
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 	GetCharacterMovement()->GravityScale = 0.f;
@@ -61,13 +65,18 @@ ASeaCreature::ASeaCreature()
 void ASeaCreature::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	//Data = SeaCreatureDataTable->Findero
 
-	if (Data)
+	/*if (Data)
 	{
 		const auto& Stats = Data->Stats;
 
-		//SteeringComp->InitParams(Stats.wanderR)
-	}
+		SteeringComp->InitParams(
+			Data
+			Stats.WanderRadius,
+			Stats.SlowRadius);
+	}*/
 
 	FishStateComponent->OnTakeDamage.BindLambda([this](float Percent)
 		{
@@ -109,6 +118,18 @@ void ASeaCreature::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ASeaCreature::SpawnSeaCreature()
+{
+	/*int index = FMath::RandHelper(StatDataNames.Num());
+	FName SeaCreatureName = StatDataNames[index];
+	FSeaCreatureData* Data = SeaCreatureDataTable->FindRow<FSeaCreatureData>(SeaCreatureName, TEXT("SeaCreatureDataTableDebug"));
+	if (nullptr != Data)
+	{
+		GetWorld()->SpawnActor<ASeaCreature>(SpawnMonsterClass, GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
+		InitStat(*Data);
+	}*/
 }
 
 void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)

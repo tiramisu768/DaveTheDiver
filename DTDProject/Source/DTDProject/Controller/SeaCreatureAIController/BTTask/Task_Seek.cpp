@@ -19,24 +19,16 @@ void UTask_Seek::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 
-	AActor* Target = Cast<AActor>(BlackboardComponent->GetValueAsObject("MoveTarget"));
+	AActor* Target = Cast<AActor>(BlackboardComponent->GetValueAsObject("TargetActor"));
 
-	if (nullptr == SeaCreature || nullptr == Target)
+	if ( nullptr == Target)
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;
 	}
-	//if (nullptr != Target)
-	//{
-	//	//task다음에 selector일 때 failed, sequence안에 있으면 succeeded로 해야함
-	//	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-	//	return;
-	//}
 
-	//Seek 부르기
 	FVector dir = SeaCreature->SteeringComp->ComputeSeekDir(Target->GetActorLocation());
-	//ObjectAvoidance 부르기
-	dir = SeaCreature->SteeringComp->ComputeAvoidanceDir();
-	//MoveSeaCreature 부르기
+	dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
+
 	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), ESeaCreatureState::Seek);
 }

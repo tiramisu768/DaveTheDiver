@@ -37,15 +37,12 @@ ASeaCreature::ASeaCreature()
 	FishHPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>HitbyMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Hitby.AM_Hitby'"));
-	if (HitbyMontageObjectFinder.Succeeded())
-		HitbyMontage = HitbyMontageObjectFinder.Object;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>DeathFlapMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Death.AM_Death'"));
 	if (DeathFlapMontageObjectFinder.Succeeded())
 		DeathFlapMontage = DeathFlapMontageObjectFinder.Object;
 	CollectSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectSphere"));
 	CollectSphere->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_AttackPinkShark.AM_AttackPinkShark'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Attack_PinkShark.AM_Attack_PinkShark'"));
 	if (AttackMontageObjectFinder.Succeeded())
 		AttackMontage = AttackMontageObjectFinder.Object;
 
@@ -64,6 +61,14 @@ ASeaCreature::ASeaCreature()
 void ASeaCreature::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (Data)
+	{
+		const auto& Stats = Data->Stats;
+
+		//SteeringComp->InitParams(Stats.wanderR)
+	}
+
 	FishStateComponent->OnTakeDamage.BindLambda([this](float Percent)
 		{
 			////////다시하기///////////
@@ -76,6 +81,17 @@ void ASeaCreature::BeginPlay()
 	);
 
 	CollectSphere->OnComponentBeginOverlap.AddDynamic(this, &ASeaCreature::OnCollectOverlap);
+}
+
+void ASeaCreature::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	/*if (SteeringComp)
+	{
+		if (IsAggressive)
+			SteeringComp->Home
+	}*/
 }
 
 // Called every frame
@@ -220,6 +236,24 @@ void ASeaCreature::Attack(AMyRobo* Target)
 	FRotator LookAtRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
 	SetActorRotation(LookAtRotation);
 	PlayAnimMontage(AttackMontage);
+}
+
+void ASeaCreature::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &ASeaCreature::OnAttackMontageEnded);
+	}
+}
+
+void ASeaCreature::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == AttackMontage || Montage == HitbyMontage)
+	{
+		OnAttackMontageEndedDelegate.ExecuteIfBound();
+	}
 }
 
 void ASeaCreature::SpawnDamagePopup(float DamageAmount)

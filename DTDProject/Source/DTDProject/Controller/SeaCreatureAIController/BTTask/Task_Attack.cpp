@@ -22,6 +22,12 @@ EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	AMyRobo* Target = Cast<AMyRobo>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TEXT("TargetActor")));
 	if (Target == nullptr) return EBTNodeResult::Failed;
 
+	Owner->OnAttackMontageEndedDelegate.BindLambda([&]()
+		{
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	);
+
 	Owner->Attack(Target);
 
 	return EBTNodeResult::InProgress;

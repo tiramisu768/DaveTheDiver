@@ -19,11 +19,14 @@ public:
 	// Sets default values for this component's properties
 	USeaCreatureSteeringComponent();
 
+	void InitParams(float InWanderRadius, float InSlowRadius);
+
 	FVector ComputeSeekDir(const FVector& TargetLocation) const;
 	FVector ComputeFleeDir(const FVector& TargetLocation) const;
 	FVector ComputeWanderDir(float DeltaTime);
 	FVector ComputeAvoidanceDir() const;
-	void ComputeApplyMoveInput(const FVector& Dir, ESeaCreatureState State);
+	void ComputeApplyMoveInput(const FVector& Dir, float Speed);
+	float GetWanderSpeed(float Speed) { return WanderSpeed = Speed; }
 
 	void SetHome(const FVector& Location) { Home = Location; }
 
@@ -32,11 +35,16 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY(VisibleAnywhere, Category = "Steering")
 	FVector Home; //물고기 스폰위치
 	FVector CurrentWanderTarget; //RandWanderPoint(홈 중심 구형 범위 내 랜덤 포인트)
-	float WanderRadius = 900.f; //물고기 배회범위
-	float SlowRadius = 300.f; //물고기 배회범위 clamp
-	float WanderSpeed = 50.f; //물고기 최고속도
+	float WanderRadius;
+	float SlowRadius;
+
+	UPROPERTY(EditAnywhere, Category = "Steering")
+	float HomeReturnDist;    //물고기 리턴거리
+	UPROPERTY(EditAnywhere, Category = "Steering")
+	float WanderSpeed = 20.f; //물고기 최고속도
 	ASeaCreature* SeaCreatureOwner = nullptr;
 	//UPROPERTY(VisibleAnywhere, Category = "AI|Home")
 	//USphereComponent* HomeSphere;
@@ -47,7 +55,7 @@ private:
 	FVector Wander(float DeltaTime); //래덤위치로 배회
 	FVector ObstacleAvoidance() const; //장애물인지 후 피하기
 
-	void ApplyMoveInput(const FVector& Dir, ESeaCreatureState State); //물고기 이동
+	void ApplyMoveInput(const FVector& Dir, float Speed); //물고기 이동
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

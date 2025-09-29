@@ -23,7 +23,7 @@ ASeaCreatureAIController::ASeaCreatureAIController()
 
 	SightConfig->SightRadius = 800.f; //기본 감지 반경
 	SightConfig->LoseSightRadius = 960.f; //잃는 반경 (버퍼)
-	SightConfig->PeripheralVisionAngleDegrees = 120.f; //시야각 (전방)
+	SightConfig->PeripheralVisionAngleDegrees = 200.f; //시야각 (전방)
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;

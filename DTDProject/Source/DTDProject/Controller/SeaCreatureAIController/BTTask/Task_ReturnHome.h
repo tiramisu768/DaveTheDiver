@@ -14,6 +14,10 @@ class DTDPROJECT_API UTask_ReturnHome : public UBTTaskNode
 {
 	GENERATED_BODY()
 	UTask_ReturnHome() { bNotifyTick = true; }
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard");
+	FBlackboardKeySelector HomeLocationKey;
+
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override
 	{
 	  return	EBTNodeResult::InProgress;

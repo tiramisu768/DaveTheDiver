@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Data/SeaCreatureData.h"
 #include "SeaCreature.generated.h"
 
+
+DECLARE_DELEGATE(FOnAttackMontageEndedDelegate);
 UCLASS()
 class DTDPROJECT_API ASeaCreature : public ACharacter
 {
@@ -20,8 +23,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "FX")
 	TObjectPtr<class UNiagaraSystem> HitEffect;
 	FVector Forward = { 0.1f,0.0f,0.0f };
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAnimMontage> HitbyMontage;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAnimMontage> DeathFlapMontage;
@@ -31,27 +32,38 @@ private:
 	class USphereComponent* CollectSphere;
 	FTimerHandle CollectHintTimer;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAnimMontage> AttackMontage;
-
 public:
-	// Sets default values for this character's properties
+
 	ASeaCreature();
-	//DataTable
-	/*UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "AI")
-	FName SpeciesId;
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category ="AI")
-	class UDataTable* SpeciesTable = nullptr;*/
+
+	UPROPERTY(EditAnywhere, Category = "Data")
+	USeaCreatureData* Data;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class USeaCreatureSteeringComponent* SteeringComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
-	TObjectPtr<class UBehaviorTree> OverrideBT = nullptr;
+
+
+	// AI
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<class UBehaviorTree> OverrideBT;
+
+	// ¸ùÅ¸Áê
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<UAnimMontage> HitbyMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<UAnimMontage> AttackMontage;
+
+	// ¼ºÇâ
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	bool IsAggressive;
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 public:	
 	// Called every frame
@@ -68,5 +80,9 @@ public:
 	void OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	void CollectSeaCreature();
 	virtual void Attack(class AMyRobo* Target);
+	void PostInitializeComponents() override;
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	FOnAttackMontageEndedDelegate OnAttackMontageEndedDelegate;
 	void SpawnDamagePopup(float DamageAmount);
 };

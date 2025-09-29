@@ -19,6 +19,12 @@ USeaCreatureSteeringComponent::USeaCreatureSteeringComponent()
 	//HomeSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void USeaCreatureSteeringComponent::InitParams(float InWanderRadius, float InSlowRadius)
+{
+	WanderRadius = InWanderRadius;
+	SlowRadius = InSlowRadius;
+}
+
 FVector USeaCreatureSteeringComponent::ComputeSeekDir(const FVector& TargetLocation) const
 {
 	return Seek(TargetLocation);
@@ -39,9 +45,9 @@ FVector USeaCreatureSteeringComponent::ComputeAvoidanceDir() const
 	return ObstacleAvoidance();
 }
 
-void USeaCreatureSteeringComponent::ComputeApplyMoveInput(const FVector& Dir, ESeaCreatureState State)
+void USeaCreatureSteeringComponent::ComputeApplyMoveInput(const FVector& Dir, float Speed)
 {
-	ApplyMoveInput(Dir, State);
+	ApplyMoveInput(Dir, Speed);
 }
 
 
@@ -58,13 +64,11 @@ void USeaCreatureSteeringComponent::BeginPlay()
 
 FVector USeaCreatureSteeringComponent::Seek(const FVector& Target) const
 {
-	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("Seek"));
 	return (Target - SeaCreatureOwner->GetActorLocation()).GetSafeNormal();
 }
 
 FVector USeaCreatureSteeringComponent::Arrive(const FVector& RandWanderPoint) const
 {
-	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("Arrive"));
 	const FVector to = RandWanderPoint - SeaCreatureOwner->GetActorLocation();
 	const float d = to.Size();
 	if (d < 1.f) return FVector::ZeroVector;
@@ -81,7 +85,6 @@ FVector USeaCreatureSteeringComponent::Flee(const FVector& TargetLocation) const
 
 FVector USeaCreatureSteeringComponent::Wander(float DeltaTime)
 {
-	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("Wander"));
 	static float Timer = 0.f; Timer += DeltaTime;
 	if (Timer > 2.f || FVector::DistSquared(SeaCreatureOwner->GetActorLocation(), CurrentWanderTarget) < 150.f * 150.f)
 	{
@@ -94,7 +97,6 @@ FVector USeaCreatureSteeringComponent::Wander(float DeltaTime)
 
 FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 {
-	//GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, TEXT("ObstacleAvoidance"));
 	const float Probe = 300.f, Radius = 50.f;
 	const FVector P = SeaCreatureOwner->GetActorLocation();
 	const FVector Fwd = SeaCreatureOwner->GetVelocity().IsNearlyZero() ? SeaCreatureOwner->GetActorForwardVector() : SeaCreatureOwner->GetVelocity().GetSafeNormal();
@@ -120,25 +122,17 @@ FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 	return FVector::ZeroVector;
 }
 
-void USeaCreatureSteeringComponent::ApplyMoveInput(const FVector& Dir, ESeaCreatureState State)
+void USeaCreatureSteeringComponent::ApplyMoveInput(const FVector& Dir, float Speed)
 {
 	float Speed = WanderSpeed;
 
-	switch (State)
+	SeaCreatureOwner->AddMovementInput(Dir.GetSafeNormal(), 1.0f);
+
+	if (auto* MoveComp = Cast<UCharacterMovementComponent>(SeaCreatureOwner->GetCharacterMovement()))
 	{
-	case ESeaCreatureState::Wander: Speed = 50.f; break;
-	case ESeaCreatureState::Flee: Speed = 150.f; break;
-	case ESeaCreatureState::Attack: Speed = 100.f; break;
-	case ESeaCreatureState::Seek: Speed = 80.f; break;
-	case ESeaCreatureState::ReturnHome: Speed = 70.f; break;
+		MoveComp->MaxFlySpeed = Speed;
 	}
 
-	if (!Dir.IsNearlyZero())
-	{
-		SeaCreatureOwner->AddMovementInput(Dir, Speed);
-	}
-	//어떤 물고기의 스피드냐
-	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Black, FString::Printf(TEXT("Speed:%f"), Speed));
 }
 
 

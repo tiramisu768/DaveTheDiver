@@ -63,8 +63,10 @@ class DTDPROJECT_API ASeaCreature : public ACharacter
 {
 	GENERATED_BODY()
 private:
-	//UPROPERTY(EditAnywhere, Category = "Spawn", meta = (AllowPriaveAccess="true"))
+	UPROPERTY(EditAnywhere, Category = "Data", meta = (AllowPriaveAccess="true"))
+	FName RowName;
 	//TArray<FName> StatDataNames;
+	UPROPERTY(EditAnywhere, Category = "Data")
 	TObjectPtr<class UDataTable> SeaCreatureDataTable;
 	FSeaCreatureData* Data;
 

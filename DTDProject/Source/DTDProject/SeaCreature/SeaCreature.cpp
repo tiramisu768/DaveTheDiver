@@ -66,17 +66,20 @@ void ASeaCreature::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//Data = SeaCreatureDataTable->Findero
+	Data = SeaCreatureDataTable->FindRow<FSeaCreatureData>(RowName, TEXT("PinkShark"));
 
-	/*if (Data)
+	if (Data)
 	{
-		const auto& Stats = Data->Stats;
+		UE_LOG(LogTemp, Log, TEXT("WanderRadius = %f, Speed = %f"),
+			Data->WanderRadius, Data->WanderSpeed);
+
+		/*const auto& Stats = Data->Stats;
 
 		SteeringComp->InitParams(
 			Data
 			Stats.WanderRadius,
-			Stats.SlowRadius);
-	}*/
+			Stats.SlowRadius);*/
+	}
 
 	FishStateComponent->OnTakeDamage.BindLambda([this](float Percent)
 		{

@@ -124,8 +124,6 @@ FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 
 void USeaCreatureSteeringComponent::ApplyMoveInput(const FVector& Dir, float Speed)
 {
-	float Speed = WanderSpeed;
-
 	SeaCreatureOwner->AddMovementInput(Dir.GetSafeNormal(), 1.0f);
 
 	if (auto* MoveComp = Cast<UCharacterMovementComponent>(SeaCreatureOwner->GetCharacterMovement()))

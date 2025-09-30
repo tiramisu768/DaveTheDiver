@@ -18,9 +18,14 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
     auto* Steer = SeaCreature->SteeringComp;
     if (!Owner || !BlackboardComponent || !SeaCreature || !Steer) { FinishLatentTask(OwnerComp, EBTNodeResult::Failed); return; } //비정상 상황
 
+    //데이터테이블의 speed를 가져오기
+    float Speed=0.f;
+    if (const FSeaCreatureData* Stats = SeaCreature->GetData())
+        Speed = Stats->ReturnSpeed;
+
     const FVector HomeLoc = BlackboardComponent->GetValueAsVector(HomeLocationKey.SelectedKeyName);
     const FVector dir = (Steer->ComputeSeekDir(HomeLoc) + Steer->ComputeAvoidanceDir()).GetSafeNormal();
-    SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), ESeaCreatureState::ReturnHome);
+    SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), Speed);
 
     const float DistFromHome = BlackboardComponent->GetValueAsFloat(TEXT("DistanceFromHome"));
     const float HomeReturnDist = BlackboardComponent->GetValueAsFloat(TEXT("HomeReturnDist"));

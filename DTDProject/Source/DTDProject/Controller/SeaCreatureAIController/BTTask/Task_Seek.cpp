@@ -27,8 +27,13 @@ void UTask_Seek::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 		return;
 	}
 
+	//데이터테이블의 speed를 가져오기
+	float Speed=0.f;
+	if (const FSeaCreatureData* Stats = SeaCreature->GetData())
+		Speed = Stats->SeekSpeed;
+
 	FVector dir = SeaCreature->SteeringComp->ComputeSeekDir(Target->GetActorLocation());
 	dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
 
-	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), ESeaCreatureState::Seek);
+	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), Speed);
 }

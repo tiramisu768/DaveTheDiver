@@ -30,7 +30,20 @@ public:
 	TObjectPtr<class USkeletalMesh> Mesh;
 
 
+	// AI
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<class UBehaviorTree> OverrideBT;
 
+	// 根鸥陵
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<UAnimMontage> HitbyMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<UAnimMontage> AttackMontage;
+
+	// 己氢
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	bool IsAggressive;
 
 
 
@@ -92,26 +105,10 @@ public:
 
 	ASeaCreature();
 
-	UPROPERTY(VisibleAnywhere, Category = "AI")
+	UPROPERTY(VisibleAnywhere, Category = "Steering")
 	class USeaCreatureSteeringComponent* SteeringComp;
 
-
-
-	// AI
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	TObjectPtr<class UBehaviorTree> OverrideBT;
-
-	// 根鸥陵
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	TObjectPtr<UAnimMontage> HitbyMontage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	TObjectPtr<UAnimMontage> AttackMontage;
-
-	// 己氢
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	bool IsAggressive;
-
+	const FSeaCreatureData* GetData() const { return Data; }
 
 protected:
 	// Called when the game starts or when spawned

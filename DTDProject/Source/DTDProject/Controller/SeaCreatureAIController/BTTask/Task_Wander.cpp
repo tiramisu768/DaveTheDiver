@@ -19,7 +19,12 @@ void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 
 	check(SeaCreature);
 
+	//데이터테이블의 speed를 가져오기
+	float Speed=0.f;
+	if (const FSeaCreatureData* Stats = SeaCreature->GetData())
+		Speed = Stats->WanderSpeed;
+
 	FVector dir = SeaCreature->SteeringComp->ComputeWanderDir(DeltaSeconds);
 	dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
-	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), ESeaCreatureState::Wander);
+	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), Speed);
 }

@@ -108,29 +108,29 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		);
 	}
 
-	FVector LastRoboPos;
-	float UpdateThreshold = 300.f;
-	//HomeLocation_Dynamic 갱신
-	if (FVector::DistSquared(Robo->GetActorLocation(), LastRoboPos) > FMath::Square(UpdateThreshold))
-	{
-		FVector HomeLocation_Dynamic = Robo->GetActorLocation() + Robo->GetActorForwardVector() * 500;
-		BlackboardComp->SetValueAsVector(TEXT("HomeLocation_Dynamic"), HomeLocation_Dynamic);
-		LastRoboPos = Robo->GetActorLocation();
+	//FVector LastRoboPos;
+	//float UpdateThreshold = 300.f;
+	////HomeLocation_Dynamic 갱신
+	//if (FVector::DistSquared(Robo->GetActorLocation(), LastRoboPos) > FMath::Square(UpdateThreshold))
+	//{
+	//	FVector HomeLocation_Dynamic = Robo->GetActorLocation() + Robo->GetActorForwardVector() * 500;
+	//	BlackboardComp->SetValueAsVector(TEXT("HomeLocation_Dynamic"), HomeLocation_Dynamic);
+	//	LastRoboPos = Robo->GetActorLocation();
 
-		// 디버그 스피어 그리기 (반지름 = DistanceFromHome)
-		if (GEngine && SeaCreature->GetWorld())
-		{
-			DrawDebugSphere(
-				SeaCreature->GetWorld(),
-				HomeLocation_Dynamic,     // 중심: HomeLocation_Dynamic
-				DistHome,                 // 반지름
-				16,                       // 세그먼트 수
-				FColor::Orange,            // 색상
-				false,                    // 영구 표시 여부 (false면 잠깐만 보임)
-				0.1f                      // 지속 시간 (초)
-			);
-		}
-	}
+	//	// 디버그 스피어 그리기 (반지름 = DistanceFromHome)
+	//	if (GEngine && SeaCreature->GetWorld())
+	//	{
+	//		DrawDebugSphere(
+	//			SeaCreature->GetWorld(),
+	//			HomeLocation_Dynamic,     // 중심: HomeLocation_Dynamic
+	//			DistHome,                 // 반지름
+	//			16,                       // 세그먼트 수
+	//			FColor::Orange,            // 색상
+	//			false,                    // 영구 표시 여부 (false면 잠깐만 보임)
+	//			0.1f                      // 지속 시간 (초)
+	//		);
+	//	}
+	//}
 
 
 

@@ -23,8 +23,8 @@ ASeaCreature::ASeaCreature()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	static ConstructorHelpers::FObjectFinder<UDataTable> SeaCreatureDataTableFinder(TEXT("/Script/Engine.DataTable'Game/BluePrint/SeaCreature/Data/DT_SeaCreatureData'"));
+	
+	static ConstructorHelpers::FObjectFinder<UDataTable> SeaCreatureDataTableFinder(TEXT("/ Script / Engine.DataTable'/Game/BluePrint/SeaCreature/Data/DT_SeaCreatureStat.DT_SeaCreatureStat'"));
 	if (SeaCreatureDataTableFinder.Succeeded())
 		SeaCreatureDataTable = SeaCreatureDataTableFinder.Object;
 
@@ -46,9 +46,10 @@ ASeaCreature::ASeaCreature()
 		DeathFlapMontage = DeathFlapMontageObjectFinder.Object;
 	CollectSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectSphere"));
 	CollectSphere->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Attack_PinkShark.AM_Attack_PinkShark'"));
+	//move to data
+	/*static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Attack_PinkShark.AM_Attack_PinkShark'"));
 	if (AttackMontageObjectFinder.Succeeded())
-		AttackMontage = AttackMontageObjectFinder.Object;
+		AttackMontage = AttackMontageObjectFinder.Object;*/
 
 	AIControllerClass = ASeaCreatureAIController::StaticClass();
 	//EAutoPossessAI
@@ -73,12 +74,9 @@ void ASeaCreature::BeginPlay()
 		UE_LOG(LogTemp, Log, TEXT("WanderRadius = %f, Speed = %f"),
 			Data->WanderRadius, Data->WanderSpeed);
 
-		/*const auto& Stats = Data->Stats;
-
 		SteeringComp->InitParams(
-			Data
-			Stats.WanderRadius,
-			Stats.SlowRadius);*/
+			Data->WanderRadius,
+			Data->SlowRadius);
 	}
 
 	FishStateComponent->OnTakeDamage.BindLambda([this](float Percent)
@@ -137,7 +135,7 @@ void ASeaCreature::SpawnSeaCreature()
 
 void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 {
-	if (FishStateComponent->IsDead() || HitbyMontage == nullptr)
+	if (FishStateComponent->IsDead() || Data->HitbyMontage == nullptr)
 		return;
 
 	FishStateComponent->TakeDamage(DamageAmount);
@@ -164,7 +162,7 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("Not isDead")));
-		PlayAnimMontage(HitbyMontage);
+		PlayAnimMontage(Data->HitbyMontage);
 	}
 
 
@@ -252,14 +250,14 @@ void ASeaCreature::CollectSeaCreature()
 void ASeaCreature::Attack(AMyRobo* Target)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Monster Attack!"));
-	if (FishStateComponent->IsDead() || AttackMontage == nullptr || Target == nullptr)
+	if (FishStateComponent->IsDead() || Data->AttackMontage == nullptr || Target == nullptr)
 		return;
-	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackMontage))
+	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(Data->AttackMontage))
 		return;
 	FVector TargetDirection = Target->GetActorLocation() - GetActorLocation();
 	FRotator LookAtRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
 	SetActorRotation(LookAtRotation);
-	PlayAnimMontage(AttackMontage);
+	PlayAnimMontage(Data->AttackMontage);
 }
 
 void ASeaCreature::PostInitializeComponents()
@@ -274,7 +272,7 @@ void ASeaCreature::PostInitializeComponents()
 
 void ASeaCreature::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Montage == AttackMontage || Montage == HitbyMontage)
+	if (Montage == Data->AttackMontage || Montage == Data->HitbyMontage)
 	{
 		OnAttackMontageEndedDelegate.ExecuteIfBound();
 	}

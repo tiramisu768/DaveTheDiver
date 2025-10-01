@@ -15,11 +15,11 @@ public:
 	FSeaCreatureData() :
 		WanderRadius(900.0f),
 		SlowRadius(300.0f),
-		WanderSpeed(20.0f),
-		FleeSpeed(70.0f),
-		AttackSpeed(30.0f),
-		SeekSpeed(20.0f),
-		ReturnSpeed(40.0f),
+		WanderSpeed(5.0f),
+		FleeSpeed(20.0f),
+		AttackSpeed(10.0f),
+		SeekSpeed(10.0f),
+		ReturnSpeed(5.0f),
 		Mesh(nullptr) {
 	}
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
@@ -28,11 +28,6 @@ public:
 	//float HP;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	TObjectPtr<class USkeletalMesh> Mesh;
-
-
-	// AI
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	TObjectPtr<class UBehaviorTree> OverrideBT;
 
 	// 몽타쥬
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
@@ -53,8 +48,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float SlowRadius; //물고기 배회범위
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float HomeReturnDist;
 
 	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
@@ -78,7 +71,11 @@ class DTDPROJECT_API ASeaCreature : public ACharacter
 private:
 	UPROPERTY(EditAnywhere, Category = "Data", meta = (AllowPriaveAccess="true"))
 	FName RowName;
+
+	float HomeReturnDist=0.f;
+
 	//TArray<FName> StatDataNames;
+
 	UPROPERTY(EditAnywhere, Category = "Data")
 	TObjectPtr<class UDataTable> SeaCreatureDataTable;
 	FSeaCreatureData* Data;
@@ -105,15 +102,19 @@ public:
 
 	ASeaCreature();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BT")
+	TObjectPtr<class UBehaviorTree> OverrideBT;
+
 	UPROPERTY(VisibleAnywhere, Category = "Steering")
 	class USeaCreatureSteeringComponent* SteeringComp;
 
 	const FSeaCreatureData* GetData() const { return Data; }
 
+	float GetHomeReturnDist() const { return HomeReturnDist; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	virtual void OnConstruction(const FTransform& Transform) override;
 
 public:	
 	// Called every frame

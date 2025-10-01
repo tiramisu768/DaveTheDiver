@@ -6,11 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 
-// Sets default values for this component's properties
 USeaCreatureSteeringComponent::USeaCreatureSteeringComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
 	//HomeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("HomeSphere"));
@@ -59,7 +56,7 @@ void USeaCreatureSteeringComponent::BeginPlay()
 	SeaCreatureOwner = Cast<ASeaCreature>(GetOwner());
 
 	Home = GetOwner()->GetActorLocation();
-	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, Home.ToString());
+
 }
 
 FVector USeaCreatureSteeringComponent::Seek(const FVector& Target) const
@@ -79,7 +76,6 @@ FVector USeaCreatureSteeringComponent::Arrive(const FVector& RandWanderPoint) co
 FVector USeaCreatureSteeringComponent::Flee(const FVector& TargetLocation) const
 {
 	FVector v = SeaCreatureOwner->GetActorLocation()- TargetLocation;
-	v.Z = 0.0f;
 	return v.GetSafeNormal();
 }
 

@@ -27,12 +27,4 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
     const FVector dir = (Steer->ComputeSeekDir(HomeLoc) + Steer->ComputeAvoidanceDir()).GetSafeNormal();
     SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), Speed);
 
-    const float DistFromHome = BlackboardComponent->GetValueAsFloat(TEXT("DistanceFromHome"));
-    const float HomeReturnDist = BlackboardComponent->GetValueAsFloat(TEXT("HomeReturnDist"));
-
-    if (DistFromHome <= HomeReturnDist) 
-    {
-        FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded); // → Selector가 Wander로 폴백
-        return;
-    }
 }

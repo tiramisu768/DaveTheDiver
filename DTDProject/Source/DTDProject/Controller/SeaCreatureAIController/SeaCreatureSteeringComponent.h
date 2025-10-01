@@ -26,9 +26,6 @@ public:
 	FVector ComputeWanderDir(float DeltaTime);
 	FVector ComputeAvoidanceDir() const;
 	void ComputeApplyMoveInput(const FVector& Dir, float Speed);
-	float GetWanderSpeed(float Speed) { return WanderSpeed = Speed; }
-
-	void SetHome(const FVector& Location) { Home = Location; }
 
 protected:
 	// Called when the game starts
@@ -41,10 +38,6 @@ private:
 	float WanderRadius;
 	float SlowRadius;
 
-	UPROPERTY(EditAnywhere, Category = "Steering")
-	float HomeReturnDist;    //물고기 리턴거리
-	UPROPERTY(EditAnywhere, Category = "Steering")
-	float WanderSpeed = 20.f; //물고기 최고속도
 	ASeaCreature* SeaCreatureOwner = nullptr;
 	//UPROPERTY(VisibleAnywhere, Category = "AI|Home")
 	//USphereComponent* HomeSphere;

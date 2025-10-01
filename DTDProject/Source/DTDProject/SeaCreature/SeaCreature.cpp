@@ -71,12 +71,12 @@ void ASeaCreature::BeginPlay()
 
 	if (Data)
 	{
-		UE_LOG(LogTemp, Log, TEXT("WanderRadius = %f, Speed = %f"),
-			Data->WanderRadius, Data->WanderSpeed);
+		UE_LOG(LogTemp, Log, TEXT("WanderRadius = %f, Speed = %f"),	Data->WanderRadius, Data->WanderSpeed);
 
-		SteeringComp->InitParams(
-			Data->WanderRadius,
-			Data->SlowRadius);
+		//공격성물고기는 -300, 회피성물고기는 -100
+		HomeReturnDist = Data->IsAggressive? Data->WanderRadius - 300.f: Data->WanderRadius - 100.f;
+
+		SteeringComp->InitParams(Data->WanderRadius,Data->SlowRadius);
 	}
 
 	FishStateComponent->OnTakeDamage.BindLambda([this](float Percent)
@@ -93,25 +93,10 @@ void ASeaCreature::BeginPlay()
 	CollectSphere->OnComponentBeginOverlap.AddDynamic(this, &ASeaCreature::OnCollectOverlap);
 }
 
-void ASeaCreature::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	/*if (SteeringComp)
-	{
-		if (IsAggressive)
-			SteeringComp->Home
-	}*/
-}
-
 // Called every frame
 void ASeaCreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	///////AI 하면 사라질 부분////////
-	/*if (!FishStateComponent->IsDead())
-		AddMovementInput(Forward);*/
 }
 
 // Called to bind functionality to input

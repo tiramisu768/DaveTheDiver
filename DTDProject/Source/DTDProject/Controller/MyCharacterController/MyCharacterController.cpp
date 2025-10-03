@@ -44,6 +44,16 @@ AMyCharacterController::AMyCharacterController()
 	{
 		SwitchWeaponAction = SwitchWeaponActionFinder.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> UseToolActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_UseTool.IA_UseTool'"));
+	if (UseToolActionFinder.Succeeded())
+	{
+		UseToolAction = UseToolActionFinder.Object;
+	}	
+	static ConstructorHelpers::FObjectFinder<UInputAction> SwitchToolActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_SwitchTool.IA_SwitchTool'"));
+	if (SwitchToolActionFinder.Succeeded())
+	{
+		SwitchToolAction = SwitchToolActionFinder.Object;
+	}
 	/*static ConstructorHelpers::FObjectFinder<UInputAction> EquipActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Equip_Ch.IA_Equip_Ch'"));
 	if (EquipActionFinder.Succeeded())
 	{
@@ -110,6 +120,8 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(MeleeAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::MeleeAttackInput);
 		input->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::RangedAttackInput);
 		input->BindAction(SwitchWeaponAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchWeaponInput);
+		input->BindAction(UseToolAction, ETriggerEvent::Started, this, &AMyCharacterController::UseToolInput);
+		input->BindAction(SwitchToolAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchToolInput);
 		/*input->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);*/
 		//input->BindAction(InteractionAction, ETriggerEvent::Started, this, &AMyCharacterController::InteractionInput);
 	}
@@ -158,6 +170,18 @@ void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
 	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Red, FString::Printf(TEXT("SwitchWeaponInput: %d")));
 }
+
+void AMyCharacterController::UseToolInput(const FInputActionValue& value)
+{
+	//UI변경(아이템사용)
+	//해당툴의몽타쥬실행
+	//남은시간 UI노출
+	//시간종료 시 원래 몽타쥬로 돌아가기, UI 사라짐
+}
+
+void AMyCharacterController::SwitchToolInput(const FInputActionValue& value)
+{
+}
  
 //void AMyCharacterController::EquipInput(const FInputActionValue& value)
 //{
@@ -168,4 +192,34 @@ void AMyCharacterController::InteractionInput(const FInputActionValue& value)
 {
 	/*if (ControlledCharacter)
 		ControlledCharacter->InteractionAction();*/
+}
+
+void AMyCharacterController::OnSpacePressed()
+{
+	IsSpacePressed = true;
+	SpacePressedTime = GetWorld()->GetTimeSeconds();
+}
+
+void AMyCharacterController::OnSpaceReleased()
+{
+	IsSpacePressed = false;
+
+	float HeldTime = GetWorld()->GetTimeSeconds() - SpacePressedTime;
+	
+	//길게 눌렀을 때
+	if (HeldTime >= HoldThreshold)
+	{
+		if (AMyRobo* Robo = Cast<AMyRobo>(GetPawn()))
+		{
+			//Robo->HandleLongPress();
+		}
+	}
+	//짧게 눌렀을 때
+	else
+	{
+		if (AMyRobo* Robo = Cast<AMyRobo>(GetPawn()))
+		{
+			//Robo->HandleShortPress();
+		}
+	}
 }

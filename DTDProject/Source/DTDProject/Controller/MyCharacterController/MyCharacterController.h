@@ -28,10 +28,18 @@ private:
 	TObjectPtr<class UInputAction> RangedAttackAction;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> SwitchWeaponAction;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInputAction> UseToolAction;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInputAction> SwitchToolAction;
 	/*UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> EquipAction;*/
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputMappingContext> MappingContext;
+	float SpacePressedTime;
+	bool IsSpacePressed;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	float HoldThreshold = 1.0f;
 #pragma endregion
 #pragma region Attribute
 	TObjectPtr<class AMyRobo> ControlledRobo;
@@ -52,7 +60,11 @@ public:
 	void MeleeAttackInput(const FInputActionValue& value);
 	void RangedAttackInput(const FInputActionValue& value);
 	void SwitchWeaponInput(const FInputActionValue& value);
+	void UseToolInput(const FInputActionValue& value);
+	void SwitchToolInput(const FInputActionValue& value);
 	/*void EquipInput(const FInputActionValue& value);*/
 	void InteractionInput(const FInputActionValue& value);
 //	bool GetIsMoveInput() const { return isMoveInput; }
+	void OnSpacePressed();
+	void OnSpaceReleased();
 };

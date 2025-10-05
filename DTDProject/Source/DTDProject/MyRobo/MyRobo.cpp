@@ -15,6 +15,7 @@
 #include "WaterBodyComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "SeaCreature/SeaCreature.h"
+#include "Engine/OverlapResult.h"
 
 
 // Sets default values
@@ -34,7 +35,7 @@ AMyRobo::AMyRobo()
 	BuoyancyComponent = CreateDefaultSubobject<UBuoyancyComponent>(TEXT("BuoyancyComponent"));
 
 	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
-	WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
+	//WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
 
 	//SpringArm->bUsePawnControlRotation = true;
 	//bUseControllerRotationYaw = false;
@@ -63,6 +64,77 @@ AMyRobo::AMyRobo()
 	//if (InteractionWidgetClassFinder.Succeeded())
 	//	InteractionWidgetClass = InteractionWidgetClassFinder.Class;
 	//InteractionWidget->SetWidgetClass(InteractionWidgetClass);
+}
+
+AWeapon* AMyRobo::FindNearbyWeapon()
+{
+	FVector CheckLoc = GetMesh()->GetSocketLocation(TEXT("Weapon"));
+	float SearchRadius = 150.f;
+
+	TArray<FOverlapResult> Overlaps;
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(SearchRadius);
+
+	bool IsHit = GetWorld()->OverlapMultiByObjectType(
+		Overlaps,
+		CheckLoc,
+		FQuat::Identity,
+		FCollisionObjectQueryParams(ECC_WorldDynamic),
+		Sphere
+	);
+
+	if (!IsHit) return nullptr;
+
+	AWeapon* ClosestWeapon = nullptr;
+	float ClosestDistSq = MAX_FLT;
+
+	for (auto& Hit : Overlaps)
+	{
+		AWeapon* Weapon = Cast<AWeapon>(Hit.GetActor());
+		if (!Weapon || Weapon == CurrentWeapon) continue;
+
+		float DistSq = FVector::DistSquared(CheckLoc, Weapon->GetActorLocation());
+		if (DistSq < ClosestDistSq)
+		{
+			ClosestDistSq = DistSq;
+			ClosestWeapon = Weapon;
+		}
+	}
+
+	return ClosestWeapon;
+}
+
+void AMyRobo::DropCurrentWeapon()
+{
+	if (!CurrentWeapon) return;
+
+	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	UStaticMeshComponent* WeaponMesh = CurrentWeapon->FindComponentByClass<UStaticMeshComponent>();
+	if(WeaponMesh)
+	{
+		CurrentWeapon->SetActorEnableCollision(true);
+		CurrentWeapon = nullptr;
+	}
+
+	CurrentWeapon = nullptr;
+}
+
+void AMyRobo::EquipWeapon(AWeapon* NewWeapon)
+{
+	if (!NewWeapon) return;
+
+	UStaticMeshComponent* WeaponMesh = NewWeapon->FindComponentByClass<UStaticMeshComponent>();
+
+	if (WeaponMesh)
+	{
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+	NewWeapon->AttachToComponent(GetMesh(), AttachRules, TEXT("Weapon"));
+
+	CurrentWeapon = NewWeapon;
+
 }
 
 // Called when the game starts or when spawned
@@ -170,6 +242,25 @@ void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName Sectio
 		BodyComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
 	}
 }
+void AMyRobo::HandleLongPress()
+{
+	UE_LOG(LogTemp, Log, TEXT("Space Long Press"));
+}
+void AMyRobo::HandleShortPress()
+{
+	// 근처 무기 유무 확인
+	AWeapon* ClosestWeapon = FindNearbyWeapon();
+	if (!ClosestWeapon) return;
+
+	// 무기 장착중이라면, 무기를 버린다
+	if (CurrentWeapon)
+	{
+		DropCurrentWeapon();
+	}
+
+	//무기 장착
+	EquipWeapon(ClosestWeapon);
+}
 void AMyRobo::PlayMeleeAttackMontage()
 {
 	if (nullptr != MeleeAttackMontage)
@@ -187,9 +278,9 @@ void AMyRobo::PlayMeleeAttackMontage()
 
 void AMyRobo::WeaponActive()
 {
-	isEquip = true;
+	/*isEquip = true;
 	WeaponComponent->AttachToComponent(BodyComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
-	FName(TEXT("Weapon")));
+	FName(TEXT("Weapon")));*/
 }
 
 void AMyRobo::WeaponInactive()

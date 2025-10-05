@@ -32,14 +32,15 @@ private:
 	TObjectPtr<class UInputAction> UseToolAction;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> SwitchToolAction;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInputAction> SpacePressAction;
 	/*UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> EquipAction;*/
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputMappingContext> MappingContext;
-	float SpacePressedTime;
-	bool IsSpacePressed;
+	float SpacePressedTime =0.f;
 	UPROPERTY(EditAnywhere, Category = "Input")
-	float HoldThreshold = 1.0f;
+	float HoldThreshold = 0.5f;
 #pragma endregion
 #pragma region Attribute
 	TObjectPtr<class AMyRobo> ControlledRobo;
@@ -65,6 +66,6 @@ public:
 	/*void EquipInput(const FInputActionValue& value);*/
 	void InteractionInput(const FInputActionValue& value);
 //	bool GetIsMoveInput() const { return isMoveInput; }
-	void OnSpacePressed();
-	void OnSpaceReleased();
+	void OnSpaceStarted();
+	void OnSpaceCompleted();
 };

@@ -54,6 +54,11 @@ AMyCharacterController::AMyCharacterController()
 	{
 		SwitchToolAction = SwitchToolActionFinder.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> SpacePressActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_SpacePress.IA_SpacePress'"));
+	if (SpacePressActionFinder.Succeeded())
+	{
+		SpacePressAction = SpacePressActionFinder.Object;
+	}
 	/*static ConstructorHelpers::FObjectFinder<UInputAction> EquipActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Equip_Ch.IA_Equip_Ch'"));
 	if (EquipActionFinder.Succeeded())
 	{
@@ -122,6 +127,8 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(SwitchWeaponAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchWeaponInput);
 		input->BindAction(UseToolAction, ETriggerEvent::Started, this, &AMyCharacterController::UseToolInput);
 		input->BindAction(SwitchToolAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchToolInput);
+		input->BindAction(SpacePressAction, ETriggerEvent::Started, this, &AMyCharacterController::OnSpaceStarted);
+		input->BindAction(SpacePressAction, ETriggerEvent::Completed, this, &AMyCharacterController::OnSpaceCompleted);
 		/*input->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);*/
 		//input->BindAction(InteractionAction, ETriggerEvent::Started, this, &AMyCharacterController::InteractionInput);
 	}
@@ -194,32 +201,25 @@ void AMyCharacterController::InteractionInput(const FInputActionValue& value)
 		ControlledCharacter->InteractionAction();*/
 }
 
-void AMyCharacterController::OnSpacePressed()
+void AMyCharacterController::OnSpaceStarted()
 {
-	IsSpacePressed = true;
 	SpacePressedTime = GetWorld()->GetTimeSeconds();
 }
 
-void AMyCharacterController::OnSpaceReleased()
+void AMyCharacterController::OnSpaceCompleted()
 {
-	IsSpacePressed = false;
-
 	float HeldTime = GetWorld()->GetTimeSeconds() - SpacePressedTime;
-	
+	AMyRobo* Robo = Cast<AMyRobo>(GetPawn());
+	if (!Robo) return;
+
 	//±æ°Ô ´­·¶À» ¶§
 	if (HeldTime >= HoldThreshold)
 	{
-		if (AMyRobo* Robo = Cast<AMyRobo>(GetPawn()))
-		{
-			//Robo->HandleLongPress();
-		}
+		Robo->HandleLongPress();
 	}
 	//Âª°Ô ´­·¶À» ¶§
 	else
 	{
-		if (AMyRobo* Robo = Cast<AMyRobo>(GetPawn()))
-		{
-			//Robo->HandleShortPress();
-		}
+		Robo->HandleShortPress();
 	}
 }

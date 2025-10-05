@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
+#include "Weapon/Weapon.h"
 #include "MyRobo.generated.h"
 
 UCLASS()
@@ -39,19 +40,22 @@ private:
 	float DepthBelowSurface = 0.f; // +면 수면 아래, -면 수면 위
 #pragma endregion
 
-public:
-	// Sets default values for this character's properties
-	AMyRobo();
+	AWeapon* CurrentWeapon = nullptr;
+
+	AWeapon* FindNearbyWeapon();
+	void DropCurrentWeapon();
+	void EquipWeapon(AWeapon* NewWeapon);
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
+	AMyRobo();
+
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
@@ -59,6 +63,10 @@ public:
 	void PossessedBy(AController* NewController) override;
 
 	void PlayMontageFullBody(TObjectPtr<UAnimMontage>Montage, FName SectionName = "");
+
+	void HandleLongPress();
+
+	void HandleShortPress();
 
 	void PlayMeleeAttackMontage();
 

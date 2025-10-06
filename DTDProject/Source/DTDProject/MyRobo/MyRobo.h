@@ -40,12 +40,18 @@ private:
 	float DepthBelowSurface = 0.f; // +면 수면 아래, -면 수면 위
 #pragma endregion
 
+#pragma region Weapon
 	AWeapon* CurrentWeapon = nullptr;
 
 	AWeapon* FindNearbyWeapon();
 	void DropCurrentWeapon();
 	void EquipWeapon(AWeapon* NewWeapon);
+#pragma endregion
 
+#pragma region Aim
+	bool IsAiming;
+	FVector AimDirection;
+#pragma endregion
 
 protected:
 	// Called when the game starts or when spawned

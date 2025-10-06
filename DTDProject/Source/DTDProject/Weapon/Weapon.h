@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -58,9 +60,13 @@ public:
 
 	FWeaponData* WeaponStats;
 
-
 protected:
-	// Called when the game starts or when spawned
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	UCapsuleComponent* CapsuleComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	UStaticMeshComponent* MeshComponent;
+
 	virtual void BeginPlay() override;
 	virtual void Attack(ACharacter* OwnerCharacter);
 

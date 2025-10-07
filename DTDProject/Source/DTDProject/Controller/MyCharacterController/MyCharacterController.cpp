@@ -11,6 +11,7 @@
 //#include "Kismet/KismetSystemLibrary.h"
 //#include "Object/Door.h"
 //#include "Interface/InteractionObject.h"
+#include "HUD/MyHUD.h"
 
 AMyCharacterController::AMyCharacterController()
 {
@@ -112,6 +113,26 @@ void AMyCharacterController::Tick(float DeltaTime)
 		ControlledCharacter->SetInteractionObject(nullptr);*/
 }
 
+void AMyCharacterController::PlayerTick(float DeltaTime)
+{
+	Super::PlayerTick(DeltaTime);
+
+	AMyHUD* controlledHUD = Cast<AMyHUD>(GetHUD());
+	if (controlledHUD)
+	{
+		float MouseX, MouseY;
+		GetMousePosition(MouseX, MouseY);
+
+		FVector2D MousePos(MouseX, MouseY);
+		FVector2D Dir = MousePos - controlledHUD->GetArcCenter();
+		float Angle = FMath::Atan2(Dir.Y, Dir.X);
+
+		Angle = FMath::Clamp(Angle, -60.f * PI / 180.f, 60.f * PI / 180.f);
+
+		controlledHUD->SetAimAngle(Angle);
+	}
+}
+
 void AMyCharacterController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -123,7 +144,9 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCharacterController::LookInput);
 		input->BindAction(DashAction, ETriggerEvent::Started, this, &AMyCharacterController::DashInput);
 		input->BindAction(MeleeAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::MeleeAttackInput);
-		input->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::RangedAttackInput);
+		input->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::StartAiming); //우클릭 시작 시
+		input->BindAction(RangedAttackAction, ETriggerEvent::Completed, this, &AMyCharacterController::StopAiming); //우클릭 끝 시
+		input->BindAction(RangedAttackAction, ETriggerEvent::Triggered, this, &AMyCharacterController::UpdateAimDirection); //마우스 이동 시
 		input->BindAction(SwitchWeaponAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchWeaponInput);
 		input->BindAction(UseToolAction, ETriggerEvent::Started, this, &AMyCharacterController::UseToolInput);
 		input->BindAction(SwitchToolAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchToolInput);
@@ -168,9 +191,28 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 	ControlledRobo->PlayMeleeAttackMontage();
 }
 
-void AMyCharacterController::RangedAttackInput(const FInputActionValue& value)
+void AMyCharacterController::StartAiming(const FInputActionValue& value)
 {
 	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Red, FString::Printf(TEXT("RangedAttackInput: %d")));
+	IsAiming = true;
+}
+
+void AMyCharacterController::StopAiming(const FInputActionValue& value)
+{
+	IsAiming = false;
+}
+
+void AMyCharacterController::UpdateAimDirection(const FInputActionValue& value)
+{
+	if (IsAiming)
+	{
+		FVector WorldLoc, WorldDir;
+		if (DeprojectMousePositionToWorld(WorldLoc, WorldDir))
+		{
+			AimDirection = (WorldLoc - ControlledRobo->GetActorLocation()).GetSafeNormal();
+			//화살표 ui에 aimdirection적용
+		}
+	}
 }
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)

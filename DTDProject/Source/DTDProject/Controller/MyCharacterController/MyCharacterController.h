@@ -46,6 +46,9 @@ private:
 	TObjectPtr<class AMyRobo> ControlledRobo;
 	bool isMoveInput{ false };
 #pragma endregion
+	bool IsAiming;
+	FVector AimDirection;
+
 //	UPROPERTY(VisibleAnywhere)
 //	TObjectPtr<class UInputAction> InteractionAction;
 //	//bool isHit{ true };
@@ -53,13 +56,16 @@ public:
 	AMyCharacterController();
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
+	void PlayerTick(float DeltaTime) override;
 	void SetupInputComponent() override;
 	void MoveInput(const FInputActionValue& value);
 	void MoveEndInput(const FInputActionValue& value);
 	void LookInput(const FInputActionValue& value);
 	void DashInput(const FInputActionValue& value);
 	void MeleeAttackInput(const FInputActionValue& value);
-	void RangedAttackInput(const FInputActionValue& value);
+	void StartAiming(const FInputActionValue& value);
+	void StopAiming(const FInputActionValue& value);
+	void UpdateAimDirection(const FInputActionValue& value);
 	void SwitchWeaponInput(const FInputActionValue& value);
 	void UseToolInput(const FInputActionValue& value);
 	void SwitchToolInput(const FInputActionValue& value);

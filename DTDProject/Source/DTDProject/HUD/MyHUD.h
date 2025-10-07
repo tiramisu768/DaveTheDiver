@@ -28,10 +28,21 @@ private:
 
 	//Äù½ºÆ® Á¤º¸
 
+	//Aim
+	TSubclassOf<UUserWidget> AimWidget;
+	TObjectPtr<class URoboAimUI> RoboAimUIClass;
+	float AimAngle = 0.f;
+	float ArcRadius = 200.f;
+	FVector2D ArcCenter;
+
 public:
 	AMyHUD();
 	void BeginPlay() override;
+	void DrawHUD() override;
 	void SetHPPercent(float Percent);
 	void SetMeters(float Meter);
 	void SetWeights(float Current, float Max);
+	float GetAimAngle() const { return AimAngle;}
+	void SetAimAngle(float Angle);
+	FVector2D GetArcCenter() const { return ArcCenter; }
 };

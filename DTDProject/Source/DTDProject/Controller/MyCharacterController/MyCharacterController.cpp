@@ -124,7 +124,7 @@ void AMyCharacterController::PlayerTick(float DeltaTime)
 		GetMousePosition(MouseX, MouseY);
 
 		FVector2D MousePos(MouseX, MouseY);
-		FVector2D Dir = MousePos - controlledHUD->GetArcCenter();
+		FVector2D Dir = MousePos - controlledHUD->GetRoboAimUI()->GetArcCenter();
 		float Angle = FMath::Atan2(Dir.Y, Dir.X);
 
 		Angle = FMath::Clamp(Angle, -60.f * PI / 180.f, 60.f * PI / 180.f);
@@ -193,13 +193,22 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 
 void AMyCharacterController::StartAiming(const FInputActionValue& value)
 {
-	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Red, FString::Printf(TEXT("RangedAttackInput: %d")));
 	IsAiming = true;
+	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+	if (ControlledHUD && ControlledHUD->GetRoboAimUI())
+	{
+		ControlledHUD->GetRoboAimUI()->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void AMyCharacterController::StopAiming(const FInputActionValue& value)
 {
 	IsAiming = false;
+	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+	if (ControlledHUD && ControlledHUD->GetRoboAimUI())
+	{
+		ControlledHUD->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void AMyCharacterController::UpdateAimDirection(const FInputActionValue& value)

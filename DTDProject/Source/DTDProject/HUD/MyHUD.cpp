@@ -4,7 +4,6 @@
 #include "HUD/MyHUD.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/RoboHPBarUI.h"
-#include "UI/RoboAimUI.h"
 #include "Engine/Canvas.h"
 
 AMyHUD::AMyHUD()
@@ -104,36 +103,11 @@ void AMyHUD::BeginPlay()
 		if (RoboAimUIClass)
 		{
 			RoboAimUIClass->AddToViewport();
+			//RoboAimUIClass->SetArcInfo(ArcCenter, ArcRadius);
 		}
 	}
 }
 
-void AMyHUD::DrawHUD()
-{
-	Super::DrawHUD();
-
-	const FVector2D ScrennSize(Canvas->SizeX, Canvas->SizeY);
-	ArcCenter = ScrennSize * 0.5f;
-
-	const float ArcStartAngle = -60.f * PI / 180.f;
-	const float ArcEndAngle = 60.f * PI / 180.f;
-	const int NumSegments = 32;
-
-	for (int i = 0; i < NumSegments; i++)
-	{
-		float T0 = FMath::Lerp(ArcStartAngle, ArcEndAngle, float(i) / NumSegments);
-		float T1 = FMath::Lerp(ArcStartAngle, ArcEndAngle, float(i+1) / NumSegments);
-
-		FVector2D P0 = ArcCenter + FVector2D(FMath::Cos(T0), FMath::Sin(T0)) * ArcRadius;
-		FVector2D P1 = ArcCenter + FVector2D(FMath::Cos(T1), FMath::Sin(T1)) * ArcRadius;
-
-		DrawLine(P0.X, P0.Y, P1.X, P1.Y, FLinearColor::White, 2.f);
-	}
-
-	FVector2D ArrowPos = ArcCenter + FVector2D(FMath::Cos(AimAngle), FMath::Sin(AimAngle)) * ArcRadius;
-
-	DrawRect(FLinearColor::Red, ArrowPos.X - 8, ArrowPos.Y - 8, 16, 16);
-}
 
 void AMyHUD::SetHPPercent(float value)
 {
@@ -152,7 +126,6 @@ void AMyHUD::SetWeights(float Current, float Max)
 
 void AMyHUD::SetAimAngle(float Angle)
 {
-	AimAngle = Angle;
 	if (RoboAimUIClass)
 	{
 		RoboAimUIClass->SetAimAngle(Angle);

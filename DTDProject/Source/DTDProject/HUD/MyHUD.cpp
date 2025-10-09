@@ -14,25 +14,10 @@ AMyHUD::AMyHUD()
 		HPBarWidget = HPBarWidgetClassFinder.Class;
 	}
 
-	//static ConstructorHelpers::FClassFinder<UUserWidget> MeleeWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Melee.BP_Melee_C"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> MeleeWidgetClassFinder(TEXT(""));
-	if (MeleeWidgetClassFinder.Succeeded())
+	static ConstructorHelpers::FClassFinder<UUserWidget> WeaponWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_WeaponUI.BP_WeaponUI_C"));
+	if (WeaponWidgetClassFinder.Succeeded())
 	{
-		MeleeWidget = MeleeWidgetClassFinder.Class;
-	}
-
-	//static ConstructorHelpers::FClassFinder<UUserWidget> ToolWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Tool.BP_Tool_C"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> ToolWidgetClassFinder(TEXT(""));
-	if (ToolWidgetClassFinder.Succeeded())
-	{
-		ToolWidget = ToolWidgetClassFinder.Class;
-	}
-
-	//static ConstructorHelpers::FClassFinder<UUserWidget> RangedWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Ranged.BP_Ranged_C"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> RangedWidgetClassFinder(TEXT(""));
-	if (RangedWidgetClassFinder.Succeeded())
-	{
-		RangedWidget = RangedWidgetClassFinder.Class;
+		WeaponWidget = WeaponWidgetClassFinder.Class;
 	}
 
 	//static ConstructorHelpers::FClassFinder<UUserWidget> RankWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Rank2.BP_Rank2_C"));
@@ -61,30 +46,12 @@ void AMyHUD::BeginPlay()
 		}
 	}
 
-	if (MeleeWidget)
+	if (WeaponWidget)
 	{
-		UUserWidget* UWMelee = CreateWidget<UUserWidget>(GetWorld(), MeleeWidget);
-		if (UWMelee)
+		UUserWidget* UWWeapon = CreateWidget<UUserWidget>(GetWorld(), WeaponWidget);
+		if (UWWeapon)
 		{
-			UWMelee->AddToViewport();
-		}
-	}
-
-	if (ToolWidget)
-	{
-		UUserWidget* UWTool = CreateWidget<UUserWidget>(GetWorld(), ToolWidget);
-		if (UWTool)
-		{
-			UWTool->AddToViewport();
-		}
-	}
-
-	if (RangedWidget)
-	{
-		UUserWidget* UWRanged = CreateWidget<UUserWidget>(GetWorld(), RangedWidget);
-		if (UWRanged)
-		{
-			UWRanged->AddToViewport();
+			UWWeapon->AddToViewport();
 		}
 	}
 

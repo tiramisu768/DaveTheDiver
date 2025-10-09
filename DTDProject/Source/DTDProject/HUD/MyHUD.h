@@ -20,9 +20,7 @@ private:
 	TObjectPtr<class URoboHPBarUI> RoboHPBarUIClass;
 
 	//무기
-	TSubclassOf<UUserWidget> MeleeWidget;
-	TSubclassOf<UUserWidget> ToolWidget;
-	TSubclassOf<UUserWidget> RangedWidget;
+	TSubclassOf<UUserWidget> WeaponWidget;
 
 	//잡은 물고기 정보
 	TSubclassOf<UUserWidget> RankWidget;

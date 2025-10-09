@@ -226,7 +226,12 @@ void AMyCharacterController::UpdateAimDirection(const FInputActionValue& value)
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
-	GEngine->AddOnScreenDebugMessage(-2, 2.0f, FColor::Red, FString::Printf(TEXT("SwitchWeaponInput: %d")));
+	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponCount;
+	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+	if (ControlledHUD && ControlledHUD->GetRoboWeaponUI())
+	{
+		ControlledHUD->GetRoboWeaponUI()->PlaySwitchAnimation(CurrentWeaponIndex);
+	}
 }
 
 void AMyCharacterController::UseToolInput(const FInputActionValue& value)

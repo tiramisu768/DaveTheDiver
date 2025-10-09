@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "UI/RoboAimUI.h"
+#include "UI/RoboWeaponUI.h"
 #include "MyHUD.generated.h"
 
 /**
@@ -21,6 +22,7 @@ private:
 
 	//무기
 	TSubclassOf<UUserWidget> WeaponWidget;
+	TObjectPtr<class URoboWeaponUI> RoboWeaponUIClass;
 
 	//잡은 물고기 정보
 	TSubclassOf<UUserWidget> RankWidget;
@@ -37,6 +39,8 @@ public:
 	void SetHPPercent(float Percent);
 	void SetMeters(float Meter);
 	void SetWeights(float Current, float Max);
+	URoboWeaponUI* GetRoboWeaponUI() const { return RoboWeaponUIClass; }
+	void PlaySwitchAnimation(int32 SelectedIndex);
 	URoboAimUI* GetRoboAimUI() const { return RoboAimUIClass; }
 	void SetAimAngle(float Angle);
 };

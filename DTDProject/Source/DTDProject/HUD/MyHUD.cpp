@@ -91,6 +91,14 @@ void AMyHUD::SetWeights(float Current, float Max)
 	RoboHPBarUIClass->SetCurrentAndMaxWeight(Current, Max);
 }
 
+void AMyHUD::PlaySwitchAnimation(int32 SelectedIndex)
+{
+	if (RoboWeaponUIClass)
+	{
+		RoboWeaponUIClass->PlaySwitchAnimation(SelectedIndex);
+	}
+}
+
 void AMyHUD::SetAimAngle(float Angle)
 {
 	if (RoboAimUIClass)

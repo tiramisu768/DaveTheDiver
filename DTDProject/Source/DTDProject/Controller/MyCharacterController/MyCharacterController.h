@@ -46,8 +46,12 @@ private:
 	TObjectPtr<class AMyRobo> ControlledRobo;
 	bool isMoveInput{ false };
 #pragma endregion
+	//Aim 상태 관리
 	bool IsAiming;
 	FVector AimDirection;
+	//무기 선택 상태 관리
+	int32 CurrentWeaponIndex = 0;
+	const int32 WeaponCount = 2;
 
 //	UPROPERTY(VisibleAnywhere)
 //	TObjectPtr<class UInputAction> InteractionAction;

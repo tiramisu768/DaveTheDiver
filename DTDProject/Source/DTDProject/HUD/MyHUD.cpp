@@ -37,6 +37,9 @@ AMyHUD::AMyHUD()
 void AMyHUD::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("RoboWeaponUI »ý¼ºµÊ: %s"), *GetNameSafe(RoboWeaponUIClass));
+
 	if (HPBarWidget)
 	{
 		RoboHPBarUIClass = CreateWidget<URoboHPBarUI>(GetWorld(), HPBarWidget);
@@ -48,10 +51,10 @@ void AMyHUD::BeginPlay()
 
 	if (WeaponWidget)
 	{
-		UUserWidget* UWWeapon = CreateWidget<UUserWidget>(GetWorld(), WeaponWidget);
-		if (UWWeapon)
+		RoboWeaponUIClass = CreateWidget<URoboWeaponUI>(GetWorld(), WeaponWidget);
+		if (RoboWeaponUIClass)
 		{
-			UWWeapon->AddToViewport();
+			RoboWeaponUIClass->AddToViewport();
 		}
 	}
 

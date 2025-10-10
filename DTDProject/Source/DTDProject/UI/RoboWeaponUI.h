@@ -15,11 +15,11 @@ class DTDPROJECT_API URoboWeaponUI : public UUserWidget
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UOverlay> Ranged_Current;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UOverlay> Ranged_Back;
-	TArray<TObjectPtr<UOverlay>> WeaponOverlayArray;
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UWidgetAnimation* TabAni;
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* TabAni_Reverse;
+
 public:
 	void PlaySwitchAnimation(int32 SelectedIndex);
 	

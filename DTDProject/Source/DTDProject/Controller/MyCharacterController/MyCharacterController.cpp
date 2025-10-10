@@ -89,6 +89,15 @@ void AMyCharacterController::BeginPlay()
 		InputSystem->AddMappingContext(MappingContext, 0);
 	}
 	ControlledRobo = Cast<AMyRobo>(GetCharacter());
+
+	//if (HUDClass)
+	//{
+	//	AMyHUD* MyHUD = GetWorld()->SpawnActor<AMyHUD>(HUDClass);
+	//	if (MyHUD)
+	//	{
+	//		SetHUD(MyHUD);
+	//	}
+	//}
 }
 
 void AMyCharacterController::Tick(float DeltaTime)
@@ -228,6 +237,10 @@ void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
 	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponCount;
 	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+
+	UE_LOG(LogTemp, Warning, TEXT("ControlledHUD: %s"), *GetNameSafe(ControlledHUD));
+	UE_LOG(LogTemp, Warning, TEXT("RoboWeaponUI: %s"), *GetNameSafe(ControlledHUD ? ControlledHUD->GetRoboWeaponUI() : nullptr));
+
 	if (ControlledHUD && ControlledHUD->GetRoboWeaponUI())
 	{
 		ControlledHUD->GetRoboWeaponUI()->PlaySwitchAnimation(CurrentWeaponIndex);

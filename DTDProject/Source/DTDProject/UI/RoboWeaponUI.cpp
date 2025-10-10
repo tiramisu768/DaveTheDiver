@@ -5,15 +5,12 @@
 
 void URoboWeaponUI::PlaySwitchAnimation(int32 SelectedIndex)
 {
-	for (int32 i = 0; i < 2; ++i)
+	if (SelectedIndex == 0)
 	{
-		if (i == SelectedIndex)
-		{
-			WeaponOverlayArray[i]->SetVisibility(ESlateVisibility::Visible);
-		}
-		else
-		{
-			WeaponOverlayArray[i]->SetVisibility(ESlateVisibility::Hidden);
-		}
+		PlayAnimation(TabAni);
+	}
+	else if (SelectedIndex == 1)
+	{
+		PlayAnimation(TabAni_Reverse);
 	}
 }

@@ -130,7 +130,10 @@ void AMyRobo::EquipWeapon(AWeapon* NewWeapon)
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+	//무기마다 크기가 다를 경우 코드를 세분화해서 크기 부분을 통제한다
+	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget,
+		EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, true);
+	////////여기서 무기별로 탐색해서 각 소켓에 붙여야 하나
 	NewWeapon->AttachToComponent(GetMesh(), AttachRules, TEXT("Weapon"));
 
 	CurrentWeapon = NewWeapon;

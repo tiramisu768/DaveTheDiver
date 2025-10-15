@@ -185,8 +185,16 @@ void AMyCharacterController::MoveEndInput(const FInputActionValue& value)
 void AMyCharacterController::LookInput(const FInputActionValue& value)
 {
 	FVector2D MoveValue = value.Get<FVector2D>();
-	AddYawInput(MoveValue.X);
-	AddPitchInput(MoveValue.Y);
+
+	if (!IsAiming)
+	{
+		AddYawInput(MoveValue.X);
+		AddPitchInput(MoveValue.Y);
+	}
+	else
+	{
+		MoveAimPoint(MoveValue);
+	}
 }
 
 void AMyCharacterController::DashInput(const FInputActionValue& value)
@@ -198,6 +206,17 @@ void AMyCharacterController::DashInput(const FInputActionValue& value)
 void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 {
 	ControlledRobo->PlayMeleeAttackMontage();
+}
+
+void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
+{
+	int32 SizeX, SizeY;
+	GetViewportSize(SizeX, SizeY);
+	FVector2D ViewportSize(SizeX, SizeY);
+	AimScreenPos.X += MoveValue.X * 2.5f;
+	AimScreenPos.Y -= MoveValue.Y * 2.5f;
+
+
 }
 
 void AMyCharacterController::StartAiming(const FInputActionValue& value)

@@ -2,15 +2,15 @@
 
 
 #include "UI/RoboAimUI.h"
-#include "Components/Image.h"
+#include "Components/Overlay.h"
 
 void URoboAimUI::SetAimAngle(float Angle)
 {
-	if (Img_Arrow)
+	if (Overlay_Arrow)
 	{
 		float Degrees = FMath::RadiansToDegrees(Angle);
 		FVector2D ArrowPos = ArcCenter + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * ArcRadius;
-		Img_Arrow->SetRenderTranslation(ArrowPos - GetCachedGeometry().GetLocalSize() * 0.5f);
-		Img_Arrow->SetRenderTransformAngle(Degrees);
+		Overlay_Arrow->SetRenderTranslation(ArrowPos - GetCachedGeometry().GetLocalSize() * 0.5f);
+		Overlay_Arrow->SetRenderTransformAngle(Degrees);
 	}
 }

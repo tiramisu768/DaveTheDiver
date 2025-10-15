@@ -49,6 +49,8 @@ private:
 	//Aim 상태 관리
 	bool IsAiming;
 	FVector AimDirection;
+	FVector2D AimScreenPos = FVector2D(960.f, 540.f);
+
 	//무기 선택 상태 관리
 	int32 CurrentWeaponIndex = 0;
 	const int32 WeaponCount = 2;
@@ -67,6 +69,7 @@ public:
 	void LookInput(const FInputActionValue& value);
 	void DashInput(const FInputActionValue& value);
 	void MeleeAttackInput(const FInputActionValue& value);
+	void MoveAimPoint(const FVector2D& MoveValue);
 	void StartAiming(const FInputActionValue& value);
 	void StopAiming(const FInputActionValue& value);
 	void UpdateAimDirection(const FInputActionValue& value);

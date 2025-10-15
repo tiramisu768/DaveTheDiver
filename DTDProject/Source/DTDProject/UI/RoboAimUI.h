@@ -15,7 +15,7 @@ class DTDPROJECT_API URoboAimUI : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UImage> Img_Arrow;
+	TObjectPtr<class UOverlay> Overlay_Arrow;
 
 	FVector2D ArcCenter = FVector2D(960, 540);
 	float ArcRadius = 200.f;

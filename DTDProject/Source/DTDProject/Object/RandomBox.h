@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interface/InteractionObject.h"
 #include "RandomBox.generated.h"
 
 UCLASS()
-class DTDPROJECT_API ARandomBox : public AActor
+class DTDPROJECT_API ARandomBox : public AActor,public IInteractionObject
 {
 	GENERATED_BODY()
 private:
+	bool IsOpen{ false };
 	UPROPERTY(VisibleAnywhere, Category ="Mesh")
 	TObjectPtr<UStaticMeshComponent> BoxFrameMesh;
 	UPROPERTY(VisibleAnywhere, Category ="Collision")
@@ -27,8 +29,10 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void Interact() override;
 	UFUNCTION()
 	void RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
-	void RandomBoxOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	void RandomBoxOnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 };

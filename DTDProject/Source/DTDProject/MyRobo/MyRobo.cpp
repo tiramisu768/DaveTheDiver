@@ -16,6 +16,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Engine/OverlapResult.h"
+#include "Interface/InteractionObject.h"
 
 
 // Sets default values
@@ -149,21 +150,23 @@ void AMyRobo::BeginPlay()
 	RoboComponent->InitRoboUIStatement();
 
 	//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
+
+	InteractionWidget->SetHiddenInGame(true);
 }
 
 // Called every frame
 void AMyRobo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//if (InteractionObject)
-	//{
-	//	InteractionWidget->SetHiddenInGame(false);
-	//	AActor* InteractionActor = Cast<AActor>(InteractionObject);
-	//	if (InteractionActor)
-	//		InteractionWidget->SetWorldLocation(InteractionActor->GetActorLocation());
-	//}
-	//else
-	//	InteractionWidget->SetHiddenInGame(true);
+	if (InteractionObject)
+	{
+		InteractionWidget->SetHiddenInGame(false);
+		AActor* InteractionActor = Cast<AActor>(InteractionObject);
+		if (InteractionActor)
+			InteractionWidget->SetWorldLocation(InteractionActor->GetActorLocation());
+	}
+	else
+		InteractionWidget->SetHiddenInGame(true);
 
 	//DepthBelowSurface = GetDepthBelowSurface();
 

@@ -91,4 +91,6 @@ public:
 	float GetDepthBelowSurface() const;
 
 	void AttackTrace() override;
+
+	void SetInteractionObject(IInteractionObject* NewInteractionObject) { InteractionObject = NewInteractionObject; }
 };

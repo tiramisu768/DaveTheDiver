@@ -13,10 +13,13 @@ class DTDPROJECT_API ARandomBox : public AActor,public IInteractionObject
 	GENERATED_BODY()
 private:
 	bool IsOpen{ false };
+	bool IsRoboOverlap{ false };
 	UPROPERTY(VisibleAnywhere, Category ="Mesh")
 	TObjectPtr<UStaticMeshComponent> BoxFrameMesh;
 	UPROPERTY(VisibleAnywhere, Category ="Collision")
 	TObjectPtr<class UBoxComponent> BoxCollision;
+	UMaterialInstanceDynamic* DynMat;
+	float Brightness = 1.0f;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -34,5 +37,6 @@ public:
 	void RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	void RandomBoxOnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void OpenRandomBox(float DeltaTime);
 
 };

@@ -53,6 +53,14 @@ private:
 	FVector AimDirection;
 #pragma endregion
 
+#pragma region Interaction
+	class IInteractionObject* InteractionObject;
+	UPROPERTY(VisibleAnywhere, Category = "Interaction")
+	TObjectPtr<class UWidgetComponent> InteractionWidget;
+	TSubclassOf<class UUserWidget> InteractionWidgetClass;
+
+#pragma endregion
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

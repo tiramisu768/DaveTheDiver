@@ -58,12 +58,13 @@ AMyRobo::AMyRobo()
 #pragma endregion
 
 	RoboComponent = CreateDefaultSubobject<URoboComponent>(TEXT("RoboComponent"));
-	//InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
-	//InteractionWidget->SetupAttachment(GetRootComponent());
-	//static ConstructorHelpers::FClassFinder<UUserWidget> InteractionWidgetClassFinder(TEXT("/Game/Blueprints/UI/BP_InteractionUI.BP_InteractionUI_C"));
-	//if (InteractionWidgetClassFinder.Succeeded())
-	//	InteractionWidgetClass = InteractionWidgetClassFinder.Class;
-	//InteractionWidget->SetWidgetClass(InteractionWidgetClass);
+
+	InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
+	InteractionWidget->SetupAttachment(GetRootComponent());
+	static ConstructorHelpers::FClassFinder<UUserWidget> InteractionWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_LongPress.BP_LongPress_C"));
+	if (InteractionWidgetClassFinder.Succeeded())
+		InteractionWidgetClass = InteractionWidgetClassFinder.Class;
+	InteractionWidget->SetWidgetClass(InteractionWidgetClass);
 }
 
 AWeapon* AMyRobo::FindNearbyWeapon()
@@ -248,6 +249,8 @@ void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName Sectio
 void AMyRobo::HandleLongPress()
 {
 	UE_LOG(LogTemp, Log, TEXT("Space Long Press"));
+	//무기상자 오픈 시
+	//큰물고기 살점 해체 시
 }
 void AMyRobo::HandleShortPress()
 {

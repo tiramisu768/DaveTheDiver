@@ -33,7 +33,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> SwitchToolAction;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class UInputAction> SpacePressAction;
+	TObjectPtr<class UInputAction> InteractionAction;
 	/*UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> EquipAction;*/
 	UPROPERTY(VisibleAnywhere)
@@ -77,8 +77,7 @@ public:
 	void UseToolInput(const FInputActionValue& value);
 	void SwitchToolInput(const FInputActionValue& value);
 	/*void EquipInput(const FInputActionValue& value);*/
-	void InteractionInput(const FInputActionValue& value);
+	void InteractionStarted(const FInputActionValue& value);
+	void InteractionCompleted(const FInputActionValue& value);
 //	bool GetIsMoveInput() const { return isMoveInput; }
-	void OnSpaceStarted();
-	void OnSpaceCompleted();
 };

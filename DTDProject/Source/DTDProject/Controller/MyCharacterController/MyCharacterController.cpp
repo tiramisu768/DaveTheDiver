@@ -55,10 +55,10 @@ AMyCharacterController::AMyCharacterController()
 	{
 		SwitchToolAction = SwitchToolActionFinder.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> SpacePressActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_SpacePress.IA_SpacePress'"));
-	if (SpacePressActionFinder.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UInputAction> InteractionActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_SpacePress.IA_SpacePress'"));
+	if (InteractionActionFinder.Succeeded())
 	{
-		SpacePressAction = SpacePressActionFinder.Object;
+		InteractionAction = InteractionActionFinder.Object;
 	}
 	/*static ConstructorHelpers::FObjectFinder<UInputAction> EquipActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Equip_Ch.IA_Equip_Ch'"));
 	if (EquipActionFinder.Succeeded())
@@ -103,23 +103,24 @@ void AMyCharacterController::BeginPlay()
 void AMyCharacterController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	/*FHitResult HitResult;
+
+	FHitResult HitResult;
 	bool isHit = UKismetSystemLibrary::BoxTraceSingle(this,
-		ControlledCharacter->GetActorLocation(),
-		ControlledCharacter->GetActorLocation() + ControlledCharacter->GetActorForwardVector() * 500.0f,
+		ControlledRobo->GetActorLocation(),
+		ControlledRobo->GetActorLocation() + ControlledRobo->GetActorForwardVector() * 500.0f,
 		FVector(50.0f, 50.0f, 100.0f),
 		FRotator::ZeroRotator,
-		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel4),
+		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel6),
 		false,
-		{ ControlledCharacter },
+		{ ControlledRobo },
 		EDrawDebugTrace::ForOneFrame,
 		HitResult,
 		true
 	);
 	if (isHit)
-		ControlledCharacter->SetInteractionObject(Cast<IInteractionObject>(HitResult.GetActor()));
+		ControlledRobo->SetInteractionObject(Cast<IInteractionObject>(HitResult.GetActor()));
 	else
-		ControlledCharacter->SetInteractionObject(nullptr);*/
+		ControlledRobo->SetInteractionObject(nullptr);
 }
 
 void AMyCharacterController::PlayerTick(float DeltaTime)
@@ -159,10 +160,9 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(SwitchWeaponAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchWeaponInput);
 		input->BindAction(UseToolAction, ETriggerEvent::Started, this, &AMyCharacterController::UseToolInput);
 		input->BindAction(SwitchToolAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchToolInput);
-		input->BindAction(SpacePressAction, ETriggerEvent::Started, this, &AMyCharacterController::OnSpaceStarted);
-		input->BindAction(SpacePressAction, ETriggerEvent::Completed, this, &AMyCharacterController::OnSpaceCompleted);
+		input->BindAction(InteractionAction, ETriggerEvent::Started, this, &AMyCharacterController::InteractionStarted);
+		input->BindAction(InteractionAction, ETriggerEvent::Completed, this, &AMyCharacterController::InteractionCompleted);
 		/*input->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);*/
-		//input->BindAction(InteractionAction, ETriggerEvent::Started, this, &AMyCharacterController::InteractionInput);
 	}
 }
 
@@ -283,18 +283,12 @@ void AMyCharacterController::SwitchToolInput(const FInputActionValue& value)
 //	//ControlledCharacter->PlayEquipWeaponMontage();
 //}
 
-void AMyCharacterController::InteractionInput(const FInputActionValue& value)
-{
-	/*if (ControlledCharacter)
-		ControlledCharacter->InteractionAction();*/
-}
-
-void AMyCharacterController::OnSpaceStarted()
+void AMyCharacterController::InteractionStarted(const FInputActionValue& value)
 {
 	SpacePressedTime = GetWorld()->GetTimeSeconds();
 }
 
-void AMyCharacterController::OnSpaceCompleted()
+void AMyCharacterController::InteractionCompleted(const FInputActionValue& value)
 {
 	float HeldTime = GetWorld()->GetTimeSeconds() - SpacePressedTime;
 	AMyRobo* Robo = Cast<AMyRobo>(GetPawn());
@@ -303,33 +297,6 @@ void AMyCharacterController::OnSpaceCompleted()
 	//±æ°Ô ´­·¶À» ¶§
 	if (HeldTime >= HoldThreshold)
 	{
-		FHitResult HitResult;
-		bool IsHit = UKismetSystemLibrary::BoxTraceSingle(
-			this,
-			ControlledRobo->GetActorLocation(),
-			ControlledRobo->GetActorLocation() + ControlledRobo->GetActorForwardVector() * 500.f,
-			FVector(50.f,50.f,100.f),
-			FRotator::ZeroRotator,
-			UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel4),
-			false,
-			{ControlledRobo},
-			EDrawDebugTrace::ForDuration,
-			HitResult,
-			true
-		);
-		if (IsHit)
-		{
-			IInteractionObject* InteractionObj = Cast<IInteractionObject>(HitResult.GetActor());
-			if (InteractionObj != nullptr)
-			{
-				InteractionObj->Interact();
-				ControlledRobo->SetInteractionObject(InteractionObj);
-			}
-		}
-		else
-		{
-			ControlledRobo->SetInteractionObject(nullptr);
-		}
 		Robo->HandleLongPress();
 	}
 	//Âª°Ô ´­·¶À» ¶§

@@ -224,6 +224,17 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 	}
 }
 
+void AMyRobo::OnBeginInteractable(IInteractionObject* Object)
+{
+	//if (InteractionWidgetClass)
+	//{
+	//	//InteractionWidgetClass->AddToViewport();
+	//	InteractionWidgetClass->SetVisibility(ESlateVisibility::Visible);
+	//	InteractionWidgetClass->AttachToActor(Cast<AActor>(Object), FAttachmentTransformRules::KeepWorldTransform);
+
+	//}
+}
+
 //controller 생성이후 호출되는 함수
 void AMyRobo::PossessedBy(AController* NewController)
 {
@@ -252,8 +263,11 @@ void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName Sectio
 void AMyRobo::HandleLongPress()
 {
 	UE_LOG(LogTemp, Log, TEXT("Space Long Press"));
-	//무기상자 오픈 시
+
+	//무기상자 오픈 -> 무기 활성화 -> 박스 어둡게 변화
 	//큰물고기 살점 해체 시
+	if (InteractionObject)
+		InteractionObject->Interact();
 }
 void AMyRobo::HandleShortPress()
 {
@@ -354,6 +368,15 @@ void AMyRobo::AttackTrace()
 			}
 		}
 	}
+}
+
+void AMyRobo::ShowInteractionUI(ARandomBox* Box)
+{
+
+	//InteractionWidget->SetHiddenInGame(false);
+	//AActor* InteractionActor = Cast<AActor>(InteractionObject);
+	//if (InteractionActor)
+	//	InteractionWidget->SetWorldLocation(InteractionActor->GetActorLocation());
 }
 
 #pragma region reference

@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
+#include "Interface/InteractionReceiver.h"
+#include "Object/RandomBox.h"
 #include "Weapon/Weapon.h"
 #include "MyRobo.generated.h"
 
 UCLASS()
-class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify
+class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify, public IInteractionReceiver
 {
 	GENERATED_BODY()
 
@@ -74,6 +76,8 @@ public:
 
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
+	virtual void OnBeginInteractable(IInteractionObject* Object) override;
+
 	void PossessedBy(AController* NewController) override;
 
 	void PlayMontageFullBody(TObjectPtr<UAnimMontage>Montage, FName SectionName = "");
@@ -93,4 +97,6 @@ public:
 	void AttackTrace() override;
 
 	void SetInteractionObject(IInteractionObject* NewInteractionObject) { InteractionObject = NewInteractionObject; }
+
+	void ShowInteractionUI(ARandomBox* Box);
 };

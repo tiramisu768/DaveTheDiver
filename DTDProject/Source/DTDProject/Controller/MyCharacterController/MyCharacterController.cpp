@@ -8,9 +8,9 @@
 #include "EnhancedInputComponent.h"  //InputAction을 관리하는 component
 //#include "InputActionValue.h"
 #include "MyRobo/MyRobo.h"
-//#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 //#include "Object/Door.h"
-//#include "Interface/InteractionObject.h"
+#include "Interface/InteractionObject.h"
 #include "HUD/MyHUD.h"
 
 AMyCharacterController::AMyCharacterController()
@@ -303,6 +303,33 @@ void AMyCharacterController::OnSpaceCompleted()
 	//길게 눌렀을 때
 	if (HeldTime >= HoldThreshold)
 	{
+		FHitResult HitResult;
+		bool IsHit = UKismetSystemLibrary::BoxTraceSingle(
+			this,
+			ControlledRobo->GetActorLocation(),
+			ControlledRobo->GetActorLocation() + ControlledRobo->GetActorForwardVector() * 500.f,
+			FVector(50.f,50.f,100.f),
+			FRotator::ZeroRotator,
+			UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel4),
+			false,
+			{ControlledRobo},
+			EDrawDebugTrace::ForDuration,
+			HitResult,
+			true
+		);
+		if (IsHit)
+		{
+			IInteractionObject* InteractionObj = Cast<IInteractionObject>(HitResult.GetActor());
+			if (InteractionObj != nullptr)
+			{
+				InteractionObj->Interact();
+				ControlledRobo->SetInteractionObject(InteractionObj);
+			}
+		}
+		else
+		{
+			ControlledRobo->SetInteractionObject(nullptr);
+		}
 		Robo->HandleLongPress();
 	}
 	//짧게 눌렀을 때

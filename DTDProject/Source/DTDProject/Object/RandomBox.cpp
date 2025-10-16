@@ -39,7 +39,7 @@ void ARandomBox::Tick(float DeltaTime)
 
 	if(IsRoboOverlap)
 	{
-		if (!IsOpen)
+		if (IsOpen)
 		{
 			OpenRandomBox(DeltaTime);
 		}
@@ -62,13 +62,10 @@ void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	if (OtherActor && OtherActor != this)
 	{
 		IsRoboOverlap = true;
+		// 카메라 고정
+		// UI 표시
+		// 상호작용 가능 상태로 변경
 	}
-	//if (OtherActor->IsA(AYourPlayerCharacter::StaticClass()))
-	//{
-	//	// 카메라 고정
-	//	// UI 표시
-	//	// 상호작용 가능 상태로 변경
-	//}
 }
 
 void ARandomBox::RandomBoxOnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

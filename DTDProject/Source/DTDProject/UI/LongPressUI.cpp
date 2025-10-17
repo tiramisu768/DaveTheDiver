@@ -8,8 +8,5 @@
 void ULongPressUI::SetLongPressBarPercent(float Percent)
 {
 	if (LongPressBar)
-	{
 		LongPressBar->SetPercent(Percent);
-	}
-
 }

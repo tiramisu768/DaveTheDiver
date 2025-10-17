@@ -74,6 +74,7 @@ void AMyHUD::BeginPlay()
 		{
 			RoboAimUIClass->AddToViewport();
 			//RoboAimUIClass->SetArcInfo(ArcCenter, ArcRadius);
+			RoboAimUIClass->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }

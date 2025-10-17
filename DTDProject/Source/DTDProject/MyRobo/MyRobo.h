@@ -5,13 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
-#include "Interface/InteractionReceiver.h"
 #include "Object/RandomBox.h"
 #include "Weapon/Weapon.h"
 #include "MyRobo.generated.h"
 
 UCLASS()
-class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify, public IInteractionReceiver
+class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify
 {
 	GENERATED_BODY()
 
@@ -60,7 +59,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
 	TObjectPtr<class UWidgetComponent> InteractionWidget;
 	TSubclassOf<class UUserWidget> InteractionWidgetClass;
-
+	FTimerHandle HoldTimerHandle;
+	float HoldeDuration = 2.0f;
+	bool IsHolding = false;
 #pragma endregion
 
 protected:
@@ -75,8 +76,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
-
-	virtual void OnBeginInteractable(IInteractionObject* Object) override;
 
 	void PossessedBy(AController* NewController) override;
 
@@ -98,5 +97,8 @@ public:
 
 	void SetInteractionObject(IInteractionObject* NewInteractionObject) { InteractionObject = NewInteractionObject; }
 
-	void ShowInteractionUI(ARandomBox* Box);
+	void SetInteractionProgress(float Value);
+	void UpdateInteractionProgress();
+
+	void FocusOnInteractionTarget(IInteractionObject* Target);
 };

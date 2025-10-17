@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "UI/RoboHPBarUI.h"		
+#include "UI/LongPressUI.h"		
 #include "HUD/MyHUD.h"
 #include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Components/WidgetComponent.h"
@@ -224,17 +225,6 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 	}
 }
 
-void AMyRobo::OnBeginInteractable(IInteractionObject* Object)
-{
-	//if (InteractionWidgetClass)
-	//{
-	//	//InteractionWidgetClass->AddToViewport();
-	//	InteractionWidgetClass->SetVisibility(ESlateVisibility::Visible);
-	//	InteractionWidgetClass->AttachToActor(Cast<AActor>(Object), FAttachmentTransformRules::KeepWorldTransform);
-
-	//}
-}
-
 //controller 생성이후 호출되는 함수
 void AMyRobo::PossessedBy(AController* NewController)
 {
@@ -263,14 +253,24 @@ void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName Sectio
 void AMyRobo::HandleLongPress()
 {
 	UE_LOG(LogTemp, Log, TEXT("Space Long Press"));
+	if (!InteractionObject) return;
 
-	//무기상자 오픈 -> 무기 활성화 -> 박스 어둡게 변화
-	//큰물고기 살점 해체 시
-	if (InteractionObject)
-		InteractionObject->Interact();
+	IsHolding = true;
+
+	SetInteractionProgress(0.0f);
+
+	GetWorldTimerManager().SetTimer(HoldTimerHandle, this, &AMyRobo::UpdateInteractionProgress, 0.05f, true);
 }
+
 void AMyRobo::HandleShortPress()
 {
+	IsHolding = false;
+
+	GetWorldTimerManager().ClearTimer(HoldTimerHandle);
+
+	SetInteractionProgress(0.0f);
+
+
 	// 근처 무기 유무 확인
 	AWeapon* ClosestWeapon = FindNearbyWeapon();
 	if (!ClosestWeapon) return;
@@ -370,24 +370,47 @@ void AMyRobo::AttackTrace()
 	}
 }
 
-void AMyRobo::ShowInteractionUI(ARandomBox* Box)
+void AMyRobo::SetInteractionProgress(float Value)
+{
+	if (UUserWidget* UserWidget = InteractionWidget->GetUserWidgetObject())
+	{
+		if (ULongPressUI* UI = Cast<ULongPressUI>(UserWidget))
+		{
+			UI->SetLongPressBarPercent(Value);
+		}
+	}
+}
+
+float CurrentHoldTime = 0.0f;
+
+void AMyRobo::UpdateInteractionProgress()
+{
+	if (!IsHolding) return;
+
+	CurrentHoldTime += 0.05f;
+	float Ratio = CurrentHoldTime / HoldeDuration;
+
+	SetInteractionProgress(Ratio);
+
+	if (Ratio >= 1.0f)
+	{
+		if (InteractionObject)
+			InteractionObject->Interact();
+
+		GetWorldTimerManager().ClearTimer(HoldTimerHandle);
+		CurrentHoldTime =0.0f;
+		IsHolding = false;
+		SetInteractionProgress(0.0f);
+	}
+}
+
+void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 {
 
-	//InteractionWidget->SetHiddenInGame(false);
-	//AActor* InteractionActor = Cast<AActor>(InteractionObject);
-	//if (InteractionActor)
-	//	InteractionWidget->SetWorldLocation(InteractionActor->GetActorLocation());
 }
 
 #pragma region reference
 
-
-//void AMyCharacter::InteractionAction()
-//{
-//	if (InteractionObject)
-//		InteractionObject->Interact();
-//}
-//
 //void AMyCharacter::HitBy(float DamageAmount)
 //{
 //	StateComponent->TakeDamage(DamageAmount);

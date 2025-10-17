@@ -5,7 +5,6 @@
 #include "RandomBox.h"
 #include "Components/BoxComponent.h"
 #include "MyRobo/MyRobo.h"
-#include "Interface/InteractionReceiver.h"
 
 // Sets default values
 ARandomBox::ARandomBox()
@@ -58,24 +57,19 @@ void ARandomBox::Interact()
 	if (IsOpen) return;
 
 	IsOpen = true;
-	GEngine->AddOnScreenDebugMessage(-6, 3.0f, FColor::Purple, TEXT("IsOpen"));
+	GEngine->AddOnScreenDebugMessage(-6, 3.0f, FColor::Purple, TEXT("IsOpen is True"));
 }
 
 void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, FString::Printf(TEXT("OnBeginOverlap")) + OtherActor->GetName());
 	if (OtherActor && OtherActor != this)
 	{
 		AMyRobo* Robo = Cast<AMyRobo>(OtherActor);
 		if (Robo)
 		{
 			IsRoboOverlap = true;
-			Robo->ShowInteractionUI(this);
+			Robo->FocusOnInteractionTarget(this); //카메라 고정
 		}
-			//Receiver->OnBeginInteractable(OtherActor);
-		// 카메라 고정
-		// UI 표시
-		// 상호작용 가능 상태로 변경
 	}
 }
 

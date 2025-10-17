@@ -68,6 +68,8 @@ void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponen
 		if (Robo)
 		{
 			IsRoboOverlap = true;
+			Robo->SetCurrentInteractable(this);
+			Robo->ShowInteractionWidget(true, 0.0f);
 			Robo->FocusOnInteractionTarget(this); //카메라 고정
 		}
 	}
@@ -75,7 +77,17 @@ void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponen
 
 void ARandomBox::RandomBoxOnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	GEngine->AddOnScreenDebugMessage(-7, 3.0f, FColor::Purple, FString::Printf(TEXT("OnEndOverlap")) + OtherActor->GetName());
+	if (OtherActor && OtherActor != this)
+	{
+		AMyRobo* Robo = Cast<AMyRobo>(OtherActor);
+		if (Robo)
+		{
+			IsRoboOverlap = false;
+			Robo->SetCurrentInteractable(nullptr);
+			Robo->ShowInteractionWidget(false,0.0f);
+			Robo->FocusOnInteractionTarget(this); //카메라 고정
+		}
+	}
 }
 
 void ARandomBox::OpenRandomBox(float DeltaTime)

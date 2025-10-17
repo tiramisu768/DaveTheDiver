@@ -55,8 +55,11 @@ private:
 	int32 CurrentWeaponIndex = 0;
 	const int32 WeaponCount = 2;
 
-//	UPROPERTY(VisibleAnywhere)
-//	TObjectPtr<class UInputAction> InteractionAction;
+	//Interaction
+	FTimerHandle HoldTimerHandle;
+	float HoldeDuration = 2.0f;
+	bool IsHolding = false;
+
 //	//bool isHit{ true };
 public:
 	AMyCharacterController();
@@ -79,5 +82,6 @@ public:
 	/*void EquipInput(const FInputActionValue& value);*/
 	void InteractionStarted(const FInputActionValue& value);
 	void InteractionCompleted(const FInputActionValue& value);
+	void UpdateInteractionProgress();
 //	bool GetIsMoveInput() const { return isMoveInput; }
 };

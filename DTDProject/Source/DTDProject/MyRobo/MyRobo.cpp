@@ -159,15 +159,6 @@ void AMyRobo::BeginPlay()
 void AMyRobo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (InteractionObject)
-	{
-		InteractionWidget->SetHiddenInGame(false);
-		AActor* InteractionActor = Cast<AActor>(InteractionObject);
-		if (InteractionActor)
-			InteractionWidget->SetWorldLocation(InteractionActor->GetActorLocation());
-	}
-	else
-		InteractionWidget->SetHiddenInGame(true);
 
 	//DepthBelowSurface = GetDepthBelowSurface();
 
@@ -257,18 +248,18 @@ void AMyRobo::HandleLongPress()
 
 	IsHolding = true;
 
-	SetInteractionProgress(0.0f);
+	//SetInteractionProgress(0.0f);
 
-	GetWorldTimerManager().SetTimer(HoldTimerHandle, this, &AMyRobo::UpdateInteractionProgress, 0.05f, true);
+	//GetWorldTimerManager().SetTimer(HoldTimerHandle, this, &AMyRobo::UpdateInteractionProgress, 0.05f, true);
 }
 
 void AMyRobo::HandleShortPress()
 {
 	IsHolding = false;
 
-	GetWorldTimerManager().ClearTimer(HoldTimerHandle);
+	/*GetWorldTimerManager().ClearTimer(HoldTimerHandle);
 
-	SetInteractionProgress(0.0f);
+	SetInteractionProgress(0.0f);*/
 
 
 	// 근처 무기 유무 확인
@@ -370,8 +361,23 @@ void AMyRobo::AttackTrace()
 	}
 }
 
-void AMyRobo::SetInteractionProgress(float Value)
+void AMyRobo::ShowInteractionWidget(bool bShow, float Value)
 {
+	if (!InteractionWidget)
+		return;
+
+	if (bShow)
+	{
+		InteractionWidget->SetHiddenInGame(false);
+		AActor* InteractionActor = Cast<AActor>(InteractionObject);
+		if (InteractionActor)
+			InteractionWidget->SetWorldLocation(InteractionActor->GetActorLocation());
+	}
+	else
+	{
+		InteractionWidget->SetHiddenInGame(true);
+	}
+
 	if (UUserWidget* UserWidget = InteractionWidget->GetUserWidgetObject())
 	{
 		if (ULongPressUI* UI = Cast<ULongPressUI>(UserWidget))
@@ -381,28 +387,28 @@ void AMyRobo::SetInteractionProgress(float Value)
 	}
 }
 
-float CurrentHoldTime = 0.0f;
-
-void AMyRobo::UpdateInteractionProgress()
-{
-	if (!IsHolding) return;
-
-	CurrentHoldTime += 0.05f;
-	float Ratio = CurrentHoldTime / HoldeDuration;
-
-	SetInteractionProgress(Ratio);
-
-	if (Ratio >= 1.0f)
-	{
-		if (InteractionObject)
-			InteractionObject->Interact();
-
-		GetWorldTimerManager().ClearTimer(HoldTimerHandle);
-		CurrentHoldTime =0.0f;
-		IsHolding = false;
-		SetInteractionProgress(0.0f);
-	}
-}
+//float CurrentHoldTime = 0.0f;
+//
+//void AMyRobo::UpdateInteractionProgress()
+//{
+//	if (!IsHolding) return;
+//
+//	CurrentHoldTime += 0.05f;
+//	float Ratio = CurrentHoldTime / HoldeDuration;
+//
+//	SetInteractionProgress(Ratio);
+//
+//	if (Ratio >= 1.0f)
+//	{
+//		if (InteractionObject)
+//			InteractionObject->Interact();
+//
+//		GetWorldTimerManager().ClearTimer(HoldTimerHandle);
+//		CurrentHoldTime =0.0f;
+//		IsHolding = false;
+//		SetInteractionProgress(0.0f);
+//	}
+//}
 
 void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 {

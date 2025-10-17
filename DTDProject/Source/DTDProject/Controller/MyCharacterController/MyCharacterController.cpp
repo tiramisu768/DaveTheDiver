@@ -286,10 +286,16 @@ void AMyCharacterController::SwitchToolInput(const FInputActionValue& value)
 void AMyCharacterController::InteractionStarted(const FInputActionValue& value)
 {
 	SpacePressedTime = GetWorld()->GetTimeSeconds();
+
+	IsHolding = true;
+	GetWorldTimerManager().SetTimer(HoldTimerHandle, this, &AMyCharacterController::UpdateInteractionProgress, 0.05f, true);
 }
 
 void AMyCharacterController::InteractionCompleted(const FInputActionValue& value)
 {
+	IsHolding = false;
+	GetWorldTimerManager().ClearTimer(HoldTimerHandle);
+
 	float HeldTime = GetWorld()->GetTimeSeconds() - SpacePressedTime;
 	AMyRobo* Robo = Cast<AMyRobo>(GetPawn());
 	if (!Robo) return;
@@ -304,4 +310,25 @@ void AMyCharacterController::InteractionCompleted(const FInputActionValue& value
 	{
 		Robo->HandleShortPress();
 	}
+}
+
+float CurrentHoldTime = 0.0f;
+
+void AMyCharacterController::UpdateInteractionProgress()
+{
+	if (!IsHolding) return;
+
+	CurrentHoldTime += 0.05f;
+	float Ratio = CurrentHoldTime / HoldeDuration;
+
+	//if (Ratio >= 1.0f)
+	//{
+	//	if (InteractionObject)
+	//		InteractionObject->Interact();
+
+	//	GetWorldTimerManager().ClearTimer(HoldTimerHandle);
+	//	CurrentHoldTime = 0.0f;
+	//	IsHolding = false;
+	//	SetInteractionProgress(0.0f);
+	//}
 }

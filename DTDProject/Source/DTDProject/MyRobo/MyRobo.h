@@ -56,6 +56,8 @@ private:
 
 #pragma region Interaction
 	class IInteractionObject* InteractionObject;
+	UPROPERTY()
+	TScriptInterface<IInteractionObject> CurrentInteractable;
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
 	TObjectPtr<class UWidgetComponent> InteractionWidget;
 	TSubclassOf<class UUserWidget> InteractionWidgetClass;
@@ -95,10 +97,13 @@ public:
 
 	void AttackTrace() override;
 
+	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable){CurrentInteractable = NewInteractable;}
+
+	void ShowInteractionWidget(bool bShow, float Value);
+
 	void SetInteractionObject(IInteractionObject* NewInteractionObject) { InteractionObject = NewInteractionObject; }
 
-	void SetInteractionProgress(float Value);
-	void UpdateInteractionProgress();
+	//void UpdateInteractionProgress();
 
 	void FocusOnInteractionTarget(IInteractionObject* Target);
 };

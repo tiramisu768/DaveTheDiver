@@ -62,8 +62,9 @@ private:
 	TObjectPtr<class UWidgetComponent> InteractionWidget;
 	TSubclassOf<class UUserWidget> InteractionWidgetClass;
 	FTimerHandle HoldTimerHandle;
-	float HoldeDuration = 2.0f;
+	float HoldDuration = 2.0f;
 	bool IsHolding = false;
+	float HoldElapsed = 0.0f;
 #pragma endregion
 
 protected:
@@ -83,10 +84,6 @@ public:
 
 	void PlayMontageFullBody(TObjectPtr<UAnimMontage>Montage, FName SectionName = "");
 
-	void HandleLongPress();
-
-	void HandleShortPress();
-
 	void PlayMeleeAttackMontage();
 
 	void WeaponActive();
@@ -99,11 +96,15 @@ public:
 
 	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable){CurrentInteractable = NewInteractable;}
 
-	void ShowInteractionWidget(bool bShow, float Value);
+	void ShowInteractionWidget(bool bShow);
 
-	void SetInteractionObject(IInteractionObject* NewInteractionObject) { InteractionObject = NewInteractionObject; }
+	void StartSpaceHold();
 
-	//void UpdateInteractionProgress();
+	void StopSpaceHold();
+
+	void HandleShortPress();
+
+	void UpdateInteractionProgress(float Percent);
 
 	void FocusOnInteractionTarget(IInteractionObject* Target);
 };

@@ -111,7 +111,7 @@ void AMyRobo::DropCurrentWeapon()
 	if (!CurrentWeapon) return;
 
 	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	UStaticMeshComponent* WeaponMesh = CurrentWeapon->FindComponentByClass<UStaticMeshComponent>();
+	USkeletalMeshComponent* WeaponMesh = CurrentWeapon->FindComponentByClass<USkeletalMeshComponent>();
 	if(WeaponMesh)
 	{
 		CurrentWeapon->SetActorEnableCollision(true);
@@ -125,7 +125,7 @@ void AMyRobo::EquipWeapon(AWeapon* NewWeapon)
 {
 	if (!NewWeapon) return;
 
-	UStaticMeshComponent* WeaponMesh = NewWeapon->FindComponentByClass<UStaticMeshComponent>();
+	USkeletalMeshComponent* WeaponMesh = NewWeapon->FindComponentByClass<USkeletalMeshComponent>();
 
 	if (WeaponMesh)
 	{
@@ -193,6 +193,27 @@ void AMyRobo::Tick(float DeltaTime)
 		}
 	}
 
+	if (IsHolding && CurrentInteractable)
+	{
+		HoldElapsed += DeltaTime;
+		const float Duration = FMath::Max(HoldDuration, 0.01f);
+		const float Percent = FMath::Clamp(HoldElapsed / Duration, 0.f, 1.f);
+		UpdateInteractionProgress(Percent);
+
+		if (Percent >= 1.f)
+		{
+			IsHolding = false;
+			UpdateInteractionProgress(0.f);
+
+			if (CurrentInteractable)
+			{
+				CurrentInteractable->Interact();
+			}
+
+			ShowInteractionWidget(false);
+		}
+	}
+
 }
 
 // Called to bind functionality to input
@@ -241,40 +262,7 @@ void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName Sectio
 		BodyComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
 	}
 }
-void AMyRobo::HandleLongPress()
-{
-	UE_LOG(LogTemp, Log, TEXT("Space Long Press"));
-	if (!InteractionObject) return;
 
-	IsHolding = true;
-
-	//SetInteractionProgress(0.0f);
-
-	//GetWorldTimerManager().SetTimer(HoldTimerHandle, this, &AMyRobo::UpdateInteractionProgress, 0.05f, true);
-}
-
-void AMyRobo::HandleShortPress()
-{
-	IsHolding = false;
-
-	/*GetWorldTimerManager().ClearTimer(HoldTimerHandle);
-
-	SetInteractionProgress(0.0f);*/
-
-
-	// 근처 무기 유무 확인
-	AWeapon* ClosestWeapon = FindNearbyWeapon();
-	if (!ClosestWeapon) return;
-
-	// 무기 장착중이라면, 무기를 버린다
-	if (CurrentWeapon)
-	{
-		DropCurrentWeapon();
-	}
-
-	//무기 장착
-	EquipWeapon(ClosestWeapon);
-}
 void AMyRobo::PlayMeleeAttackMontage()
 {
 	if (nullptr != MeleeAttackMontage)
@@ -361,7 +349,7 @@ void AMyRobo::AttackTrace()
 	}
 }
 
-void AMyRobo::ShowInteractionWidget(bool bShow, float Value)
+void AMyRobo::ShowInteractionWidget(bool bShow)
 {
 	if (!InteractionWidget)
 		return;
@@ -382,33 +370,63 @@ void AMyRobo::ShowInteractionWidget(bool bShow, float Value)
 	{
 		if (ULongPressUI* UI = Cast<ULongPressUI>(UserWidget))
 		{
-			UI->SetLongPressBarPercent(Value);
+			UI->SetLongPressBarPercent(0.0f);
+		}
+	}
+
+}
+
+void AMyRobo::StartSpaceHold()
+{
+	if (!CurrentInteractable)
+		return;
+
+	IsHolding = true;
+	HoldElapsed = 0.f;
+	UpdateInteractionProgress(0.f);
+}
+
+void AMyRobo::StopSpaceHold()
+{
+	if (HoldElapsed < HoldDuration)
+	{
+		HandleShortPress();
+	}
+	IsHolding = false;
+	HoldElapsed = 0.f;
+	UpdateInteractionProgress(0.f);
+}
+
+void AMyRobo::HandleShortPress()
+{
+	IsHolding = false;
+
+	// 근처 무기 유무 확인
+	AWeapon* ClosestWeapon = FindNearbyWeapon();
+	if (!ClosestWeapon) return;
+
+	// 무기 장착중이라면, 무기를 버린다
+	if (CurrentWeapon)
+	{
+		DropCurrentWeapon();
+	}
+
+	//무기 장착
+	EquipWeapon(ClosestWeapon);
+}
+
+void AMyRobo::UpdateInteractionProgress(float Percent)
+{
+	if (!InteractionWidget) return;
+
+	if (UUserWidget* UserWidget = InteractionWidget->GetWidget())
+	{
+		if (ULongPressUI* LongPress = Cast<ULongPressUI>(UserWidget))
+		{
+			LongPress->SetLongPressBarPercent(Percent);
 		}
 	}
 }
-
-//float CurrentHoldTime = 0.0f;
-//
-//void AMyRobo::UpdateInteractionProgress()
-//{
-//	if (!IsHolding) return;
-//
-//	CurrentHoldTime += 0.05f;
-//	float Ratio = CurrentHoldTime / HoldeDuration;
-//
-//	SetInteractionProgress(Ratio);
-//
-//	if (Ratio >= 1.0f)
-//	{
-//		if (InteractionObject)
-//			InteractionObject->Interact();
-//
-//		GetWorldTimerManager().ClearTimer(HoldTimerHandle);
-//		CurrentHoldTime =0.0f;
-//		IsHolding = false;
-//		SetInteractionProgress(0.0f);
-//	}
-//}
 
 void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 {

@@ -104,7 +104,7 @@ void AMyCharacterController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FHitResult HitResult;
+	/*FHitResult HitResult;
 	bool isHit = UKismetSystemLibrary::BoxTraceSingle(this,
 		ControlledRobo->GetActorLocation(),
 		ControlledRobo->GetActorLocation() + ControlledRobo->GetActorForwardVector() * 500.0f,
@@ -120,7 +120,7 @@ void AMyCharacterController::Tick(float DeltaTime)
 	if (isHit)
 		ControlledRobo->SetInteractionObject(Cast<IInteractionObject>(HitResult.GetActor()));
 	else
-		ControlledRobo->SetInteractionObject(nullptr);
+		ControlledRobo->SetInteractionObject(nullptr);*/
 }
 
 void AMyCharacterController::PlayerTick(float DeltaTime)
@@ -285,50 +285,16 @@ void AMyCharacterController::SwitchToolInput(const FInputActionValue& value)
 
 void AMyCharacterController::InteractionStarted(const FInputActionValue& value)
 {
-	SpacePressedTime = GetWorld()->GetTimeSeconds();
-
-	IsHolding = true;
-	GetWorldTimerManager().SetTimer(HoldTimerHandle, this, &AMyCharacterController::UpdateInteractionProgress, 0.05f, true);
+	if (AMyRobo* Robo = Cast<AMyRobo>(GetPawn()))
+	{
+		Robo->StartSpaceHold();
+	}
 }
 
 void AMyCharacterController::InteractionCompleted(const FInputActionValue& value)
 {
-	IsHolding = false;
-	GetWorldTimerManager().ClearTimer(HoldTimerHandle);
-
-	float HeldTime = GetWorld()->GetTimeSeconds() - SpacePressedTime;
-	AMyRobo* Robo = Cast<AMyRobo>(GetPawn());
-	if (!Robo) return;
-
-	//±æ°Ô ´­·¶À» ¶§
-	if (HeldTime >= HoldThreshold)
+	if (AMyRobo* Robo = Cast<AMyRobo>(GetPawn()))
 	{
-		Robo->HandleLongPress();
+		Robo->StopSpaceHold();
 	}
-	//Âª°Ô ´­·¶À» ¶§
-	else
-	{
-		Robo->HandleShortPress();
-	}
-}
-
-float CurrentHoldTime = 0.0f;
-
-void AMyCharacterController::UpdateInteractionProgress()
-{
-	if (!IsHolding) return;
-
-	CurrentHoldTime += 0.05f;
-	float Ratio = CurrentHoldTime / HoldeDuration;
-
-	//if (Ratio >= 1.0f)
-	//{
-	//	if (InteractionObject)
-	//		InteractionObject->Interact();
-
-	//	GetWorldTimerManager().ClearTimer(HoldTimerHandle);
-	//	CurrentHoldTime = 0.0f;
-	//	IsHolding = false;
-	//	SetInteractionProgress(0.0f);
-	//}
 }

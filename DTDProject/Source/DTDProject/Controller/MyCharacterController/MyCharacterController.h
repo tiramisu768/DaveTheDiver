@@ -60,7 +60,6 @@ public:
 	AMyCharacterController();
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
-	void PlayerTick(float DeltaTime) override;
 	void SetupInputComponent() override;
 	void MoveInput(const FInputActionValue& value);
 	void MoveEndInput(const FInputActionValue& value);

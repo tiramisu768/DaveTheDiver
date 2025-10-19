@@ -18,10 +18,10 @@ private:
 	TObjectPtr<class UOverlay> Overlay_Arrow;
 
 	FVector2D ArcCenter = FVector2D(960, 540);
-	float ArcRadius = 200.f;
+	float ArcRadius = 250.f;
 public:
 	void SetArcInfo(FVector2D Center, float Radius) { ArcCenter = Center; ArcRadius = Radius; }
-	void SetAimPos(float Angle);
+	void SetAimPos(FVector2D AimPos);
 	FVector2D GetArcCenter() const { return ArcCenter; }
 	float GetArcRadius() const { return ArcRadius; }
 };

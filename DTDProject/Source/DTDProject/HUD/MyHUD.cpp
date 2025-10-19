@@ -103,10 +103,10 @@ void AMyHUD::PlaySwitchAnimation(int32 SelectedIndex)
 	}
 }
 
-void AMyHUD::SetAimPos(float Pos)
+void AMyHUD::SetAimPos(FVector2D AimPos)
 {
 	if (RoboAimUIClass)
 	{
-		RoboAimUIClass->SetAimPos(Pos);
+		RoboAimUIClass->SetAimPos(AimPos);
 	}
 }

@@ -123,26 +123,6 @@ void AMyCharacterController::Tick(float DeltaTime)
 		ControlledRobo->SetInteractionObject(nullptr);*/
 }
 
-void AMyCharacterController::PlayerTick(float DeltaTime)
-{
-	Super::PlayerTick(DeltaTime);
-
-	AMyHUD* controlledHUD = Cast<AMyHUD>(GetHUD());
-	if (controlledHUD)
-	{
-		float MouseX, MouseY;
-		GetMousePosition(MouseX, MouseY);
-
-		FVector2D MousePos(MouseX, MouseY);
-		FVector2D Dir = MousePos - controlledHUD->GetRoboAimUI()->GetArcCenter();
-		float Angle = FMath::Atan2(Dir.Y, Dir.X);
-
-		Angle = FMath::Clamp(Angle, -60.f * PI / 180.f, 60.f * PI / 180.f);
-
-		controlledHUD->SetAimPos(Angle);
-	}
-}
-
 void AMyCharacterController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -246,8 +226,7 @@ void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
 		
 		// HUD에 반영하려면 위치 계산
 		FVector2D Delta = AimScreenPos - ArcCenter;
-		float Pos = FMath::Atan2(Delta.Y, Delta.X);
-		ControlledHUD->SetAimPos(Pos);
+		ControlledHUD->SetAimPos(AimScreenPos);
 	}
 	else
 	{
@@ -265,7 +244,7 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 	{
 		ControlledHUD->GetRoboAimUI()->SetVisibility(ESlateVisibility::Visible);
 		AimScreenPos = ControlledHUD->GetRoboAimUI()->GetArcCenter();
-		ControlledHUD->SetAimPos(0.f);
+		ControlledHUD->SetAimPos(AimScreenPos);
 	}
 
 	// 마우스 커서 숨기거나 포커스 고정할 필요가 있으면 여기서 처리
@@ -297,39 +276,17 @@ void AMyCharacterController::UpdateAimDirection(const FInputActionValue& value)
 	FVector2D ArcCenter = AimUI->GetArcCenter();
 	float ArcRadius = AimUI->GetArcRadius();
 
-	// 마우스 커서를 조준점으로 직접 사용
-	AimScreenPos = MousePos;
-
-	// clamp to arc
-	FVector2D Dir = AimScreenPos - ArcCenter;
+	// ArcCenter 기준으로 Clamp
+	FVector2D Dir = MousePos - ArcCenter;
 	float Dist = Dir.Size();
 	if (Dist > ArcRadius)
 	{
 		Dir = Dir.GetSafeNormal() * ArcRadius;
-		AimScreenPos = ArcCenter + Dir;
 	}
 
-	// aim direction 월드 벡터 계산: 화면 위치를 월드로 Deproject
-	FVector WorldLoc, WorldDir;
-	if (DeprojectScreenPositionToWorld(AimScreenPos.X, AimScreenPos.Y, WorldLoc, WorldDir))
-	{
-		FVector TraceStart = WorldLoc;
-		FVector TraceEnd = TraceStart + WorldDir * 10000.f;
-		FHitResult Hit;
-		FCollisionQueryParams Params(SCENE_QUERY_STAT(AimTrace), true);
-		Params.AddIgnoredActor(ControlledRobo);
-		if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
-		{
-			AimDirection = (Hit.ImpactPoint - ControlledRobo->GetActorLocation()).GetSafeNormal();
-		}
-		else
-		{
-			AimDirection = (TraceEnd - ControlledRobo->GetActorLocation()).GetSafeNormal();
-		}
-		// HUD 각도 업데이트
-		float Pos = FMath::Atan2(Dir.Y, Dir.X);
-		ControlledHUD->SetAimPos(Pos);
-	}
+	FVector2D AimPos = ArcCenter + Dir;
+	ControlledHUD->SetAimPos(AimPos);
+	
 }
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)

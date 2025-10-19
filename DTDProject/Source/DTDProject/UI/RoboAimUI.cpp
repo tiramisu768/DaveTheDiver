@@ -4,14 +4,13 @@
 #include "UI/RoboAimUI.h"
 #include "Components/Overlay.h"
 
-void URoboAimUI::SetAimPos(float Pos)
+void URoboAimUI::SetAimPos(FVector2D AimPos)
 {
 	if (Overlay_Arrow)
     {
-        FVector2D ArrowPos = ArcCenter + FVector2D(FMath::Cos(Pos), FMath::Sin(Pos)) * ArcRadius;
-        Overlay_Arrow->SetRenderTranslation(ArrowPos - GetCachedGeometry().GetLocalSize() * 0.5f);
+        Overlay_Arrow->SetRenderTranslation(AimPos - GetCachedGeometry().GetLocalSize() * 0.5f);
 
         // 위치 로그 출력
-        UE_LOG(LogTemp, Warning, TEXT("Overlay_Arrow Pos: X=%f, Y=%f"), ArrowPos.X, ArrowPos.Y);
+        UE_LOG(LogTemp, Warning, TEXT("Overlay_Arrow Pos: X=%f, Y=%f"), AimPos.X, AimPos.Y);
     }
 }

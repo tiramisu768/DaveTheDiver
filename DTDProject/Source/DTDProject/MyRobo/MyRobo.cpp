@@ -81,7 +81,7 @@ AWeapon* AMyRobo::FindNearbyWeapon()
 		Overlaps,
 		CheckLoc,
 		FQuat::Identity,
-		FCollisionObjectQueryParams(ECC_WorldDynamic),
+		FCollisionObjectQueryParams(ECC_GameTraceChannel8),
 		Sphere
 	);
 
@@ -443,4 +443,11 @@ void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 
 
 #pragma endregion
+void AMyRobo::FireCurrentWeapon()
+{
+	/*if (CurrentWeapon)
+	{
+		CurrentWeapon->Attack(this);
+	}*/
+}
 

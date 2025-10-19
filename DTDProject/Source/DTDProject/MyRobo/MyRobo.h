@@ -49,11 +49,6 @@ private:
 	void EquipWeapon(AWeapon* NewWeapon);
 #pragma endregion
 
-#pragma region Aim
-	bool IsAiming;
-	FVector AimDirection;
-#pragma endregion
-
 #pragma region Interaction
 	class IInteractionObject* InteractionObject;
 	UPROPERTY()
@@ -95,7 +90,7 @@ public:
 	void AttackTrace() override;
 
 	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable){CurrentInteractable = NewInteractable;}
-
+	
 	void ShowInteractionWidget(bool bShow);
 
 	void StartSpaceHold();
@@ -107,4 +102,7 @@ public:
 	void UpdateInteractionProgress(float Percent);
 
 	void FocusOnInteractionTarget(IInteractionObject* Target);
+
+	// New helper to fire current weapon (safe wrapper)
+	void FireCurrentWeapon();
 };

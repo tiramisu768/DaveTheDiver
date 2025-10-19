@@ -21,6 +21,7 @@ private:
 	float ArcRadius = 200.f;
 public:
 	void SetArcInfo(FVector2D Center, float Radius) { ArcCenter = Center; ArcRadius = Radius; }
-	void SetAimAngle(float Angle);
+	void SetAimPos(float Angle);
 	FVector2D GetArcCenter() const { return ArcCenter; }
+	float GetArcRadius() const { return ArcRadius; }
 };

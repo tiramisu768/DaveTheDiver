@@ -42,5 +42,5 @@ public:
 	URoboWeaponUI* GetRoboWeaponUI() const { return RoboWeaponUIClass; }
 	void PlaySwitchAnimation(int32 SelectedIndex);
 	URoboAimUI* GetRoboAimUI() const { return RoboAimUIClass; }
-	void SetAimAngle(float Angle);
+	void SetAimPos(float Angle);
 };

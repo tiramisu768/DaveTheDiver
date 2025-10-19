@@ -139,7 +139,7 @@ void AMyCharacterController::PlayerTick(float DeltaTime)
 
 		Angle = FMath::Clamp(Angle, -60.f * PI / 180.f, 60.f * PI / 180.f);
 
-		controlledHUD->SetAimAngle(Angle);
+		controlledHUD->SetAimPos(Angle);
 	}
 }
 
@@ -205,18 +205,56 @@ void AMyCharacterController::DashInput(const FInputActionValue& value)
 
 void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 {
-	ControlledRobo->PlayMeleeAttackMontage();
+	if (IsAiming)
+	{
+		if (ControlledRobo)
+		{
+			ControlledRobo->FireCurrentWeapon();
+		}
+	}
+	else
+	{
+		if (ControlledRobo)
+		{
+			ControlledRobo->PlayMeleeAttackMontage();
+		}
+	}
 }
 
 void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
 {
-	int32 SizeX, SizeY;
-	GetViewportSize(SizeX, SizeY);
-	FVector2D ViewportSize(SizeX, SizeY);
-	AimScreenPos.X += MoveValue.X * 2.5f;
-	AimScreenPos.Y -= MoveValue.Y * 2.5f;
+	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+	float Sensitivity = 2.5f;
 
+	if (ControlledHUD && ControlledHUD->GetRoboAimUI())
+	{
+		URoboAimUI* AimUI = ControlledHUD->GetRoboAimUI();
+		FVector2D ArcCenter = AimUI->GetArcCenter();
+		float ArcRadius = AimUI->GetArcRadius();
 
+		AimScreenPos.X += MoveValue.X * Sensitivity;
+		AimScreenPos.Y -= MoveValue.Y * Sensitivity; // Y축 반전
+
+		// arc 내부에 있도록 clamp
+		FVector2D Dir = AimScreenPos - ArcCenter;
+		float Dist = Dir.Size();
+		if (Dist > ArcRadius)
+		{
+			Dir = Dir.GetSafeNormal() * ArcRadius;
+			AimScreenPos = ArcCenter + Dir;
+		}
+		
+		// HUD에 반영하려면 위치 계산
+		FVector2D Delta = AimScreenPos - ArcCenter;
+		float Pos = FMath::Atan2(Delta.Y, Delta.X);
+		ControlledHUD->SetAimPos(Pos);
+	}
+	else
+	{
+		// HUD 없으면 기본 동작
+		AimScreenPos.X += MoveValue.X * Sensitivity;
+		AimScreenPos.Y -= MoveValue.Y * Sensitivity;
+	}
 }
 
 void AMyCharacterController::StartAiming(const FInputActionValue& value)
@@ -226,7 +264,11 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 	if (ControlledHUD && ControlledHUD->GetRoboAimUI())
 	{
 		ControlledHUD->GetRoboAimUI()->SetVisibility(ESlateVisibility::Visible);
+		AimScreenPos = ControlledHUD->GetRoboAimUI()->GetArcCenter();
+		ControlledHUD->SetAimPos(0.f);
 	}
+
+	// 마우스 커서 숨기거나 포커스 고정할 필요가 있으면 여기서 처리
 }
 
 void AMyCharacterController::StopAiming(const FInputActionValue& value)
@@ -241,14 +283,52 @@ void AMyCharacterController::StopAiming(const FInputActionValue& value)
 
 void AMyCharacterController::UpdateAimDirection(const FInputActionValue& value)
 {
-	if (IsAiming)
+	//마우스의 절대 위치(커서)로부터 조준 방향 갱신이 필요한 경우 사용
+	if (!IsAiming) return;
+
+	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+	if (!ControlledHUD || !ControlledHUD->GetRoboAimUI() || !ControlledRobo) return;
+
+	float MouseX, MouseY;
+	if (!GetMousePosition(MouseX, MouseY)) return;
+
+	FVector2D MousePos(MouseX, MouseY);
+	URoboAimUI* AimUI = ControlledHUD->GetRoboAimUI();
+	FVector2D ArcCenter = AimUI->GetArcCenter();
+	float ArcRadius = AimUI->GetArcRadius();
+
+	// 마우스 커서를 조준점으로 직접 사용
+	AimScreenPos = MousePos;
+
+	// clamp to arc
+	FVector2D Dir = AimScreenPos - ArcCenter;
+	float Dist = Dir.Size();
+	if (Dist > ArcRadius)
 	{
-		FVector WorldLoc, WorldDir;
-		if (DeprojectMousePositionToWorld(WorldLoc, WorldDir))
+		Dir = Dir.GetSafeNormal() * ArcRadius;
+		AimScreenPos = ArcCenter + Dir;
+	}
+
+	// aim direction 월드 벡터 계산: 화면 위치를 월드로 Deproject
+	FVector WorldLoc, WorldDir;
+	if (DeprojectScreenPositionToWorld(AimScreenPos.X, AimScreenPos.Y, WorldLoc, WorldDir))
+	{
+		FVector TraceStart = WorldLoc;
+		FVector TraceEnd = TraceStart + WorldDir * 10000.f;
+		FHitResult Hit;
+		FCollisionQueryParams Params(SCENE_QUERY_STAT(AimTrace), true);
+		Params.AddIgnoredActor(ControlledRobo);
+		if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
 		{
-			AimDirection = (WorldLoc - ControlledRobo->GetActorLocation()).GetSafeNormal();
-			//화살표 ui에 aimdirection적용
+			AimDirection = (Hit.ImpactPoint - ControlledRobo->GetActorLocation()).GetSafeNormal();
 		}
+		else
+		{
+			AimDirection = (TraceEnd - ControlledRobo->GetActorLocation()).GetSafeNormal();
+		}
+		// HUD 각도 업데이트
+		float Pos = FMath::Atan2(Dir.Y, Dir.X);
+		ControlledHUD->SetAimPos(Pos);
 	}
 }
 

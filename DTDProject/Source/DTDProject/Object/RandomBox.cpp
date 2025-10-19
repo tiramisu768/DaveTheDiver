@@ -10,9 +10,10 @@
 ARandomBox::ARandomBox()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
-
 	BoxFrameMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxFrameMesh"));
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+	//BoxCollision->SetupAttachment(BoxFrameMesh);
+
 
 }
 

@@ -74,7 +74,7 @@ void AMyHUD::BeginPlay()
 		{
 			RoboAimUIClass->AddToViewport();
 			//RoboAimUIClass->SetArcInfo(ArcCenter, ArcRadius);
-			RoboAimUIClass->SetVisibility(ESlateVisibility::Hidden);
+			//RoboAimUIClass->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
@@ -103,10 +103,10 @@ void AMyHUD::PlaySwitchAnimation(int32 SelectedIndex)
 	}
 }
 
-void AMyHUD::SetAimAngle(float Angle)
+void AMyHUD::SetAimPos(float Pos)
 {
 	if (RoboAimUIClass)
 	{
-		RoboAimUIClass->SetAimAngle(Angle);
+		RoboAimUIClass->SetAimPos(Pos);
 	}
 }

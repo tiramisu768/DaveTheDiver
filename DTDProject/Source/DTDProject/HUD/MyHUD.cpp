@@ -110,3 +110,11 @@ void AMyHUD::SetAimPos(FVector2D AimPos)
 		RoboAimUIClass->SetAimPos(AimPos);
 	}
 }
+
+void AMyHUD::ResetAimPos()
+{
+	if (RoboAimUIClass)
+	{
+		RoboAimUIClass->ResetPosition();
+	}
+}

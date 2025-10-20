@@ -171,10 +171,13 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 		AddYawInput(MoveValue.X);
 		AddPitchInput(MoveValue.Y);
 	}
-	//else
-	//{
-	//	MoveAimPoint(MoveValue);
-	//}
+	else
+	{
+		AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+		if (ControlledHUD && ControlledHUD->GetRoboAimUI())
+			ControlledHUD->SetAimPos(MoveValue * 5);
+		//MoveAimPoint(MoveValue);
+	}
 }
 
 void AMyCharacterController::DashInput(const FInputActionValue& value)
@@ -245,12 +248,13 @@ void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
 void AMyCharacterController::StartAiming(const FInputActionValue& value)
 {
 	IsAiming = true;
+	PrevMousePosition = { -1,-1 };
 	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
 	if (ControlledHUD && ControlledHUD->GetRoboAimUI())
 	{
 		ControlledHUD->GetRoboAimUI()->SetVisibility(ESlateVisibility::Visible);
 		AimScreenPos = ControlledHUD->GetRoboAimUI()->GetArcCenter();
-		ControlledHUD->SetAimPos(AimScreenPos);
+		ControlledHUD->ResetAimPos();
 	}
 
 	// 마우스 커서 숨기거나 포커스 고정할 필요가 있으면 여기서 처리
@@ -269,29 +273,41 @@ void AMyCharacterController::StopAiming(const FInputActionValue& value)
 void AMyCharacterController::UpdateAimDirection(const FInputActionValue& value)
 {
 	//마우스의 절대 위치(커서)로부터 조준 방향 갱신이 필요한 경우 사용
-	if (!IsAiming) return;
+	//if (!IsAiming) return;
 
-	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
-	if (!ControlledHUD || !ControlledHUD->GetRoboAimUI() || !ControlledRobo) return;
+	//AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+	//if (!ControlledHUD || !ControlledHUD->GetRoboAimUI() || !ControlledRobo) return;
 
-	float MouseX, MouseY;
-	if (!GetMousePosition(MouseX, MouseY)) return;
+	//float MouseX, MouseY;
+	//if (!GetMousePosition(MouseX, MouseY)) return;
 
-	FVector2D MousePos(MouseX, MouseY);
-	URoboAimUI* AimUI = ControlledHUD->GetRoboAimUI();
-	FVector2D ArcCenter = AimUI->GetArcCenter();
-	float ArcRadius = AimUI->GetArcRadius();
+	//if (PrevMousePosition.X == -1 && PrevMousePosition.Y == -1)
+	//{
+	//	PrevMousePosition.X = MouseX;
+	//	PrevMousePosition.Y = MouseY;
+	//	return;
+	//}
 
-	// ArcCenter 기준으로 Clamp
-	FVector2D Dir = MousePos - ArcCenter;
-	float Dist = Dir.Size();
-	if (Dist > ArcRadius)
-	{
-		Dir = Dir.GetSafeNormal() * ArcRadius;
-	}
+	//FVector2D MousePos(MouseX, MouseY);
+	//ControlledHUD->SetAimPos(MousePos - PrevMousePosition);
 
-	FVector2D AimPos = ArcCenter + Dir;
-	ControlledHUD->SetAimPos(AimPos);
+	//PrevMousePosition.X = MouseX;
+	//PrevMousePosition.Y = MouseY;
+
+	//URoboAimUI* AimUI = ControlledHUD->GetRoboAimUI();
+	//FVector2D ArcCenter = AimUI->GetArcCenter();
+	//float ArcRadius = AimUI->GetArcRadius();
+
+	//// ArcCenter 기준으로 Clamp
+	//FVector2D Dir = MousePos - ArcCenter;
+	//float Dist = Dir.Size();
+	//if (Dist > ArcRadius)
+	//{
+	//	Dir = Dir.GetSafeNormal() * ArcRadius;
+	//}
+
+	//FVector2D AimPos = ArcCenter + Dir;
+	//ControlledHUD->SetAimPos(AimPos);
 	
 }
 

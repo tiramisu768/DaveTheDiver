@@ -43,4 +43,5 @@ public:
 	void PlaySwitchAnimation(int32 SelectedIndex);
 	URoboAimUI* GetRoboAimUI() const { return RoboAimUIClass; }
 	void SetAimPos(FVector2D AimPos);
+	void ResetAimPos();
 };

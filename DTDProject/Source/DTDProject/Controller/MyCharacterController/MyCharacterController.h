@@ -55,6 +55,7 @@ private:
 	int32 CurrentWeaponIndex = 0;
 	const int32 WeaponCount = 2;
 
+	FVector2D PrevMousePosition{-1,-1};
 //	//bool isHit{ true };
 public:
 	AMyCharacterController();

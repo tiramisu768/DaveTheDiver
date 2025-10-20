@@ -171,10 +171,10 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 		AddYawInput(MoveValue.X);
 		AddPitchInput(MoveValue.Y);
 	}
-	else
-	{
-		MoveAimPoint(MoveValue);
-	}
+	//else
+	//{
+	//	MoveAimPoint(MoveValue);
+	//}
 }
 
 void AMyCharacterController::DashInput(const FInputActionValue& value)

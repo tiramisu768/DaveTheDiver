@@ -67,10 +67,10 @@ protected:
 	USkeletalMeshComponent* MeshComponent;
 
 	virtual void BeginPlay() override;
-	virtual void Attack(ACharacter* OwnerCharacter);
+	//virtual void Attack(ACharacter* OwnerCharacter);
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void Attack(ACharacter* OwnerCharacter);
 };

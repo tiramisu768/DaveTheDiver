@@ -40,8 +40,10 @@ void AWeapon::Attack(ACharacter* OwnerCharacter)
 	}
 	else if (WeaponStats->Category == EWeaponCategory::Ranged)
 	{
+		GEngine->AddOnScreenDebugMessage(-6, 3.0f, FColor::Yellow, TEXT("Ranged out"));
 		if (WeaponStats->ProjectileClass)
 		{
+			GEngine->AddOnScreenDebugMessage(-8, 3.0f, FColor::Yellow, TEXT("Ranged in"));
 			FVector MuzzleLoc = OwnerCharacter->GetActorLocation() + OwnerCharacter->GetActorForwardVector() * 100.f;
 			FRotator MuzzleRot = OwnerCharacter->GetActorRotation();
 

@@ -445,9 +445,9 @@ void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 #pragma endregion
 void AMyRobo::FireCurrentWeapon()
 {
-	/*if (CurrentWeapon)
+	if (CurrentWeapon)
 	{
 		CurrentWeapon->Attack(this);
-	}*/
+	}
 }
 

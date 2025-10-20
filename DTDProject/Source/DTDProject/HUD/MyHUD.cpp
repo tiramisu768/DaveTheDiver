@@ -14,7 +14,8 @@ AMyHUD::AMyHUD()
 		HPBarWidget = HPBarWidgetClassFinder.Class;
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> WeaponWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_WeaponUI.BP_WeaponUI_C"));
+	//static ConstructorHelpers::FClassFinder<UUserWidget> WeaponWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_WeaponUI.BP_WeaponUI_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> WeaponWidgetClassFinder(TEXT(""));
 	if (WeaponWidgetClassFinder.Succeeded())
 	{
 		WeaponWidget = WeaponWidgetClassFinder.Class;
@@ -103,11 +104,11 @@ void AMyHUD::PlaySwitchAnimation(int32 SelectedIndex)
 	}
 }
 
-void AMyHUD::SetAimPos(FVector2D AimPos)
+void AMyHUD::UpdateAimPos(FVector2D AimPos)
 {
 	if (RoboAimUIClass)
 	{
-		RoboAimUIClass->SetAimPos(AimPos);
+		RoboAimUIClass->UpdateAimPos(AimPos);
 	}
 }
 
@@ -115,6 +116,6 @@ void AMyHUD::ResetAimPos()
 {
 	if (RoboAimUIClass)
 	{
-		RoboAimUIClass->ResetPosition();
+		RoboAimUIClass->ResetAimPos();
 	}
 }

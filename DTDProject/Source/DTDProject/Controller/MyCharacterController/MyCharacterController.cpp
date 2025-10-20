@@ -136,7 +136,6 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(MeleeAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::MeleeAttackInput);
 		input->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::StartAiming); //우클릭 시작 시
 		input->BindAction(RangedAttackAction, ETriggerEvent::Completed, this, &AMyCharacterController::StopAiming); //우클릭 끝 시
-		input->BindAction(RangedAttackAction, ETriggerEvent::Triggered, this, &AMyCharacterController::UpdateAimDirection); //마우스 이동 시
 		input->BindAction(SwitchWeaponAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchWeaponInput);
 		input->BindAction(UseToolAction, ETriggerEvent::Started, this, &AMyCharacterController::UseToolInput);
 		input->BindAction(SwitchToolAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchToolInput);
@@ -175,8 +174,7 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 	{
 		AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
 		if (ControlledHUD && ControlledHUD->GetRoboAimUI())
-			ControlledHUD->SetAimPos(MoveValue * 5);
-		//MoveAimPoint(MoveValue);
+			ControlledHUD->UpdateAimPos(MoveValue * 5);
 	}
 }
 
@@ -235,7 +233,7 @@ void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
 		
 		// HUD에 반영하려면 위치 계산
 		FVector2D Delta = AimScreenPos - ArcCenter;
-		ControlledHUD->SetAimPos(AimScreenPos);
+		ControlledHUD->UpdateAimPos(AimScreenPos);
 	}
 	else
 	{
@@ -268,47 +266,6 @@ void AMyCharacterController::StopAiming(const FInputActionValue& value)
 	{
 		ControlledHUD->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
 	}
-}
-
-void AMyCharacterController::UpdateAimDirection(const FInputActionValue& value)
-{
-	//마우스의 절대 위치(커서)로부터 조준 방향 갱신이 필요한 경우 사용
-	//if (!IsAiming) return;
-
-	//AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
-	//if (!ControlledHUD || !ControlledHUD->GetRoboAimUI() || !ControlledRobo) return;
-
-	//float MouseX, MouseY;
-	//if (!GetMousePosition(MouseX, MouseY)) return;
-
-	//if (PrevMousePosition.X == -1 && PrevMousePosition.Y == -1)
-	//{
-	//	PrevMousePosition.X = MouseX;
-	//	PrevMousePosition.Y = MouseY;
-	//	return;
-	//}
-
-	//FVector2D MousePos(MouseX, MouseY);
-	//ControlledHUD->SetAimPos(MousePos - PrevMousePosition);
-
-	//PrevMousePosition.X = MouseX;
-	//PrevMousePosition.Y = MouseY;
-
-	//URoboAimUI* AimUI = ControlledHUD->GetRoboAimUI();
-	//FVector2D ArcCenter = AimUI->GetArcCenter();
-	//float ArcRadius = AimUI->GetArcRadius();
-
-	//// ArcCenter 기준으로 Clamp
-	//FVector2D Dir = MousePos - ArcCenter;
-	//float Dist = Dir.Size();
-	//if (Dist > ArcRadius)
-	//{
-	//	Dir = Dir.GetSafeNormal() * ArcRadius;
-	//}
-
-	//FVector2D AimPos = ArcCenter + Dir;
-	//ControlledHUD->SetAimPos(AimPos);
-	
 }
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)

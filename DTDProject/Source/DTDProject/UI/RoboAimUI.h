@@ -15,15 +15,15 @@ class DTDPROJECT_API URoboAimUI : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UImage> Overlay_Arrow;
+	TObjectPtr<class UImage> Image_Arrow;
 
 	FVector2D ArcCenter = FVector2D(0, 0);
-	float ArcRadius = 300.f;
+	float ArcRadius = 150.f;
 public:
-	void ResetPosition();
+	void ResetAimPos();
 	void NativeConstruct();
 	void SetArcInfo(FVector2D Center, float Radius) { ArcCenter = Center; ArcRadius = Radius; }
-	void SetAimPos(FVector2D AimPos);
+	void UpdateAimPos(FVector2D AimPos);
 	FVector2D GetArcCenter() const { return ArcCenter; }
 	float GetArcRadius() const { return ArcRadius; }
 };

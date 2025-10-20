@@ -9,7 +9,7 @@
 //#include "InputActionValue.h"
 #include "MyRobo/MyRobo.h"
 #include "Kismet/KismetSystemLibrary.h"
-//#include "Object/Door.h"
+#include "Engine/World.h"
 #include "Interface/InteractionObject.h"
 #include "HUD/MyHUD.h"
 
@@ -189,7 +189,13 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 	{
 		if (ControlledRobo)
 		{
-			ControlledRobo->FireCurrentWeapon();
+			FVector WorldLoc, WorldDir;
+			if (DeprojectScreenPositionToWorld(AimScreenPos.X, AimScreenPos.Y, WorldLoc, WorldDir))
+			{
+				FVector BulletSpawnLocation = WorldLoc + WorldDir * 100.f;
+				FVector AimDir = WorldDir;
+				ControlledRobo->FireCurrentWeaponAt(BulletSpawnLocation, AimDir);
+			}
 		}
 	}
 	else

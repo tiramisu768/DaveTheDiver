@@ -72,5 +72,5 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void Attack(ACharacter* OwnerCharacter);
+	virtual void Attack(ACharacter* OwnerCharacter, const FVector& AimDir = FVector::ZeroVector);
 };

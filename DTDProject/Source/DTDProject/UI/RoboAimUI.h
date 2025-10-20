@@ -17,9 +17,10 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UOverlay> Overlay_Arrow;
 
-	FVector2D ArcCenter = FVector2D(960, 540);
-	float ArcRadius = 250.f;
+	FVector2D ArcCenter = FVector2D(0, 0);
+	float ArcRadius = 300.f;
 public:
+	void NativeConstruct();
 	void SetArcInfo(FVector2D Center, float Radius) { ArcCenter = Center; ArcRadius = Radius; }
 	void SetAimPos(FVector2D AimPos);
 	FVector2D GetArcCenter() const { return ArcCenter; }

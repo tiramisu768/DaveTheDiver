@@ -103,6 +103,5 @@ public:
 
 	void FocusOnInteractionTarget(IInteractionObject* Target);
 
-	// New helper to fire current weapon (safe wrapper)
-	void FireCurrentWeapon();
+	void FireCurrentWeaponAt(const FVector& SpawnLocation, const FVector& AimDirection);
 };

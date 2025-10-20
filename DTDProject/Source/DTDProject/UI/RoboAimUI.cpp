@@ -4,6 +4,17 @@
 #include "UI/RoboAimUI.h"
 #include "Components/Overlay.h"
 
+void URoboAimUI::NativeConstruct()
+{
+    Super::NativeConstruct();
+    FVector2D ViewportSize;
+    if (GEngine && GEngine->GameViewport)
+    {
+        GEngine->GameViewport->GetViewportSize(ViewportSize);
+        ArcCenter = ViewportSize * 0.5f;
+    }
+}
+
 void URoboAimUI::SetAimPos(FVector2D AimPos)
 {
 	if (Overlay_Arrow)

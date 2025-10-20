@@ -433,6 +433,14 @@ void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 
 }
 
+void AMyRobo::FireCurrentWeaponAt(const FVector& SpawnLocation, const FVector& AimDirection)
+{
+	if (CurrentWeapon && CurrentWeapon->WeaponStats && CurrentWeapon->WeaponStats->Category == EWeaponCategory::Ranged)
+	{
+		CurrentWeapon->Attack(this, AimDirection);
+	}
+}
+
 #pragma region reference
 
 //void AMyCharacter::HitBy(float DamageAmount)
@@ -440,14 +448,4 @@ void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 //	StateComponent->TakeDamage(DamageAmount);
 //}
 //
-
-
 #pragma endregion
-void AMyRobo::FireCurrentWeapon()
-{
-	if (CurrentWeapon)
-	{
-		CurrentWeapon->Attack(this);
-	}
-}
-

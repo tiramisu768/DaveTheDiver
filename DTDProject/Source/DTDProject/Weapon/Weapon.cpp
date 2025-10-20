@@ -3,11 +3,11 @@
 
 #include "Weapon/Weapon.h"
 #include "GameFrameWork/Character.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWeapon::AWeapon()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
@@ -22,12 +22,12 @@ void AWeapon::BeginPlay()
 		WeaponStats = WeaponDataTable->FindRow<FWeaponData>(RowName, TEXT("Dagger"));
 		if (WeaponStats)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Loaded Weapon:%s, Damage:%f"), *WeaponStats->Name, WeaponStats->Damage);				
+			UE_LOG(LogTemp, Log, TEXT("Loaded Weapon:%s, Damage:%f"), *WeaponStats->Name, WeaponStats->Damage);               
 		}
 	}
 }
 
-void AWeapon::Attack(ACharacter* OwnerCharacter)
+void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDir /*= FVector::ZeroVector*/)
 {
 	if (!WeaponStats) return;
 
@@ -40,14 +40,22 @@ void AWeapon::Attack(ACharacter* OwnerCharacter)
 	}
 	else if (WeaponStats->Category == EWeaponCategory::Ranged)
 	{
-		GEngine->AddOnScreenDebugMessage(-6, 3.0f, FColor::Yellow, TEXT("Ranged out"));
 		if (WeaponStats->ProjectileClass)
 		{
-			GEngine->AddOnScreenDebugMessage(-8, 3.0f, FColor::Yellow, TEXT("Ranged in"));
 			FVector MuzzleLoc = OwnerCharacter->GetActorLocation() + OwnerCharacter->GetActorForwardVector() * 100.f;
 			FRotator MuzzleRot = OwnerCharacter->GetActorRotation();
 
-			OwnerCharacter->GetWorld()->SpawnActor<AActor>(WeaponStats->ProjectileClass, MuzzleLoc, MuzzleRot);
+			// If AimDir provided, rotate to that direction
+			if (!AimDir.IsNearlyZero())
+			{
+				MuzzleRot = AimDir.Rotation();
+			}
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = OwnerCharacter;
+			SpawnParams.Instigator = OwnerCharacter->GetInstigator();
+
+			GetWorld()->SpawnActor<AActor>(WeaponStats->ProjectileClass, MuzzleLoc, MuzzleRot, SpawnParams);
 		}
 	}
 }

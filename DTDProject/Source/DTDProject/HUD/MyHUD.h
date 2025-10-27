@@ -50,10 +50,10 @@ public:
 	void SetMeters(float Meter);
 	void SetWeights(float Current, float Max);
 	void ShowOxygenWarningUI();
-	void ShowGameEndUI();
 	URoboWeaponUI* GetRoboWeaponUI() const { return RoboWeaponUIClass; }
 	void PlaySwitchAnimation(int32 SelectedIndex);
 	URoboAimUI* GetRoboAimUI() const { return RoboAimUIClass; }
 	void UpdateAimPos(FVector2D AimPos);
 	void ResetAimPos();
+	void ShowGameEndUI();
 };

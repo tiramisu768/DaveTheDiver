@@ -67,6 +67,7 @@ void AMyHUD::BeginPlay()
 		if (WarningOxygenUIClass)
 		{
 			WarningOxygenUIClass->AddToViewport();
+			WarningOxygenUIClass->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 
@@ -94,7 +95,6 @@ void AMyHUD::BeginPlay()
 		if (RoboAimUIClass)
 		{
 			RoboAimUIClass->AddToViewport();
-			//RoboAimUIClass->SetArcInfo(ArcCenter, ArcRadius);
 			RoboAimUIClass->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
@@ -105,6 +105,7 @@ void AMyHUD::BeginPlay()
 		if (ResultTableUIClass)
 		{
 			ResultTableUIClass->AddToViewport();
+			ResultTableUIClass->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
@@ -127,12 +128,8 @@ void AMyHUD::SetWeights(float Current, float Max)
 
 void AMyHUD::ShowOxygenWarningUI()
 {
+	WarningOxygenUIClass->SetVisibility(ESlateVisibility::Visible);
 	WarningOxygenUIClass->SetOxygenWarning();
-}
-
-void AMyHUD::ShowGameEndUI()
-{
-	ResultTableUIClass->SetGameEnd();
 }
 
 void AMyHUD::PlaySwitchAnimation(int32 SelectedIndex)
@@ -157,4 +154,10 @@ void AMyHUD::ResetAimPos()
 	{
 		RoboAimUIClass->ResetAimPos();
 	}
+}
+
+void AMyHUD::ShowGameEndUI()
+{
+	ResultTableUIClass->SetVisibility(ESlateVisibility::Visible);
+	ResultTableUIClass->SetGameEnd();
 }

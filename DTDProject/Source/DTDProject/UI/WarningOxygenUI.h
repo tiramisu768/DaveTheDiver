@@ -14,9 +14,10 @@ class DTDPROJECT_API UWarningOxygenUI : public UUserWidget
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UImage> Image_Table;
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* BlinkRedScreenAnim;
 
 public:
 	void SetOxygenWarning();
+	void StopOxygenWarning();
 };

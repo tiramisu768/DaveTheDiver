@@ -5,4 +5,16 @@
 
 void UWarningOxygenUI::SetOxygenWarning()
 {
+	if (BlinkRedScreenAnim)
+	{
+		PlayAnimation(BlinkRedScreenAnim, 0.f, 0);
+	}
+}
+
+void UWarningOxygenUI::StopOxygenWarning()
+{
+	if (BlinkRedScreenAnim)
+	{
+		StopAnimation(BlinkRedScreenAnim);
+	}
 }

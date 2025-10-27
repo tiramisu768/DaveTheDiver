@@ -75,7 +75,7 @@ void URoboComponent::WarningOxygen()
 	{
 		if (AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD()))
 		{
-			//MyHUD->ShowOxygenWarningUI();
+			MyHUD->ShowOxygenWarningUI();
 		}
 	}
 }
@@ -89,7 +89,7 @@ void URoboComponent::ZeroOxygen()
 	{
 		if (AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD()))
 		{
-			//MyHUD->ShowGameEndUI();
+			MyHUD->ShowGameEndUI();
 		}
 	}
 }

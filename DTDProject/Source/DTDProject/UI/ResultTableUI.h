@@ -23,7 +23,7 @@ class DTDPROJECT_API UResultTableUI : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UImage> Image_Table;
+	TObjectPtr<class UOverlay> Overlay_Table;
 
 public:
 	void SetGameEnd();

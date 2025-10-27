@@ -24,4 +24,7 @@ class DTDPROJECT_API UResultTableUI : public UUserWidget
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> Image_Table;
+
+public:
+	void SetGameEnd();
 };

@@ -36,8 +36,8 @@ public:
 	void BeginPlay() override;
 	void StartDiving();
 	void StopDriving();
-	void InitRoboUIStatement();
-	//float GetHPPercent() const { return CurrentHP / MaxHP; }
+	virtual void SetHP(float NewHP) override;
+	void InitOxygen();
 	void DecreaseOxygen();
 	void WarningOxygen();
 	void ZeroOxygen();

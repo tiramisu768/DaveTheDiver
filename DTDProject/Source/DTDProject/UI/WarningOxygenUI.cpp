@@ -1,9 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/ResultTableUI.h"
+#include "UI/WarningOxygenUI.h"
 
-void UResultTableUI::SetGameEnd()
+void UWarningOxygenUI::SetOxygenWarning()
 {
-
 }

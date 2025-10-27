@@ -6,6 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "UI/RoboAimUI.h"
 #include "UI/RoboWeaponUI.h"
+#include "UI/ResultTableUI.h"
+#include "UI/WarningOxygenUI.h"
 #include "MyHUD.generated.h"
 
 /**
@@ -20,6 +22,10 @@ private:
 	TSubclassOf<UUserWidget> HPBarWidget;
 	TObjectPtr<class URoboHPBarUI> RoboHPBarUIClass;
 
+	//Warning Oxygen
+	TSubclassOf<UUserWidget> WarningOxygenWidget;
+	TObjectPtr<class UWarningOxygenUI> WarningOxygenUIClass;
+
 	//¹«±â
 	TSubclassOf<UUserWidget> WeaponWidget;
 	TObjectPtr<class URoboWeaponUI> RoboWeaponUIClass;
@@ -33,12 +39,18 @@ private:
 	TSubclassOf<UUserWidget> AimWidget;
 	TObjectPtr<class URoboAimUI> RoboAimUIClass;
 
+	//Result Table
+	TSubclassOf<UUserWidget> ResultTableWidget;
+	TObjectPtr<class UResultTableUI> ResultTableUIClass;
+
 public:
 	AMyHUD();
 	void BeginPlay() override;
 	void SetHPPercent(float Percent);
 	void SetMeters(float Meter);
 	void SetWeights(float Current, float Max);
+	void ShowOxygenWarningUI();
+	void ShowGameEndUI();
 	URoboWeaponUI* GetRoboWeaponUI() const { return RoboWeaponUIClass; }
 	void PlaySwitchAnimation(int32 SelectedIndex);
 	URoboAimUI* GetRoboAimUI() const { return RoboAimUIClass; }

@@ -148,7 +148,7 @@ void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RoboComponent->InitRoboUIStatement();
+	RoboComponent->InitOxygen();
 
 	//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
 

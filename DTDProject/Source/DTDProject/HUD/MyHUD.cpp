@@ -8,21 +8,26 @@
 
 AMyHUD::AMyHUD()
 {
+
 	static ConstructorHelpers::FClassFinder<UUserWidget> HPBarWidgetClassFinder(TEXT("/Game/Blueprint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
 	if (HPBarWidgetClassFinder.Succeeded())
 	{
 		HPBarWidget = HPBarWidgetClassFinder.Class;
 	}
 
-	//static ConstructorHelpers::FClassFinder<UUserWidget> WeaponWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_WeaponUI.BP_WeaponUI_C"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> WeaponWidgetClassFinder(TEXT(""));
+	static ConstructorHelpers::FClassFinder<UUserWidget> WarningOxygenWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_WarningOxygen.BP_WarningOxygen_C"));
+	if (WarningOxygenWidgetClassFinder.Succeeded())
+	{
+		WarningOxygenWidget = WarningOxygenWidgetClassFinder.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> WeaponWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_WeaponUI.BP_WeaponUI_C"));
 	if (WeaponWidgetClassFinder.Succeeded())
 	{
 		WeaponWidget = WeaponWidgetClassFinder.Class;
 	}
 
-	//static ConstructorHelpers::FClassFinder<UUserWidget> RankWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Rank2.BP_Rank2_C"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> RankWidgetClassFinder(TEXT(""));
+	static ConstructorHelpers::FClassFinder<UUserWidget> RankWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Rank2.BP_Rank2_C"));
 	if (RankWidgetClassFinder.Succeeded())
 	{
 		RankWidget = RankWidgetClassFinder.Class;
@@ -32,6 +37,12 @@ AMyHUD::AMyHUD()
 	if (AimWidgetClassFinder.Succeeded())
 	{
 		AimWidget = AimWidgetClassFinder.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> ResultTableWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_ResultTable.BP_ResultTable_C"));
+	if (ResultTableWidgetClassFinder.Succeeded())
+	{
+		ResultTableWidget = ResultTableWidgetClassFinder.Class;
 	}
 }
 
@@ -47,6 +58,15 @@ void AMyHUD::BeginPlay()
 		if (RoboHPBarUIClass)
 		{
 			RoboHPBarUIClass->AddToViewport();
+		}
+	}
+
+	if (WarningOxygenWidget)
+	{
+		WarningOxygenUIClass = CreateWidget<UWarningOxygenUI>(GetWorld(), WarningOxygenWidget);
+		if (WarningOxygenUIClass)
+		{
+			WarningOxygenUIClass->AddToViewport();
 		}
 	}
 
@@ -78,6 +98,15 @@ void AMyHUD::BeginPlay()
 			RoboAimUIClass->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
+
+	if (ResultTableWidget)
+	{
+		ResultTableUIClass = CreateWidget<UResultTableUI>(GetWorld(), ResultTableWidget);
+		if (ResultTableUIClass)
+		{
+			ResultTableUIClass->AddToViewport();
+		}
+	}
 }
 
 
@@ -94,6 +123,16 @@ void AMyHUD::SetMeters(float value)
 void AMyHUD::SetWeights(float Current, float Max)
 {
 	RoboHPBarUIClass->SetCurrentAndMaxWeight(Current, Max);
+}
+
+void AMyHUD::ShowOxygenWarningUI()
+{
+	WarningOxygenUIClass->SetOxygenWarning();
+}
+
+void AMyHUD::ShowGameEndUI()
+{
+	ResultTableUIClass->SetGameEnd();
 }
 
 void AMyHUD::PlaySwitchAnimation(int32 SelectedIndex)

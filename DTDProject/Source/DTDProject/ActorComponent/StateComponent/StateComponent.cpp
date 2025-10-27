@@ -23,6 +23,12 @@ void UStateComponent::BeginPlay()
 
 }
 
+void UStateComponent::SetHP(float NewHP)
+{
+	CurrentHP = FMath::Clamp(NewHP, 0, MaxHP);
+	OnHPChanged.ExecuteIfBound(GetHPPercent());
+}
+
 //ÇÇ°Ý
 void UStateComponent::TakeDamage(float DamageAmount)
 {

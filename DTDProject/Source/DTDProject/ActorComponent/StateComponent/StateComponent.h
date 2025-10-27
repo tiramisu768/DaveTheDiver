@@ -35,20 +35,10 @@ public:
 public:
 	float GetDamage() const { return Damage; }
 	//void SetDamage(float NewDamage) { Damage = NewDamage; }
-
 	float GetHPPercent() const { return CurrentHP / MaxHP; }
-	//float GetHP() const { return HP; }
-	/*void SetHP(float NewHP)
-	{
-		HP = MaxHP = NewHP;
-		if (HP < 0.0f) HP = 0.0f;
-		OnTakeDamage.ExecuteIfBound(GetHPPercent());
-	}*/
-
+	virtual void SetHP(float NewHP);
 	virtual void TakeDamage(float DamageAmount);
 	virtual void Heal(float HealAmount);
 	bool IsDead() const { return CurrentHP <= 0.0f; }
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;		
 };

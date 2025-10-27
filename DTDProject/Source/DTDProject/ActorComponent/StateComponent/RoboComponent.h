@@ -38,7 +38,9 @@ public:
 	void StopDriving();
 	void InitRoboUIStatement();
 	//float GetHPPercent() const { return CurrentHP / MaxHP; }
-	void DecreaseO2();
+	void DecreaseOxygen();
+	void WarningOxygen();
+	void ZeroOxygen();
 	virtual void TakeDamage(float DamageAmount) override;
 	virtual void Heal(float HealAmount) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

@@ -39,6 +39,8 @@ AMyRobo::AMyRobo()
 	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	//WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
 
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
 	//SpringArm->bUsePawnControlRotation = true;
 	//bUseControllerRotationYaw = false;
 	//GetCharacterMovement()->bOrientRotationToMovement = true;

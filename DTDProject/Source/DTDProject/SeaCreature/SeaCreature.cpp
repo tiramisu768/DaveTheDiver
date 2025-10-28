@@ -237,6 +237,16 @@ void ASeaCreature::CollectSeaCreature(AActor* OtherActor)
 				HUD->ShowRankUI();
 			}
 		}
+
+		if (robo->GetInventoryComponent())
+		{
+			//FCaughtFishInfo Info;
+			//Info.FishName = ...; // 물고기 이름
+			//Info.Weight = ...;   // 무게
+			//Info.Grade = ...;    // 등급
+			//Info.CaughtTime = FDateTime::Now();
+			//robo->InventoryComponent->AddCaughtFish(Info);
+		}
 	}
 	// 사라지기(이펙트+사운드 후)
 	SetLifeSpan(0.1f); // 또는 페이드/ Dissolve 후 Destroy

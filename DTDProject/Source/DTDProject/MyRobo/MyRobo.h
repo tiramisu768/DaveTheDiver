@@ -28,6 +28,9 @@ private:
 	TObjectPtr<class URoboComponent> RoboComponent;
 	UPROPERTY(VisibleAnywhere, Category = "Buoyancy")
 	TObjectPtr<class UBuoyancyComponent> BuoyancyComponent;
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	TObjectPtr<class UInventoryComponent> InventoryComponent;
+
 #pragma endregion
 
 #pragma region Animation
@@ -104,4 +107,6 @@ public:
 	void FocusOnInteractionTarget(IInteractionObject* Target);
 
 	void FireCurrentWeaponAt(const FVector& SpawnLocation, const FVector& AimDirection);
+
+	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 };

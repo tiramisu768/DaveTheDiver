@@ -253,6 +253,9 @@ void AMyRobo::PossessedBy(AController* NewController)
 	RoboComponent->OnDepthChanged.BindLambda([this, MyHUD](float value) {
 		MyHUD->SetMeters(value);
 		});
+	InventoryComponent->OnInventoryChanged.BindLambda([MyHUD](const TArray<FCaughtFishInfo>& FishList) {
+		MyHUD->ShowRankUI(FishList);
+		});
 }
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
 {

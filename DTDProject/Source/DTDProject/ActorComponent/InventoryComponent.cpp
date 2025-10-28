@@ -36,5 +36,6 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UInventoryComponent::AddCaughtFish(const FCaughtFishInfo& Info)
 {
 	CaughtFishList.Add(Info);
+	OnInventoryChanged.ExecuteIfBound(CaughtFishList);
 }
 

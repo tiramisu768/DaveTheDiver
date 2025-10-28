@@ -131,9 +131,13 @@ void AMyHUD::SetWeights(float Current, float Max)
 	RoboHPBarUIClass->SetCurrentAndMaxWeight(Current, Max);
 }
 
-void AMyHUD::ShowRankUI()
+void AMyHUD::ShowRankUI(const TArray<FCaughtFishInfo>& FishList)
 {
-	RankUIClass->ShowRank();
+	if(RankUIClass)
+	{
+		RankUIClass->UpdateFishRankList(FishList);
+		RankUIClass->ShowRank();
+	}
 }
 
 void AMyHUD::ShowOxygenWarningUI()

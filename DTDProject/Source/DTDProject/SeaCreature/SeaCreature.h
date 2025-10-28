@@ -27,6 +27,12 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	//float HP;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	int32 Grade;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float Weight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	TObjectPtr<class USkeletalMesh> Mesh;
 
 	// ¸ùÅ¸Áê

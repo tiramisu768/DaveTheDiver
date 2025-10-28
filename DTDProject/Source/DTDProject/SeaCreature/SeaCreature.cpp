@@ -5,6 +5,7 @@
 #include "MyRobo/MyRobo.h"
 #include "HUD/MyHUD.h"
 #include "ActorComponent/StateComponent/FishStateComponent.h"
+#include "ActorComponent/InventoryComponent.h"
 #include "Components/WidgetComponent.h"
 #include "UI/SimpleDamageUI.h"
 #include "Object/ObjectUI/DamagePopup.h"
@@ -230,22 +231,13 @@ void ASeaCreature::CollectSeaCreature(AActor* OtherActor)
 	// 루팅 로직(아이템 지급)
 	if(AMyRobo* robo = Cast<AMyRobo>(OtherActor))
 	{
-		if (APlayerController* controller = Cast<APlayerController>(robo->GetController()))
-		{
-			if (AMyHUD* HUD = Cast<AMyHUD>(controller->GetHUD()))
-			{
-				HUD->ShowRankUI();
-			}
-		}
-
 		if (robo->GetInventoryComponent())
 		{
-			//FCaughtFishInfo Info;
-			//Info.FishName = ...; // 물고기 이름
-			//Info.Weight = ...;   // 무게
-			//Info.Grade = ...;    // 등급
-			//Info.CaughtTime = FDateTime::Now();
-			//robo->InventoryComponent->AddCaughtFish(Info);
+			FCaughtFishInfo Info;
+			Info.FishName = Data->Name;
+			Info.Weight = Data->Weight;
+			Info.Grade = Data->Grade;
+			robo->GetInventoryComponent()->AddCaughtFish(Info);
 		}
 	}
 	// 사라지기(이펙트+사운드 후)

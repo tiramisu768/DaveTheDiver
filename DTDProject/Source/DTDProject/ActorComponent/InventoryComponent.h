@@ -28,6 +28,7 @@ struct FCaughtFishInfo
 	//FName DataTableRowName;
 };
 
+DECLARE_DELEGATE_OneParam(FOnInventoryChanged, const TArray<FCaughtFishInfo>&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DTDPROJECT_API UInventoryComponent : public UActorComponent
@@ -45,8 +46,10 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+public:
+	FOnInventoryChanged OnInventoryChanged;
+
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void AddCaughtFish(const FCaughtFishInfo& Info);
 };

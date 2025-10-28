@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "ActorComponent/InventoryComponent.h"
 #include "MyHUD.generated.h"
 
 /**
@@ -46,7 +47,7 @@ public:
 	void SetHPPercent(float Percent);
 	void SetMeters(float Meter);
 	void SetWeights(float Current, float Max);
-	void ShowRankUI();
+	void ShowRankUI(const TArray<FCaughtFishInfo>& FishList);
 	void ShowOxygenWarningUI();
 	URoboWeaponUI* GetRoboWeaponUI() const { return RoboWeaponUIClass; }
 	void PlaySwitchAnimation(int32 SelectedIndex);

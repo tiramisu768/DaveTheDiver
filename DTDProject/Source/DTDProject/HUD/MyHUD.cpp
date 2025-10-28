@@ -4,6 +4,11 @@
 #include "HUD/MyHUD.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/RoboHPBarUI.h"
+#include "UI/RoboAimUI.h"
+#include "UI/RoboWeaponUI.h"
+#include "UI/ResultTableUI.h"
+#include "UI/WarningOxygenUI.h"
+#include "UI/FishRankUI.h"
 #include "Engine/Canvas.h"
 
 AMyHUD::AMyHUD()
@@ -27,7 +32,7 @@ AMyHUD::AMyHUD()
 		WeaponWidget = WeaponWidgetClassFinder.Class;
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> RankWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Rank2.BP_Rank2_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> RankWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Rank.BP_Rank_C"));
 	if (RankWidgetClassFinder.Succeeded())
 	{
 		RankWidget = RankWidgetClassFinder.Class;
@@ -82,10 +87,10 @@ void AMyHUD::BeginPlay()
 
 	if (RankWidget)
 	{
-		UUserWidget* UWRank = CreateWidget<UUserWidget>(GetWorld(), RankWidget);
-		if (UWRank)
+		RankUIClass = CreateWidget<UFishRankUI>(GetWorld(), RankWidget);
+		if (RankUIClass)
 		{
-			UWRank->AddToViewport();
+			RankUIClass->AddToViewport();
 		}
 	}
 
@@ -124,6 +129,11 @@ void AMyHUD::SetMeters(float value)
 void AMyHUD::SetWeights(float Current, float Max)
 {
 	RoboHPBarUIClass->SetCurrentAndMaxWeight(Current, Max);
+}
+
+void AMyHUD::ShowRankUI()
+{
+	RankUIClass->ShowRank();
 }
 
 void AMyHUD::ShowOxygenWarningUI()

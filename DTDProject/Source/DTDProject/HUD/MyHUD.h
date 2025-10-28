@@ -4,10 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "UI/RoboAimUI.h"
-#include "UI/RoboWeaponUI.h"
-#include "UI/ResultTableUI.h"
-#include "UI/WarningOxygenUI.h"
 #include "MyHUD.generated.h"
 
 /**
@@ -32,6 +28,7 @@ private:
 
 	//잡은 물고기 정보
 	TSubclassOf<UUserWidget> RankWidget;
+	TObjectPtr<class UFishRankUI> RankUIClass;
 
 	//퀘스트 정보
 
@@ -49,6 +46,7 @@ public:
 	void SetHPPercent(float Percent);
 	void SetMeters(float Meter);
 	void SetWeights(float Current, float Max);
+	void ShowRankUI();
 	void ShowOxygenWarningUI();
 	URoboWeaponUI* GetRoboWeaponUI() const { return RoboWeaponUIClass; }
 	void PlaySwitchAnimation(int32 SelectedIndex);

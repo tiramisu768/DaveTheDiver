@@ -131,7 +131,7 @@ public:
 	void EnableCollectTrigger(bool isEnable);
 	UFUNCTION()
 	void OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	void CollectSeaCreature();
+	void CollectSeaCreature(AActor* OtherActor);
 	virtual void Attack(class AMyRobo* Target);
 	void PostInitializeComponents() override;
 	UFUNCTION()

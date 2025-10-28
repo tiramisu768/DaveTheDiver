@@ -3,6 +3,7 @@
 
 #include "SeaCreature/SeaCreature.h"
 #include "MyRobo/MyRobo.h"
+#include "HUD/MyHUD.h"
 #include "ActorComponent/StateComponent/FishStateComponent.h"
 #include "Components/WidgetComponent.h"
 #include "UI/SimpleDamageUI.h"
@@ -218,16 +219,25 @@ void ASeaCreature::OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	if (!FishStateComponent->IsDead()) return;
 	if (AMyRobo* robo = Cast<AMyRobo>(OtherActor))
 	{
-		CollectSeaCreature();
+		CollectSeaCreature(OtherActor);
 	}
 }
 
-void ASeaCreature::CollectSeaCreature()
+void ASeaCreature::CollectSeaCreature(AActor* OtherActor)
 {
 	EnableCollectTrigger(false);
 
-	// 루팅 로직(아이템 지급) …
-
+	// 루팅 로직(아이템 지급)
+	if(AMyRobo* robo = Cast<AMyRobo>(OtherActor))
+	{
+		if (APlayerController* controller = Cast<APlayerController>(robo->GetController()))
+		{
+			if (AMyHUD* HUD = Cast<AMyHUD>(controller->GetHUD()))
+			{
+				HUD->ShowRankUI();
+			}
+		}
+	}
 	// 사라지기(이펙트+사운드 후)
 	SetLifeSpan(0.1f); // 또는 페이드/ Dissolve 후 Destroy
 }

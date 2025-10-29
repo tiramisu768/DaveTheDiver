@@ -20,6 +20,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
 
+////ui 시스템 질문
+//복귀 실패 성공UI 노출 시 게임 일시정지
+//
+//로비씬 게임씬 와리가리하기
+//
+//물고기 폰으로 교체
 // Sets default values
 ASeaCreature::ASeaCreature()
 {
@@ -62,6 +68,7 @@ ASeaCreature::ASeaCreature()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	SteeringComp = CreateDefaultSubobject<USeaCreatureSteeringComponent>(TEXT("SteeringComponent"));
+	GetMesh()->AttachToComponent(GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::KeepWorld, true));
 }
 
 // Called when the game starts or when spawned
@@ -93,6 +100,7 @@ void ASeaCreature::BeginPlay()
 	);
 
 	CollectSphere->OnComponentBeginOverlap.AddDynamic(this, &ASeaCreature::OnCollectOverlap);
+	EnableCollectTrigger(false);
 }
 
 // Called every frame
@@ -157,6 +165,7 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 
 void ASeaCreature::Die()
 {
+	EnableCollectTrigger(true);
 	//사망직전 파닥파닥 애님
 	PlayAnimMontage(DeathFlapMontage);
 
@@ -211,7 +220,7 @@ void ASeaCreature::EnableCollectTrigger(bool isEnable)
 {
 	CollectSphere->SetCollisionEnabled(isEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 	CollectSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
-	CollectSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	CollectSphere->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Overlap);
 	
 }
 

@@ -3,15 +3,19 @@
 
 #include "Controller/MyCharacterController/MyCharacterController.h"
 #include "InputAction.h"
-#include "inputmappingcontext.h"
-#include "enhancedinputsubsystems.h"
-#include "EnhancedInputComponent.h"  //InputAction을 관리하는 component
-//#include "InputActionValue.h"
+#include "InputMappingContext.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 #include "MyRobo/MyRobo.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/World.h"
 #include "Interface/InteractionObject.h"
 #include "HUD/MyHUD.h"
+#include "Blueprint/UserWidget.h"
+#include "Interface/UINavigateInterface.h"
+#include "InputActionValue.h"
+#include "UI/RoboAimUI.h"
+#include "UI/RoboWeaponUI.h"
 
 AMyCharacterController::AMyCharacterController()
 {
@@ -82,22 +86,11 @@ AMyCharacterController::AMyCharacterController()
 void AMyCharacterController::BeginPlay()
 {
 	Super::BeginPlay();
-	UEnhancedInputLocalPlayerSubsystem* InputSystem =
-		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	if (InputSystem != nullptr)
+	if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		InputSystem->AddMappingContext(MappingContext, 0);
 	}
 	ControlledRobo = Cast<AMyRobo>(GetCharacter());
-
-	//if (HUDClass)
-	//{
-	//	AMyHUD* MyHUD = GetWorld()->SpawnActor<AMyHUD>(HUDClass);
-	//	if (MyHUD)
-	//	{
-	//		SetHUD(MyHUD);
-	//	}
-	//}
 }
 
 void AMyCharacterController::Tick(float DeltaTime)
@@ -126,9 +119,10 @@ void AMyCharacterController::Tick(float DeltaTime)
 void AMyCharacterController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	UEnhancedInputComponent* input = Cast<UEnhancedInputComponent>(InputComponent);
-	if (input != nullptr)
+
+	if (UEnhancedInputComponent* input = Cast<UEnhancedInputComponent>(InputComponent))
 	{
+		// 기존 입력 액션 바인딩
 		input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyCharacterController::MoveInput);
 		input->BindAction(MoveAction, ETriggerEvent::Completed, this, &AMyCharacterController::MoveEndInput);
 		input->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCharacterController::LookInput);
@@ -141,7 +135,12 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(SwitchToolAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchToolInput);
 		input->BindAction(InteractionAction, ETriggerEvent::Started, this, &AMyCharacterController::InteractionStarted);
 		input->BindAction(InteractionAction, ETriggerEvent::Completed, this, &AMyCharacterController::InteractionCompleted);
-		/*input->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);*/
+		/*EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &AMyCharacterController::EquipInput);*/
+
+		// UI 네비게이션 입력 액션 바인딩
+		input->BindAction(NavigateUpAction, ETriggerEvent::Triggered, this, &AMyCharacterController::OnNavigateUp);
+		input->BindAction(NavigateDownAction, ETriggerEvent::Triggered, this, &AMyCharacterController::OnNavigateDown);
+		input->BindAction(SelectUIButtonAction, ETriggerEvent::Triggered, this, &AMyCharacterController::OnSelectUIButton);
 	}
 }
 
@@ -149,11 +148,11 @@ void AMyCharacterController::MoveInput(const FInputActionValue& value)
 {
 	isMoveInput = true;
 	FVector2D MoveValue = value.Get<FVector2D>();
-	//FVector Forward = GetTransformComponent()->GetForwardVector();
-	//Forward.Z = 0.0;
-	//Forward.Normalize();
-	ControlledRobo->AddMovementInput(GetTransformComponent()->GetForwardVector(), MoveValue.X);
-	ControlledRobo->AddMovementInput(GetTransformComponent()->GetRightVector(), MoveValue.Y);
+	if (ControlledRobo)
+	{
+		ControlledRobo->AddMovementInput(GetTransformComponent()->GetForwardVector(), MoveValue.X);
+		ControlledRobo->AddMovementInput(GetTransformComponent()->GetRightVector(), MoveValue.Y);
+	}
 }
 
 void AMyCharacterController::MoveEndInput(const FInputActionValue& value)
@@ -180,8 +179,10 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 
 void AMyCharacterController::DashInput(const FInputActionValue& value)
 {
-	ControlledRobo->LaunchCharacter(ControlledRobo->GetActorForwardVector() * 800, true, true);
-	//좌우뒤 대쉬도 추가하려면 방향키에 대한 인풋값을 따로 저장해서 인풋키가 뭔지를 인지하고 거기에다가 벨로시티를 곱해주도록 수정해야한다
+	if (ControlledRobo)
+	{
+		ControlledRobo->LaunchCharacter(ControlledRobo->GetActorForwardVector() * 800, true, true);
+	}
 }
 
 void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
@@ -312,5 +313,41 @@ void AMyCharacterController::InteractionCompleted(const FInputActionValue& value
 	if (AMyRobo* Robo = Cast<AMyRobo>(GetPawn()))
 	{
 		Robo->StopSpaceHold();
+	}
+}
+
+void AMyCharacterController::OnNavigateUp()
+{
+	if (AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD()))
+	{
+		UUserWidget* CurrentWidget = ControlledHUD->GetCurrentWidget();
+		if (CurrentWidget && CurrentWidget->Implements<UUINavigateInterface>())
+		{
+			IUINavigateInterface::Execute_NavigateUp(CurrentWidget);
+		}
+	}
+}
+
+void AMyCharacterController::OnNavigateDown()
+{
+	if (AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD()))
+	{
+		UUserWidget* CurrentWidget = ControlledHUD->GetCurrentWidget();
+		if (CurrentWidget && CurrentWidget->Implements<UUINavigateInterface>())
+		{
+			IUINavigateInterface::Execute_NavigateDown(CurrentWidget);
+		}
+	}
+}
+
+void AMyCharacterController::OnSelectUIButton()
+{
+	if (AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD()))
+	{
+		UUserWidget* CurrentWidget = ControlledHUD->GetCurrentWidget();
+		if (CurrentWidget && CurrentWidget->Implements<UUINavigateInterface>())
+		{
+			IUINavigateInterface::Execute_Select(CurrentWidget);
+		}
 	}
 }

@@ -244,18 +244,18 @@ void AMyRobo::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	APlayerController* controller = Cast<APlayerController>(NewController);
-	AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
-	//델리게이트 등록
-	RoboComponent->OnHPChanged.BindLambda([this, MyHUD](float value) {
-		MyHUD->SetHPPercent(value);
-		});
-	RoboComponent->OnDepthChanged.BindLambda([this, MyHUD](float value) {
-		MyHUD->SetMeters(value);
-		});
-	InventoryComponent->OnInventoryChanged.BindLambda([MyHUD](const TArray<FCaughtFishInfo>& FishList) {
-		MyHUD->ShowRankUI(FishList);
-		});
+	//APlayerController* controller = Cast<APlayerController>(NewController);
+	//AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
+	////델리게이트 등록
+	//RoboComponent->OnHPChanged.BindLambda([this, MyHUD](float value) {
+	//	MyHUD->SetHPPercent(value);
+	//	});
+	//RoboComponent->OnDepthChanged.BindLambda([this, MyHUD](float value) {
+	//	MyHUD->SetMeters(value);
+	//	});
+	//InventoryComponent->OnInventoryChanged.BindLambda([MyHUD](const TArray<FCaughtFishInfo>& FishList) {
+	//	MyHUD->ShowRankUI(FishList);
+	//	});
 }
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
 {
@@ -328,23 +328,22 @@ void AMyRobo::AttackTrace()
 {
 	TArray<FHitResult> HitResult;
 	bool isHit = UKismetSystemLibrary::BoxTraceMulti(
-	this, //world에 속한 Object
-	GetActorLocation(), //박스 시작 지점
-	GetActorLocation() + GetActorForwardVector() * 100.0f, //박스 끝 지점
-	FVector(50.0f, 50.0f, 50.0f), //박스 크기
-	FRotator::ZeroRotator, //박스 회전
-	UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel3), //충돌 채널
-	false, //Trace에 복잡한 충돌체를 체크할지 여부
-	{}, //Trace에 무시할 Actor 목록
-	EDrawDebugTrace::ForDuration, //디버그용 트레이스 표시
-	HitResult, //충돌 결과를 저장할 HitResult 배열
-	true //Trace에 자기자신을 무시할지 여부
+	this,
+	GetActorLocation(),
+	GetActorLocation() + GetActorForwardVector() * 100.0f,
+	FVector(50.0f, 50.0f, 50.0f),
+	FRotator::ZeroRotator,
+	UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel3),
+	false,
+	{},
+	EDrawDebugTrace::ForDuration,
+	HitResult,
+	true 
 	);
 	if (isHit)
 	{
 		for (const FHitResult& result : HitResult)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Orange, FString::Printf(TEXT("Hit Actor: %s"), *result.GetActor()->GetName()));
 			ASeaCreature* SeaCreature = Cast<ASeaCreature>(result.GetActor());
 			if (SeaCreature != nullptr)
 			{

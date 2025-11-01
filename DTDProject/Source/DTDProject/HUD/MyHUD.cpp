@@ -11,10 +11,55 @@
 #include "UI/FishRankUI.h"
 #include "Engine/Canvas.h"
 
+void AMyHUD::ShowLobbyUI()
+{
+	if (CurrentWidget)
+	{
+		CurrentWidget->RemoveFromParent();
+	}
+
+	if (LobbyWidget)
+	{
+		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), LobbyWidget);
+		CurrentWidget->AddToViewport();
+	}
+}
+
+void AMyHUD::ShowMainUI()
+{
+	if (CurrentWidget)
+	{
+		CurrentWidget->RemoveFromParent();
+	}
+
+	if (MainWidget)
+	{
+		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), MainWidget);
+		CurrentWidget->AddToViewport();
+	}
+}
+
+void AMyHUD::OnEnterGame()
+{
+	ShowMainUI();
+
+}
+
 AMyHUD::AMyHUD()
 {
+	static ConstructorHelpers::FClassFinder<UUserWidget> LobbyWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_LobbyUI.BP_LobbyUI_C"));
+	if (LobbyWidgetClassFinder.Succeeded())
+	{
+		LobbyWidget = LobbyWidgetClassFinder.Class;
+	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> HPBarWidgetClassFinder(TEXT("/Game/Blueprint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> MainWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
+	if (MainWidgetClassFinder.Succeeded())
+	{
+		MainWidget = MainWidgetClassFinder.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> HPBarWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_RoboHPBar.BP_RoboHPBar_C"));
 	if (HPBarWidgetClassFinder.Succeeded())
 	{
 		HPBarWidget = HPBarWidgetClassFinder.Class;
@@ -55,9 +100,14 @@ void AMyHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("RoboWeaponUI 생성됨: %s"), *GetNameSafe(RoboWeaponUIClass));
+	// 레벨 이름 로그 출력
+	FString LevelName = GetWorld()->GetMapName();
+	if (LevelName == TEXT("UEDPIE_0_LobbyLevel"))
+		ShowLobbyUI();
+	else
+		ShowMainUI();
 
-	if (HPBarWidget)
+	/*if (HPBarWidget)
 	{
 		RoboHPBarUIClass = CreateWidget<URoboHPBarUI>(GetWorld(), HPBarWidget);
 		if (RoboHPBarUIClass)
@@ -112,23 +162,32 @@ void AMyHUD::BeginPlay()
 			ResultTableUIClass->AddToViewport();
 			ResultTableUIClass->SetVisibility(ESlateVisibility::Hidden);
 		}
-	}
+	}*/
 }
 
 
 void AMyHUD::SetHPPercent(float value)
 {
-	RoboHPBarUIClass->SetHPBarPercent(value);
+	if(RoboHPBarUIClass)
+	{
+		RoboHPBarUIClass->SetHPBarPercent(value);
+	}
 }
 
 void AMyHUD::SetMeters(float value)
 {
-	RoboHPBarUIClass->SetCurrentDepthMeters(value);
+	if (RoboHPBarUIClass)
+	{
+		RoboHPBarUIClass->SetCurrentDepthMeters(value);
+	}
 }
 
 void AMyHUD::SetWeights(float Current, float Max)
 {
-	RoboHPBarUIClass->SetCurrentAndMaxWeight(Current, Max);
+	if (RoboHPBarUIClass)
+	{
+		RoboHPBarUIClass->SetCurrentAndMaxWeight(Current, Max);
+	}
 }
 
 void AMyHUD::ShowRankUI(const TArray<FCaughtFishInfo>& FishList)
@@ -142,8 +201,11 @@ void AMyHUD::ShowRankUI(const TArray<FCaughtFishInfo>& FishList)
 
 void AMyHUD::ShowOxygenWarningUI()
 {
-	WarningOxygenUIClass->SetVisibility(ESlateVisibility::Visible);
-	WarningOxygenUIClass->SetOxygenWarning();
+	if (WarningOxygenUIClass)
+	{
+		WarningOxygenUIClass->SetVisibility(ESlateVisibility::Visible);
+		WarningOxygenUIClass->SetOxygenWarning();
+	}
 }
 
 void AMyHUD::PlaySwitchAnimation(int32 SelectedIndex)
@@ -172,6 +234,9 @@ void AMyHUD::ResetAimPos()
 
 void AMyHUD::ShowGameEndUI()
 {
-	ResultTableUIClass->SetVisibility(ESlateVisibility::Visible);
-	ResultTableUIClass->SetGameEnd();
+	if (ResultTableUIClass)
+	{
+		ResultTableUIClass->SetVisibility(ESlateVisibility::Visible);
+		ResultTableUIClass->SetGameEnd();
+	}
 }

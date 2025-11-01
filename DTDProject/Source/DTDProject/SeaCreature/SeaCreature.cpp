@@ -68,7 +68,7 @@ ASeaCreature::ASeaCreature()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	SteeringComp = CreateDefaultSubobject<USeaCreatureSteeringComponent>(TEXT("SteeringComponent"));
-	GetMesh()->AttachToComponent(GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::KeepWorld, true));
+	//GetMesh()->AttachToComponent(GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::KeepWorld, true));
 }
 
 // Called when the game starts or when spawned

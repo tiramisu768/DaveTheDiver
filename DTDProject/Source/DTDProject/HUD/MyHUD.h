@@ -14,6 +14,25 @@ UCLASS()
 class DTDPROJECT_API AMyHUD : public AHUD
 {
 	GENERATED_BODY()
+public:
+	UPROPERTY(EditDefaultsOnly,Category = "UI")
+	TSubclassOf<UUserWidget> LobbyWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category ="UI")
+	TSubclassOf<UUserWidget> MainWidget;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowLobbyUI();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowMainUI();
+
+	void OnEnterGame();
+
+private:
+	UPROPERTY()
+	UUserWidget* CurrentWidget;
+
 private:
 	//HP
 	TSubclassOf<UUserWidget> HPBarWidget;
@@ -44,6 +63,7 @@ private:
 public:
 	AMyHUD();
 	void BeginPlay() override;
+	UUserWidget* GetCurrentWidget() const { return CurrentWidget; };
 	void SetHPPercent(float Percent);
 	void SetMeters(float Meter);
 	void SetWeights(float Current, float Max);

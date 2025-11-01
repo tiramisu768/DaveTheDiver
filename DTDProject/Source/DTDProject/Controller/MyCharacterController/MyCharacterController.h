@@ -37,6 +37,12 @@ private:
 	/*UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> EquipAction;*/
 	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInputAction> NavigateUpAction;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInputAction> NavigateDownAction;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInputAction> SelectUIButtonAction;
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputMappingContext> MappingContext;
 	float SpacePressedTime =0.f;
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -77,5 +83,8 @@ public:
 	/*void EquipInput(const FInputActionValue& value);*/
 	void InteractionStarted(const FInputActionValue& value);
 	void InteractionCompleted(const FInputActionValue& value);
+	void OnNavigateUp();
+	void OnNavigateDown();
+	void OnSelectUIButton();
 //	bool GetIsMoveInput() const { return isMoveInput; }
 };

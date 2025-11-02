@@ -42,8 +42,10 @@ private:
 	TObjectPtr<class UInputAction> NavigateDownAction;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> SelectUIButtonAction;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class UInputMappingContext> MappingContext;
+	UPROPERTY(VisibleAnywhere,Category = "Input")
+	TObjectPtr<class UInputMappingContext> GameMappingContext;
+	UPROPERTY(VisibleAnywhere,Category = "Input")
+	TObjectPtr<class UInputMappingContext> UIMappingContext;
 	float SpacePressedTime =0.f;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	float HoldThreshold = 0.5f;
@@ -68,6 +70,8 @@ public:
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void SetupInputComponent() override;
+	void SetGameInputMode();
+	void SetUIInputMode();
 	void MoveInput(const FInputActionValue& value);
 	void MoveEndInput(const FInputActionValue& value);
 	void LookInput(const FInputActionValue& value);

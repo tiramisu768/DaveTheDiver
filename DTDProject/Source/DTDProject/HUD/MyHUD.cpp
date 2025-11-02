@@ -3,6 +3,7 @@
 
 #include "HUD/MyHUD.h"
 #include "Blueprint/UserWidget.h"
+#include "Controller/MyCharacterController/MyCharacterController.h"
 #include "UI/RoboHPBarUI.h"
 #include "UI/RoboAimUI.h"
 #include "UI/RoboWeaponUI.h"
@@ -22,6 +23,11 @@ void AMyHUD::ShowLobbyUI()
 	{
 		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), LobbyWidget);
 		CurrentWidget->AddToViewport();
+
+		if (AMyCharacterController* Controller = Cast<AMyCharacterController>(GetOwningPlayerController()))
+		{
+			Controller->SetUIInputMode();
+		}
 	}
 }
 
@@ -36,6 +42,11 @@ void AMyHUD::ShowMainUI()
 	{
 		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), MainWidget);
 		CurrentWidget->AddToViewport();
+
+		if (AMyCharacterController* Controller = Cast<AMyCharacterController>(GetOwningPlayerController()))
+		{
+			Controller->SetGameInputMode();
+		}
 	}
 }
 

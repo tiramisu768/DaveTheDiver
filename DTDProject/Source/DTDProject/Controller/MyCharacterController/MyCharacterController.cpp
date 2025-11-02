@@ -70,10 +70,32 @@ AMyCharacterController::AMyCharacterController()
 		EquipAction = EquipActionFinder.Object;
 	}*/
 
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextFinder(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/BluePrint/MyRobo/Input/IMC_Character.IMC_Character'"));
-	if (InputMappingContextFinder.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UInputAction> NavigateUpActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_NavigateUp.IA_NavigateUp'"));
+	if (NavigateUpActionFinder.Succeeded())
 	{
-		MappingContext = InputMappingContextFinder.Object;
+		NavigateUpAction = NavigateUpActionFinder.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> NavigateDownActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_NavigateDown.IA_NavigateDown'"));
+	if (NavigateDownActionFinder.Succeeded())
+	{
+		NavigateDownAction = NavigateDownActionFinder.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> SelectUIButtonActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_SelectUIButton.IA_SelectUIButton'"));
+	if (SelectUIButtonActionFinder.Succeeded())
+	{
+		SelectUIButtonAction = SelectUIButtonActionFinder.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> GameInputMappingContextFinder(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/BluePrint/MyRobo/Input/IMC_Character.IMC_Character'"));
+	if (GameInputMappingContextFinder.Succeeded())
+	{
+		GameMappingContext = GameInputMappingContextFinder.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> UIInputMappingContextFinder(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/BluePrint/MyRobo/Input/IMC_UI.IMC_UI'"));
+	if (UIInputMappingContextFinder.Succeeded())
+	{
+		UIMappingContext = UIInputMappingContextFinder.Object;
 	}
 
 	/*static ConstructorHelpers::FObjectFinder<UInputAction> InteractionActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Interaction_Ch.IA_Interaction_Ch'"));
@@ -86,10 +108,7 @@ AMyCharacterController::AMyCharacterController()
 void AMyCharacterController::BeginPlay()
 {
 	Super::BeginPlay();
-	if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		InputSystem->AddMappingContext(MappingContext, 0);
-	}
+
 	ControlledRobo = Cast<AMyRobo>(GetCharacter());
 }
 
@@ -142,6 +161,44 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(NavigateDownAction, ETriggerEvent::Triggered, this, &AMyCharacterController::OnNavigateDown);
 		input->BindAction(SelectUIButtonAction, ETriggerEvent::Triggered, this, &AMyCharacterController::OnSelectUIButton);
 	}
+}
+
+void AMyCharacterController::SetGameInputMode()
+{
+	if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		InputSystem->RemoveMappingContext(UIMappingContext);
+		InputSystem->AddMappingContext(GameMappingContext, 0);
+	}
+
+	FInputModeGameOnly GameOnlyInputMode;
+	SetInputMode(GameOnlyInputMode);
+	bShowMouseCursor = false;
+}
+
+void AMyCharacterController::SetUIInputMode()
+{
+	if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		InputSystem->RemoveMappingContext(GameMappingContext);
+		InputSystem->AddMappingContext(UIMappingContext, 1);
+	}
+
+	FInputModeUIOnly UIOnlyInputMode;
+	if (AMyHUD* controlledHUD = Cast<AMyHUD>(GetHUD()))
+	{
+		if (UUserWidget* CurrentWidget = controlledHUD->GetCurrentWidget())
+		{
+			UIOnlyInputMode.SetWidgetToFocus(CurrentWidget->TakeWidget());
+		}
+	}
+	SetInputMode(UIOnlyInputMode);
+	bShowMouseCursor = true;
+
+	//GetHUD()가 반환하는 포인터가 항상 AMyHUD라는 보장이 없으며, 
+	//GetCurrentWidget()이 반환하는 위젯이 항상 유효하다는 보장도 없으므로 에러가 남
+	//UIOnlyInputMode.SetWidgetToFocus(GetHUD()->GetCurrentWidget()->TakeWidget());
+
 }
 
 void AMyCharacterController::MoveInput(const FInputActionValue& value)
@@ -318,11 +375,13 @@ void AMyCharacterController::InteractionCompleted(const FInputActionValue& value
 
 void AMyCharacterController::OnNavigateUp()
 {
+	UE_LOG(LogTemp, Error, TEXT("AMyCharacterController::OnNavigateUp --- INPUT ACTION FIRED!"));
 	if (AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD()))
 	{
 		UUserWidget* CurrentWidget = ControlledHUD->GetCurrentWidget();
 		if (CurrentWidget && CurrentWidget->Implements<UUINavigateInterface>())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("AMyCharacterController::OnNavigateUp --- Executing  interface call on %s"), *CurrentWidget->GetName());
 			IUINavigateInterface::Execute_NavigateUp(CurrentWidget);
 		}
 	}

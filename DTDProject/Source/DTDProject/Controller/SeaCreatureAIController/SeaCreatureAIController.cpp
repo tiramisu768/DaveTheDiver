@@ -38,12 +38,24 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(InPawn);
 	if (!SeaCreature) return;
 
-	UBlackboardComponent* BlackboardComp = Blackboard.Get();
-	if (!UseBlackboard(BlackboardAsset, BlackboardComp)) return;	//UseBlackboard : 원하는 Blackboard를 사용하기 위해 초기화
-	check(RunBehaviorTree(SeaCreature->OverrideBT));   //RunBehaviorTree : 원하는 BehaviorTree를 실행
-	BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), SeaCreature->GetActorLocation());
+	// OverrideBT가 유효한지 확인합니다.
+	if (SeaCreature->OverrideBT == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASeaCreatureAIController::PlayBehaviorTree - SeaCreature '%s' has no OverrideBT set!"), *SeaCreature->GetName());
+		return;
+	}
 
-	//ensure : 실행이 실패할 경우 Error Log를 발생시키지만 실행은 지속된다
+	UBlackboardComponent* BlackboardComp = Blackboard.Get();
+	if (!UseBlackboard(BlackboardAsset, BlackboardComp)) return;
+
+	// check() 대신 if문으로 안전하게 실행합니다.
+	if (!RunBehaviorTree(SeaCreature->OverrideBT))
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASeaCreatureAIController::PlayBehaviorTree - Failed to run Behavior Tree for %s!"), *SeaCreature->GetName());
+		return;
+	}
+
+	BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), SeaCreature->GetActorLocation());
 }
 
 void ASeaCreatureAIController::OnPossess(APawn* InPawn)
@@ -51,5 +63,3 @@ void ASeaCreatureAIController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 	PlayBehaviorTree(InPawn);
 }
-
-

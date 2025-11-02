@@ -4,27 +4,46 @@
 #include "Controller/SeaCreatureAIController/BTTask/Task_Wander.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "BehaviorTree/BehaviorTreeComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
-#include "SeaCreature/SeaCreatureStateType.h"
+#include "GameFramework/FloatingPawnMovement.h"
+
+UTask_Wander::UTask_Wander()
+{
+	bNotifyTick = true;
+}
+
+EBTNodeResult::Type UTask_Wander::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::ExecuteTask(OwnerComp, NodeMemory);
+	return EBTNodeResult::InProgress;
+}
 
 void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	AAIController* Owner = OwnerComp.GetAIOwner();
-	ASeaCreature* SeaCreature = nullptr;
+	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
-	if (nullptr != Owner)
-		SeaCreature = Cast<ASeaCreature>(Owner->GetPawn());
+	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
+	if (SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr || SeaCreature->MovementComponent == nullptr)
+	{
+		return;
+	}
 
-	check(SeaCreature);
+	const FSeaCreatureData* FishData = SeaCreature->GetData();
+	if (FishData == nullptr)
+	{
+		return;
+	}
 
-	//데이터테이블의 speed를 가져오기
-	float Speed=0.f;
-	if (const FSeaCreatureData* Stats = SeaCreature->GetData())
-		Speed = Stats->WanderSpeed;
+	FVector Dir = SeaCreature->SteeringComp->ComputeWanderDir(DeltaSeconds);
+	Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
+	Dir.Normalize();
 
-	FVector dir = SeaCreature->SteeringComp->ComputeWanderDir(DeltaSeconds);
-	dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
-	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(), Speed);
+	if (!Dir.IsNearlyZero())
+	{
+		SeaCreature->MovementComponent->MaxSpeed = FishData->WanderSpeed;
+		SeaCreature->AddMovementInput(Dir);
+		FRotator TargetRotation = Dir.Rotation();
+		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
+	}
 }

@@ -2,8 +2,8 @@
 
 
 #include "SeaCreature/Animation/SeaCreatureAnimInstance.h"
-#include "GameFramework/Character.h"
 #include "SeaCreature/SeaCreature.h"
+#include "ActorComponent/StateComponent/FishStateComponent.h"
 
 void USeaCreatureAnimInstance::NativeInitializeAnimation()
 {
@@ -15,10 +15,19 @@ void USeaCreatureAnimInstance::NativeInitializeAnimation()
 void USeaCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	if (ASeaCreature* OwningCharacter = Cast<ASeaCreature>(TryGetPawnOwner()))
+	if (ASeaCreature* OwningPawn = Cast<ASeaCreature>(TryGetPawnOwner()))
 	{
-		Speed = OwningCharacter->GetVelocity().Size();
-		//GEngine->AddOnScreenDebugMessage(-6, 2.0f, FColor::Black, FString::Printf(TEXT("Speed: %f"), Speed));
-		isDead = OwningCharacter->isDead();
+		Speed = OwningPawn->GetVelocity().Size();
+		if (OwningPawn->FishStateComponent)
+		{
+			// 2. 유효할 때만 isDead()를 호출합니다.
+			isDead = OwningPawn->isDead();
+		}
+		else
+		{
+			// 만약 컴포넌트가 없다면, 안전하게 false로 처리합니다.
+			// (에디터 프리뷰 상태 등에서 이럴 수 있습니다)
+			isDead = false;
+		}
 	}
 }

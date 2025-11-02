@@ -12,5 +12,6 @@ enum class ESeaCreatureState : uint8
     Flee,
     Seek,
     Attack,
-    ReturnHome
+    ReturnHome,
+    Dead
 };

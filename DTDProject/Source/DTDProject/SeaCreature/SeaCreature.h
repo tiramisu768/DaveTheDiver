@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "GameFramework/Pawn.h"
 #include "Engine/DataTable.h"
 #include "SeaCreature.generated.h"
 
@@ -69,9 +69,18 @@ public:
 };
 
 
+class UCapsuleComponent;
+class USkeletalMeshComponent;
+class UFloatingPawnMovement;
+class UFishStateComponent;
+class UWidgetComponent;
+class USphereComponent;
+class UDataTable;
+class UAnimMontage;
+
 DECLARE_DELEGATE(FOnAttackMontageEndedDelegate);
 UCLASS()
-class DTDPROJECT_API ASeaCreature : public ACharacter
+class DTDPROJECT_API ASeaCreature : public APawn
 {
 	GENERATED_BODY()
 private:
@@ -84,25 +93,32 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Data")
 	TObjectPtr<class UDataTable> SeaCreatureDataTable;
+
 	FSeaCreatureData* Data;
 
-	UPROPERTY(VisibleAnywhere,Category = "State")
-	TObjectPtr<class UFishStateComponent> FishStateComponent;
 	UPROPERTY(VisibleAnywhere, Category = "UI")
 	TObjectPtr<class UWidgetComponent> FishHPBarWidget;
+
 	UPROPERTY(EditAnywhere, Category = "Spawn", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ADamagePopup> SpawnDamagePopupClass;
+
 	UPROPERTY(EditAnywhere, Category = "FX")
 	TObjectPtr<class UNiagaraSystem> HitEffect;
+
 	FVector Forward = { 0.1f,0.0f,0.0f };
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAnimMontage> DeathFlapMontage;
+
 	FTimerHandle DeathTimerHandle;
 	FTimerHandle DeathRotateTimerHandle;
+
 	UPROPERTY(VisibleAnywhere) 
 	class USphereComponent* CollectSphere;
+
 	FTimerHandle CollectHintTimer;
+
+
 
 public:
 
@@ -111,38 +127,64 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BT")
 	TObjectPtr<class UBehaviorTree> OverrideBT;
 
-	UPROPERTY(VisibleAnywhere, Category = "Steering")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UCapsuleComponent> CapsuleComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> Mesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UFloatingPawnMovement> MovementComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UFishStateComponent> FishStateComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class USeaCreatureSteeringComponent* SteeringComp;
+
+	USkeletalMeshComponent* GetMesh() const { return Mesh.Get(); }
+
+	UCapsuleComponent* GetCapsuleComponent() const { return CapsuleComponent.Get(); }
 
 	const FSeaCreatureData* GetData() const { return Data; }
 
 	float GetHomeReturnDist() const { return HomeReturnDist; }
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+protected:
+	virtual void BeginPlay() override;
+
+public:
 	UFUNCTION()
 	void SpawnSeaCreature();
+
 	void HitBy(float DamageAmount, const FHitResult& HitResult);
+
 	void Die();
+
 	bool isDead();
+
 	void RotateToDeadPose(float DeltaTime);
+
 	void EnableCollectTrigger(bool isEnable);
+
 	UFUNCTION()
 	void OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
 	void CollectSeaCreature(AActor* OtherActor);
+
 	virtual void Attack(class AMyRobo* Target);
+
 	void PostInitializeComponents() override;
+
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
 	FOnAttackMontageEndedDelegate OnAttackMontageEndedDelegate;
+
 	void SpawnDamagePopup(float DamageAmount);
 
 };

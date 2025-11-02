@@ -8,32 +8,37 @@
 #include "SeaCreature/SeaCreature.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
 #include "SeaCreature/SeaCreatureStateType.h"
+#include "GameFramework/FloatingPawnMovement.h" 
 
 void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	AAIController* Owner = OwnerComp.GetAIOwner();
-	ASeaCreature* SeaCreature = nullptr;
+	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
-	if (nullptr != Owner)
-		SeaCreature = Cast<ASeaCreature>(Owner->GetPawn());
+	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
+	AActor* Target = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TEXT("TargetActor")));
 
-	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
-
-	AActor* Target = Cast<AActor>(BlackboardComponent->GetValueAsObject("TargetActor"));
-
-	//도망성공 조건 : 타겟을 잃어버림, 거리가 멀어짐 fleedist? losetargetdist?
-	if (nullptr == SeaCreature || nullptr == Target)
+	// SeaCreature나 Target이 없으면 태스크를 성공으로 종료하고 도망 상태를 끝낸다
+	if (nullptr == SeaCreature || nullptr == Target || nullptr == SeaCreature->SteeringComp || nullptr == SeaCreature->MovementComponent)
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return;
 	}
 
-	//데이터테이블의 speed를 가져오기
-	float Speed =0.f;
-	if (const FSeaCreatureData* Stats = SeaCreature->GetData())
-		Speed = Stats->FleeSpeed;
+	const FSeaCreatureData* FishData = SeaCreature->GetData();
+	if (FishData == nullptr)
+	{
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		return;
+	}
 
-	FVector dir = SeaCreature->SteeringComp->ComputeFleeDir(Target->GetActorLocation());
-	dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
-	SeaCreature->SteeringComp->ComputeApplyMoveInput(dir.GetSafeNormal(),Speed);
+	FVector Dir = SeaCreature->SteeringComp->ComputeFleeDir(Target->GetActorLocation());
+	Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
+	Dir.Normalize();
+
+	if (!Dir.IsNearlyZero())
+	{
+		SeaCreature->MovementComponent->MaxSpeed = FishData->FleeSpeed;
+		SeaCreature->AddMovementInput(Dir);
+		FRotator TargetRotation = Dir.Rotation();
+		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
 }

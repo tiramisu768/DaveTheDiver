@@ -3,7 +3,7 @@
 
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
 #include "SeaCreature/SeaCreature.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 
 
 USeaCreatureSteeringComponent::USeaCreatureSteeringComponent()
@@ -42,9 +42,9 @@ FVector USeaCreatureSteeringComponent::ComputeAvoidanceDir() const
 	return ObstacleAvoidance();
 }
 
-void USeaCreatureSteeringComponent::ComputeApplyMoveInput(const FVector& Dir, float Speed)
+FVector USeaCreatureSteeringComponent::ComputeApplyMoveInput(float DeltaSeconds)
 {
-	ApplyMoveInput(Dir, Speed);
+	return ApplyMoveInput(DeltaSeconds);
 }
 
 
@@ -118,15 +118,12 @@ FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 	return FVector::ZeroVector;
 }
 
-void USeaCreatureSteeringComponent::ApplyMoveInput(const FVector& Dir, float Speed)
+FVector USeaCreatureSteeringComponent::ApplyMoveInput(float DeltaSeconds)
 {
-	SeaCreatureOwner->AddMovementInput(Dir.GetSafeNormal(), 1.0f);
-
-	if (auto* MoveComp = Cast<UCharacterMovementComponent>(SeaCreatureOwner->GetCharacterMovement()))
-	{
-		MoveComp->MaxFlySpeed = Speed;
-	}
-
+	FVector Dir = FVector::ZeroVector;
+	Dir += Wander(DeltaSeconds);
+	Dir += ObstacleAvoidance();
+	return Dir.GetSafeNormal();
 }
 
 

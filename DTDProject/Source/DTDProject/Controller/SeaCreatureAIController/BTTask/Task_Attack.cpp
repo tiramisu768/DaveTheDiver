@@ -11,24 +11,33 @@
 
 UTask_Attack::UTask_Attack()
 {
+	// 이 태스크는 한 번만 실행되고 몽타주가 끝날 때까지 기다리므로, Tick이 필요 없음
+	bNotifyTick = false;
 }
 
 EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
-	ASeaCreature* Owner = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
-	if (Owner == nullptr) return EBTNodeResult::Failed;
+
+	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
+	if (SeaCreature == nullptr)
+	{
+		return EBTNodeResult::Failed;
+	}
 
 	AMyRobo* Target = Cast<AMyRobo>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TEXT("TargetActor")));
-	if (Target == nullptr) return EBTNodeResult::Failed;
+	if (Target == nullptr)
+	{
+		return EBTNodeResult::Failed;
+	}
 
-	Owner->OnAttackMontageEndedDelegate.BindLambda([&]()
+	SeaCreature->OnAttackMontageEndedDelegate.BindLambda([&]()
 		{
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
 	);
 
-	Owner->Attack(Target);
+	SeaCreature->Attack(Target);
 
 	return EBTNodeResult::InProgress;
 }

@@ -17,43 +17,43 @@
 #include "Components/PrimitiveComponent.h"
 //#include "Kismet/GameplayStatics.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
+#include "Animation/AnimInstance.h"
 
-////ui 시스템 질문
-//복귀 실패 성공UI 노출 시 게임 일시정지
-//
-//로비씬 게임씬 와리가리하기
-//
-//물고기 폰으로 교체
-// Sets default values
 ASeaCreature::ASeaCreature()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
+	RootComponent = CapsuleComponent;
+
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	Mesh->SetupAttachment(RootComponent);
+
+	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComp"));
+
+	FishStateComponent = CreateDefaultSubobject<UFishStateComponent>(TEXT("FishStateComponent"));
 	
 	static ConstructorHelpers::FObjectFinder<UDataTable> SeaCreatureDataTableFinder(TEXT("/ Script / Engine.DataTable'/Game/BluePrint/SeaCreature/Data/DT_SeaCreatureStat.DT_SeaCreatureStat'"));
 	if (SeaCreatureDataTableFinder.Succeeded())
 		SeaCreatureDataTable = SeaCreatureDataTableFinder.Object;
 
-	GetCharacterMovement()->NavAgentProps.bCanSwim = false;
-	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-	GetCharacterMovement()->GravityScale = 0.f;
-
-	FishStateComponent = CreateDefaultSubobject<UFishStateComponent>(TEXT("FishStateComponent"));
 	FishHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FishHPBarWidget"));
 	FishHPBarWidget->SetupAttachment(GetRootComponent());
-	static ConstructorHelpers::FClassFinder<UUserWidget> FishHPBarWidgetClassFinder(TEXT(""));
-	if (FishHPBarWidgetClassFinder.Succeeded())
-		FishHPBarWidget->SetWidgetClass(FishHPBarWidgetClassFinder.Class);
+	//static ConstructorHelpers::FClassFinder<UUserWidget> FishHPBarWidgetClassFinder(TEXT(""));
+	//if (FishHPBarWidgetClassFinder.Succeeded())
+	//	FishHPBarWidget->SetWidgetClass(FishHPBarWidgetClassFinder.Class);
 	FishHPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
-
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>DeathFlapMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Death.AM_Death'"));
 	if (DeathFlapMontageObjectFinder.Succeeded())
 		DeathFlapMontage = DeathFlapMontageObjectFinder.Object;
+
 	CollectSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectSphere"));
 	CollectSphere->SetupAttachment(RootComponent);
+
 	//move to data
 	/*static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Attack_PinkShark.AM_Attack_PinkShark'"));
 	if (AttackMontageObjectFinder.Succeeded())
@@ -157,7 +157,10 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("Not isDead")));
-		PlayAnimMontage(Data->HitbyMontage);
+		if (Data->HitbyMontage && Mesh && Mesh->GetAnimInstance())
+		{
+			Mesh->GetAnimInstance()->Montage_Play(Data->HitbyMontage);
+		}
 	}
 
 
@@ -167,10 +170,16 @@ void ASeaCreature::Die()
 {
 	EnableCollectTrigger(true);
 	//사망직전 파닥파닥 애님
-	PlayAnimMontage(DeathFlapMontage);
+	if (DeathFlapMontage && Mesh && Mesh->GetAnimInstance())
+	{
+		Mesh->GetAnimInstance()->Montage_Play(DeathFlapMontage);
+	}
 
-	auto* CM = GetCharacterMovement();
-	CM->SetMovementMode(MOVE_None);
+	// 이동 컴포넌트를 비활성화하여 움직임을 멈춘다
+	if (MovementComponent)
+	{
+		MovementComponent->Deactivate();
+	}
 
 	USkeletalMeshComponent* M = GetMesh();
 	// 현재 프레임 고정
@@ -263,16 +272,32 @@ void ASeaCreature::Attack(AMyRobo* Target)
 	FVector TargetDirection = Target->GetActorLocation() - GetActorLocation();
 	FRotator LookAtRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
 	SetActorRotation(LookAtRotation);
-	PlayAnimMontage(Data->AttackMontage);
+	if (Data->AttackMontage && Mesh && Mesh->GetAnimInstance())
+	{
+		Mesh->GetAnimInstance()->Montage_Play(Data->AttackMontage);
+	}
 }
 
 void ASeaCreature::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	// 1. Mesh 포인터가 유효한지 먼저 확인합니다.
+	if (Mesh == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASeaCreature::PostInitializeComponents - Mesh component is NULL for %s!"), *GetName());
+		return; // Mesh가 없으면 더 이상 진행하지 않고 함수를 종료합니다.
+	}
+
+	// 2. Mesh가 유효하다는 것이 보장된 상태에서 AnimInstance를 가져옵니다.
+	UAnimInstance* AnimInstance = Mesh->GetAnimInstance();
 	if (AnimInstance)
 	{
 		AnimInstance->OnMontageEnded.AddDynamic(this, &ASeaCreature::OnAttackMontageEnded);
+	}
+	else
+	{
+		// AnimInstance가 없는 경우도 로그를 남겨서 디버깅을 돕습니다.
+		UE_LOG(LogTemp, Warning, TEXT("ASeaCreature::PostInitializeComponents - AnimInstance is NULL for %s."), *GetName());
 	}
 }
 

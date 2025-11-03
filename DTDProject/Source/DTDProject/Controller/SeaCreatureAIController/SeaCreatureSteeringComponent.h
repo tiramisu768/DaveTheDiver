@@ -25,7 +25,6 @@ public:
 	FVector ComputeFleeDir(const FVector& TargetLocation) const;
 	FVector ComputeWanderDir(float DeltaTime);
 	FVector ComputeAvoidanceDir() const;
-	FVector ComputeApplyMoveInput(float DeltaSeconds);
 
 protected:
 	// Called when the game starts
@@ -47,8 +46,6 @@ private:
 	FVector Flee(const FVector& TargetLocation) const; //로봇으로부터 도망가기
 	FVector Wander(float DeltaTime); //래덤위치로 배회
 	FVector ObstacleAvoidance() const; //장애물인지 후 피하기
-
-	FVector ApplyMoveInput(float DeltaSeconds); //물고기 이동
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

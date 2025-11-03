@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
+#include "BehaviorTree/BTTaskNode.h"
 #include "Task_Seek.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DTDPROJECT_API UTask_Seek : public UBTTask_BlackboardBase
+class DTDPROJECT_API UTask_Seek : public UBTTaskNode
 {
 	GENERATED_BODY()
 

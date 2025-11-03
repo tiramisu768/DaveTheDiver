@@ -12,16 +12,7 @@ struct FSeaCreatureData : public FTableRowBase
 {
 	GENERATED_BODY()
 public:
-	FSeaCreatureData() :
-		WanderRadius(900.0f),
-		SlowRadius(300.0f),
-		WanderSpeed(5.0f),
-		FleeSpeed(20.0f),
-		AttackSpeed(10.0f),
-		SeekSpeed(10.0f),
-		ReturnSpeed(5.0f),
-		Mesh(nullptr) {
-	}
+	FSeaCreatureData();
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	//float Damage;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
@@ -50,22 +41,22 @@ public:
 
 	// 반경
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float WanderRadius; //물고기 배회범위
+	float WanderRadius = { 900.0f }; //물고기 배회범위
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float SlowRadius; //물고기 배회범위
+	float SlowRadius = { 300.0f }; //물고기 배회범위
 
 	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float WanderSpeed;
+	float WanderSpeed = { 5.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float FleeSpeed;
+	float FleeSpeed = { 20.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float AttackSpeed;
+	float AttackSpeed{ 10.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float SeekSpeed;
+	float SeekSpeed = { 10.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float ReturnSpeed;
+	float ReturnSpeed = { 5.0f };
 };
 
 

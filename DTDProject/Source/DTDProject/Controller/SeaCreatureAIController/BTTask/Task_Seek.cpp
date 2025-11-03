@@ -10,22 +10,26 @@
 
 UTask_Seek::UTask_Seek()
 {
-    bNotifyTick = true;
-    BlackboardKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UTask_Seek, BlackboardKey), AActor::StaticClass());
+	bNotifyTick = true;
 }
 
 EBTNodeResult::Type UTask_Seek::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-    Super::ExecuteTask(OwnerComp, NodeMemory);
-    return EBTNodeResult::InProgress;
+	Super::ExecuteTask(OwnerComp, NodeMemory);
+	return EBTNodeResult::InProgress;
 }
 
 void UTask_Seek::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
-	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
-	AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(GetSelectedBlackboardKey()));
+	AAIController* Owner = OwnerComp.GetAIOwner();
+	ASeaCreature* SeaCreature = nullptr;
+	if (nullptr != Owner)
+		SeaCreature = Cast<ASeaCreature>(Owner->GetPawn());
+
+	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
+	AActor* TargetActor = Cast<AActor>(BlackboardComponent->GetValueAsObject("TargetActor"));
 
 	if (SeaCreature == nullptr || TargetActor == nullptr || SeaCreature->SteeringComp == nullptr || SeaCreature->MovementComponent == nullptr)
 	{

@@ -10,6 +10,17 @@
 #include "SeaCreature/SeaCreatureStateType.h"
 #include "GameFramework/FloatingPawnMovement.h" 
 
+UTask_Flee::UTask_Flee()
+{
+	bNotifyTick = true;
+}
+
+EBTNodeResult::Type UTask_Flee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::ExecuteTask(OwnerComp, NodeMemory);
+	return EBTNodeResult::InProgress;
+}
+
 void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
@@ -41,4 +52,5 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 		SeaCreature->AddMovementInput(Dir);
 		FRotator TargetRotation = Dir.Rotation();
 		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
+	}
 }

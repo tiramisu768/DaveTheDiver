@@ -39,13 +39,13 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
         return;
     }
 
-    //FVector HomeLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HomeLocation"));
-    //float DistanceToHome = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
+    FVector HomeLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HomeLocation"));
+    float DistanceToHome = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
     
     // UBTTask_BlackboardBase를 사용하므로, GetValueAsVector로 직접 키 이름을 쓰는 대신
     // 설정된 블랙보드 키에서 값을 가져옵니다.
-    FVector HomeLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(GetSelectedBlackboardKey());
-    float DistanceToHome = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
+  //  FVector HomeLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(GetSelectedBlackboardKey());
+   // float DistanceToHome = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
 
     if (DistanceToHome < 100.0f)
     {

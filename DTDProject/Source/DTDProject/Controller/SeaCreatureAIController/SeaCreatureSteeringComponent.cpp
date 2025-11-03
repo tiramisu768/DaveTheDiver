@@ -42,12 +42,6 @@ FVector USeaCreatureSteeringComponent::ComputeAvoidanceDir() const
 	return ObstacleAvoidance();
 }
 
-FVector USeaCreatureSteeringComponent::ComputeApplyMoveInput(float DeltaSeconds)
-{
-	return ApplyMoveInput(DeltaSeconds);
-}
-
-
 // Called when the game starts
 void USeaCreatureSteeringComponent::BeginPlay()
 {
@@ -117,15 +111,6 @@ FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 	}
 	return FVector::ZeroVector;
 }
-
-FVector USeaCreatureSteeringComponent::ApplyMoveInput(float DeltaSeconds)
-{
-	FVector Dir = FVector::ZeroVector;
-	Dir += Wander(DeltaSeconds);
-	Dir += ObstacleAvoidance();
-	return Dir.GetSafeNormal();
-}
-
 
 // Called every frame
 void USeaCreatureSteeringComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

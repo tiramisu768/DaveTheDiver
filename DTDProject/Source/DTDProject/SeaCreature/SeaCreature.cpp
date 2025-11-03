@@ -34,6 +34,13 @@ ASeaCreature::ASeaCreature()
 
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComp"));
 
+	if (MovementComponent)
+	{
+		MovementComponent->Acceleration = 1500.0f;
+		MovementComponent->Deceleration = 1500.0f;
+		MovementComponent->TurningBoost = 8.0f;
+	}
+
 	FishStateComponent = CreateDefaultSubobject<UFishStateComponent>(TEXT("FishStateComponent"));
 	
 	static ConstructorHelpers::FObjectFinder<UDataTable> SeaCreatureDataTableFinder(TEXT("/ Script / Engine.DataTable'/Game/BluePrint/SeaCreature/Data/DT_SeaCreatureStat.DT_SeaCreatureStat'"));
@@ -327,5 +334,6 @@ void ASeaCreature::SpawnDamagePopup(float DamageAmount)
 	
 }
 
-
-
+FSeaCreatureData::FSeaCreatureData()
+{
+}

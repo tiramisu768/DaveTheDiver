@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/ResponsiveUI.h"
 #include "ActorComponent/InventoryComponent.h"
 #include "FishRankUI.generated.h"
 
@@ -11,12 +11,10 @@
  * 
  */
 UCLASS()
-class DTDPROJECT_API UFishRankUI : public UUserWidget
+class DTDPROJECT_API UFishRankUI : public UResponsiveUI
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(meta =(BindWidgetAnim),Transient)
-	UWidgetAnimation* SlideInOutAnim;
 	UPROPERTY(meta =(BindWidget))
 	TObjectPtr<class UTextBlock> Text_FishName;
 	UPROPERTY(meta = (BindWidget))
@@ -24,6 +22,5 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> Text_FishWeight;
 public:
-	void ShowRank();
-	void UpdateFishRankList(const TArray<FCaughtFishInfo>& FishList);
+	void UpdateAndShow(const FCaughtFishInfo& FishInfo,float SustainTime);
 };

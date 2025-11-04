@@ -205,8 +205,8 @@ void AMyHUD::ShowRankUI(const TArray<FCaughtFishInfo>& FishList)
 {
 	if(RankUIClass)
 	{
-		RankUIClass->UpdateFishRankList(FishList);
-		RankUIClass->ShowRank();
+		/*RankUIClass->UpdateFishRankList(FishList);
+		RankUIClass->UpdateAndShow();*/
 	}
 }
 

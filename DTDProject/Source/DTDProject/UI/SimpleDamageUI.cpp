@@ -8,6 +8,6 @@ void USimpleDamageUI::SetDamageText(float DamageAmount)
 {
 	if (DamageText)
 	{
-		DamageText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%"), DamageAmount)));
+		DamageText->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), DamageAmount)));
 	}
 }

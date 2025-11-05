@@ -13,7 +13,7 @@ void URoboHPBarUI::SetHPBarPercent(float Percent)
 	}
 	if (RoboHPText)
 	{
-		RoboHPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%"), Percent * 100.0f)));
+		RoboHPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%%"), Percent * 100.0f)));
 	}
 }
 
@@ -25,7 +25,7 @@ void URoboHPBarUI::SetCurrentDepthMeters(float Meter)
 	//}
 	if (RoboDepthText)
 	{
-		RoboDepthText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm%"), Meter)));
+		RoboDepthText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Meter)));
 	}
 }
 
@@ -33,10 +33,10 @@ void URoboHPBarUI::SetCurrentAndMaxWeight(float Current, float Max)
 {
 	if (RoboCurrentWeightText)
 	{
-		RoboCurrentWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm%"), Current)));
+		RoboCurrentWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Current)));
 	}
 	if (RoboMaxWeightText)
 	{
-		RoboMaxWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm%"), Max)));
+		RoboMaxWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Max)));
 	}
 }

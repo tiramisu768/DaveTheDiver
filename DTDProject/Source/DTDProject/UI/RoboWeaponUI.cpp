@@ -7,10 +7,10 @@ void URoboWeaponUI::PlaySwitchAnimation(int32 SelectedIndex)
 {
 	if (SelectedIndex == 0)
 	{
-		PlayAnimation(TabAni);
+		PlayAnimation(RangedAnim);
 	}
 	else if (SelectedIndex == 1)
 	{
-		PlayAnimation(TabAni_Reverse);
+		PlayAnimation(RangedAnim_Reverse);
 	}
 }

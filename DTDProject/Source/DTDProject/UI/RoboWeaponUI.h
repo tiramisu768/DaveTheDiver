@@ -16,9 +16,9 @@ class DTDPROJECT_API URoboWeaponUI : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
-	UWidgetAnimation* TabAni;
+	UWidgetAnimation* RangedAnim;
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
-	UWidgetAnimation* TabAni_Reverse;
+	UWidgetAnimation* RangedAnim_Reverse;
 
 public:
 	void PlaySwitchAnimation(int32 SelectedIndex);

@@ -4,6 +4,8 @@
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "GameModeBase/CharacterGameModeBase/CharacterGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 
 USeaCreatureSteeringComponent::USeaCreatureSteeringComponent()
@@ -75,12 +77,33 @@ FVector USeaCreatureSteeringComponent::Flee(const FVector& TargetLocation) const
 
 FVector USeaCreatureSteeringComponent::Wander(float DeltaTime)
 {
+	//타임핸들러로 바꾸기
 	static float Timer = 0.f; Timer += DeltaTime;
 	if (Timer > 2.f || FVector::DistSquared(SeaCreatureOwner->GetActorLocation(), CurrentWanderTarget) < 150.f * 150.f)
 	{
 		Timer = 0.f;
+
+		const FVector RandomUnitPoint = FMath::VRand() * FMath::FRand();
+
+		const FVector EllipsoidRadius = FVector(WanderRadius, WanderRadius, WanderRadius * 0.5f);
+		const FVector RandomOffset = RandomUnitPoint * EllipsoidRadius;
+
 		// 홈 중심 구형 범위 내 랜덤 포인트
-		CurrentWanderTarget = Home + FMath::VRand() * WanderRadius;
+		CurrentWanderTarget = Home + RandomOffset;
+
+		if (ACharacterGameModeBase* GameMode = Cast<ACharacterGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Wander LimitZ: %f"), GameMode->LimitZ);
+			if (CurrentWanderTarget.Z > GameMode->LimitZ)
+			{
+				CurrentWanderTarget.Z = GameMode->LimitZ;
+				UE_LOG(LogTemp, Warning, TEXT("Adjusted Wander Target Z to LimitZ: %f"),CurrentWanderTarget.Z);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Not Found"));
+		}
 	}
 	return Arrive(CurrentWanderTarget);
 }
@@ -106,7 +129,12 @@ FVector USeaCreatureSteeringComponent::ObstacleAvoidance() const
 		if (GetWorld()->SweepSingleByChannel(hit, start, end, FQuat::Identity, ECC_WorldStatic,
 			FCollisionShape::MakeSphere(Radius)))
 		{
-			return FVector::VectorPlaneProject(d, hit.Normal).GetSafeNormal() * 0.8f;
+			FVector AvoidanceDir = FVector::VectorPlaneProject(d, hit.Normal).GetSafeNormal();
+			if (AvoidanceDir.Z > 0)
+			{
+				AvoidanceDir.Z = 0;
+			}
+			return AvoidanceDir;
 		}
 	}
 	return FVector::ZeroVector;

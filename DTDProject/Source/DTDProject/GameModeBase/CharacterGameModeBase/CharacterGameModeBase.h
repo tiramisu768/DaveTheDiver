@@ -15,4 +15,8 @@ class DTDPROJECT_API ACharacterGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 public:
 	ACharacterGameModeBase();
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GameModeBase")
+	float LimitZ = .0f;
+
 };

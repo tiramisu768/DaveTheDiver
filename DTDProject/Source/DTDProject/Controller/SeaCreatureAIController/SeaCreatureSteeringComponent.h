@@ -29,6 +29,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	void UpdateWanderTarget();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Steering")
@@ -36,6 +37,8 @@ private:
 	FVector CurrentWanderTarget; //RandWanderPoint(홈 중심 구형 범위 내 랜덤 포인트)
 	float WanderRadius;
 	float SlowRadius;
+
+	FTimerHandle WanderTargetUpdateTimerHandle;
 
 	ASeaCreature* SeaCreatureOwner = nullptr;
 	//UPROPERTY(VisibleAnywhere, Category = "AI|Home")

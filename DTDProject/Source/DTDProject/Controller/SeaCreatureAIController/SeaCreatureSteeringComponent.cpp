@@ -50,9 +50,46 @@ void USeaCreatureSteeringComponent::BeginPlay()
 	Super::BeginPlay();
 
 	SeaCreatureOwner = Cast<ASeaCreature>(GetOwner());
+	if(SeaCreatureOwner)
+	{
+		Home = GetOwner()->GetActorLocation();
+	}
 
-	Home = GetOwner()->GetActorLocation();
+	UpdateWanderTarget();
 
+	GetWorld()->GetTimerManager().SetTimer(
+		WanderTargetUpdateTimerHandle,
+		this,
+		&USeaCreatureSteeringComponent::UpdateWanderTarget,
+		2.0f,
+		true);
+}
+
+void USeaCreatureSteeringComponent::UpdateWanderTarget()
+{
+	if (SeaCreatureOwner == nullptr) return;
+
+	const FVector RandomUnitPoint = FMath::VRand() * FMath::FRand();
+
+	const FVector EllipsoidRadius = FVector(WanderRadius, WanderRadius, WanderRadius * 0.5f);
+	const FVector RandomOffset = RandomUnitPoint * EllipsoidRadius;
+
+	// 홈 중심 구형 범위 내 랜덤 포인트
+	CurrentWanderTarget = Home + RandomOffset;
+
+	if (ACharacterGameModeBase* GameMode = Cast<ACharacterGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Wander LimitZ: %f"), GameMode->LimitZ);
+		if (CurrentWanderTarget.Z > GameMode->LimitZ)
+		{
+			CurrentWanderTarget.Z = GameMode->LimitZ;
+			UE_LOG(LogTemp, Warning, TEXT("Adjusted Wander Target Z to LimitZ: %f"), CurrentWanderTarget.Z);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Not Found"));
+	}
 }
 
 FVector USeaCreatureSteeringComponent::Seek(const FVector& Target) const
@@ -71,40 +108,13 @@ FVector USeaCreatureSteeringComponent::Arrive(const FVector& RandWanderPoint) co
 
 FVector USeaCreatureSteeringComponent::Flee(const FVector& TargetLocation) const
 {
-	FVector v = SeaCreatureOwner->GetActorLocation()- TargetLocation;
-	return v.GetSafeNormal();
+	FVector FleeDir = SeaCreatureOwner->GetActorLocation()- TargetLocation;
+	FleeDir.Z = 0; //수평으로만 도망가도록 Z값을 무시한다
+	return FleeDir.GetSafeNormal();
 }
 
 FVector USeaCreatureSteeringComponent::Wander(float DeltaTime)
 {
-	//타임핸들러로 바꾸기
-	static float Timer = 0.f; Timer += DeltaTime;
-	if (Timer > 2.f || FVector::DistSquared(SeaCreatureOwner->GetActorLocation(), CurrentWanderTarget) < 150.f * 150.f)
-	{
-		Timer = 0.f;
-
-		const FVector RandomUnitPoint = FMath::VRand() * FMath::FRand();
-
-		const FVector EllipsoidRadius = FVector(WanderRadius, WanderRadius, WanderRadius * 0.5f);
-		const FVector RandomOffset = RandomUnitPoint * EllipsoidRadius;
-
-		// 홈 중심 구형 범위 내 랜덤 포인트
-		CurrentWanderTarget = Home + RandomOffset;
-
-		if (ACharacterGameModeBase* GameMode = Cast<ACharacterGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Wander LimitZ: %f"), GameMode->LimitZ);
-			if (CurrentWanderTarget.Z > GameMode->LimitZ)
-			{
-				CurrentWanderTarget.Z = GameMode->LimitZ;
-				UE_LOG(LogTemp, Warning, TEXT("Adjusted Wander Target Z to LimitZ: %f"),CurrentWanderTarget.Z);
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Not Found"));
-		}
-	}
 	return Arrive(CurrentWanderTarget);
 }
 

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTService.h"
+#include "BehaviorTree/Services/BTService_BlackboardBase.h"
 #include "Service_PerceptionUpdate.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DTDPROJECT_API UService_PerceptionUpdate : public UBTService
+class DTDPROJECT_API UService_PerceptionUpdate : public UBTService_BlackboardBase
 {
 	GENERATED_BODY()
 

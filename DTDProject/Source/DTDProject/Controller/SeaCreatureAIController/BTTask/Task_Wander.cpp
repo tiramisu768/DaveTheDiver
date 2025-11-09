@@ -10,41 +10,46 @@
 
 UTask_Wander::UTask_Wander()
 {
-	bNotifyTick = true;
+	bNotifyTick = false;
+	NodeName = TEXT("Wander");
 }
 
 EBTNodeResult::Type UTask_Wander::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
-	return EBTNodeResult::InProgress;
-}
-
-void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
-{
-	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-
-	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	if (SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr || SeaCreature->MovementComponent == nullptr)
 	{
-		return;
+		return EBTNodeResult::Failed;
+		
 	}
 
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	if (FishData == nullptr)
 	{
-		return;
+		return EBTNodeResult::Failed;
 	}
 
-	FVector Dir = SeaCreature->SteeringComp->ComputeWanderDir(DeltaSeconds);
+	const float FakeDeltaTime = 0.033f;
+	FVector Dir = SeaCreature->SteeringComp->ComputeWanderDir(FakeDeltaTime);
 	Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
 	Dir.Normalize();
 
 	if (!Dir.IsNearlyZero())
 	{
 		SeaCreature->MovementComponent->MaxSpeed = FishData->WanderSpeed;
+		SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
 		SeaCreature->AddMovementInput(Dir);
 		FRotator TargetRotation = Dir.Rotation();
-		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
+		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, FakeDeltaTime, 5.0f));
 	}
+
+	return EBTNodeResult::Succeeded;
+}
+
+EBTNodeResult::Type UTask_Wander::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Wander TaskABORTED!"));
+
+	return EBTNodeResult::Aborted;
 }

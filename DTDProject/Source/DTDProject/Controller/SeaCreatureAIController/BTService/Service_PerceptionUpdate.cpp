@@ -7,6 +7,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "MyRobo/MyRobo.h"
+#include "SeaCreature/SeaCreature.h"
 
 
 UService_PerceptionUpdate::UService_PerceptionUpdate()
@@ -20,7 +21,11 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
 	AAIController* AIController = OwnerComp.GetAIOwner();
-	if (AIController == nullptr) return;
+	ASeaCreature* SeaCreature = Cast<ASeaCreature>(AIController ? AIController->GetPawn() : nullptr);
+	if (AIController == nullptr || SeaCreature == nullptr) return;
+
+	const FSeaCreatureData* FishData = SeaCreature->GetData();
+	if (FishData == nullptr) return;
 
 	UAIPerceptionComponent* PerceptionComp = AIController->GetAIPerceptionComponent();
 	if (!PerceptionComp) return;
@@ -38,10 +43,13 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		{
 			//지금은 필요없지만, 여러 대상을 감지했을 떄를 대비해 가장 가까운대상을 찾는다
 			float DistSq = FVector::DistSquared(AIController->GetPawn()->GetActorLocation(), Actor->GetActorLocation());
-			if (DistSq < MinDistSq)
+			if(DistSq<FMath::Square(FishData->FleeDistance))
 			{
-				MinDistSq = DistSq;
-				NearestTarget = Actor;
+				if (DistSq < MinDistSq)
+				{
+					MinDistSq = DistSq;
+					NearestTarget = Actor;
+				}
 			}
 		}
 	}
@@ -52,5 +60,17 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	{
 		//NearestTarget이 유효하면 플레이어 액터가, 보이지 않으면 nullptr이 설정된다
 		BlackboardComp->SetValueAsObject(GetSelectedBlackboardKey(), NearestTarget);
+	}
+
+	if(BlackboardComp && SeaCreature)
+	{
+		const FVector HomeLocation = BlackboardComp->GetValueAsVector(TEXT("HomeLocation"));
+		const FVector CurrentLocation = SeaCreature->GetActorLocation();
+		const float DistanceFromHome = FVector::Dist(CurrentLocation, HomeLocation);
+
+		BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"), DistanceFromHome);
+
+		FString DistMsg = FString::Printf(TEXT("DistanceFromHome: %.1f"), DistanceFromHome);
+		GEngine->AddOnScreenDebugMessage(2, 0.0f, FColor::Yellow, DistMsg);
 	}
 }

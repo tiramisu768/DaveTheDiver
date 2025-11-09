@@ -2,14 +2,12 @@
 
 
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
-#include "SeaCreature/SeaCreature.h"
-#include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
-#include "Perception/AIPerceptionSystem.h"
-#include "BehaviorTree/BlackboardComponent.h"
+#include "SeaCreature/SeaCreature.h"
 
 ASeaCreatureAIController::ASeaCreatureAIController()
 {
@@ -20,17 +18,28 @@ ASeaCreatureAIController::ASeaCreatureAIController()
 	//Perception
 	PerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+	if(SightConfig)
+	{
+		SightConfig->SightRadius = 5000.f; //기본 감지 반경
+		SightConfig->LoseSightRadius = 960.f; //잃는 반경 (버퍼)
+		SightConfig->PeripheralVisionAngleDegrees = 200.f; //시야각 (전방)
+		SightConfig->SetMaxAge(5.0f);
 
-	SightConfig->SightRadius = 800.f; //기본 감지 반경
-	SightConfig->LoseSightRadius = 960.f; //잃는 반경 (버퍼)
-	SightConfig->PeripheralVisionAngleDegrees = 200.f; //시야각 (전방)
-	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
-	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+		SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+		SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 
-	PerceptionComp->ConfigureSense(*SightConfig);
-	PerceptionComp->SetDominantSense(SightConfig->GetSenseImplementation());
+		PerceptionComp->ConfigureSense(*SightConfig);
+		PerceptionComp->SetDominantSense(SightConfig->GetSenseImplementation());
+	}
 
+	TeamId = FGenericTeamId(1);
+
+}
+
+FGenericTeamId ASeaCreatureAIController::GetGenericTeamId() const
+{
+	return TeamId;
 }
 
 void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)

@@ -4,18 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GenericTeamAgentInterface.h"
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
 #include "Object/RandomBox.h"
 #include "Weapon/Weapon.h"
 #include "MyRobo.generated.h"
 
+class UAIPerceptionStimuliSourceComponent;
+
 UCLASS()
-class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify
+class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
 private:
+	FGenericTeamId TeamId;
+
 #pragma region Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AI",meta = (AllowPrivateAccess="true"))
+	TObjectPtr<UAIPerceptionStimuliSourceComponent> StimuliSourceComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> BodyComponent;
 	UPROPERTY(VisibleAnywhere)
@@ -71,6 +78,8 @@ protected:
 
 public:	
 	AMyRobo();
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	virtual void Tick(float DeltaTime) override;
 

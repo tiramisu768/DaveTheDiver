@@ -19,7 +19,7 @@ bool UDecorator_ReturnHome::CalculateRawConditionValue(UBehaviorTreeComponent& O
 
 	if (!Owner || !BlackboardComp || !SeaCreature) return false;
 
-	const float DistFromHome = BlackboardComp->GetValueAsFloat(TEXT("DIstanceFromHome"));
+	const float DistFromHome = BlackboardComp->GetValueAsFloat(TEXT("DistanceFromHome"));
 	const float HomeReturnDist = SeaCreature->GetHomeReturnDist();
 
 	return DistFromHome > HomeReturnDist;

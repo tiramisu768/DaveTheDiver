@@ -2,6 +2,8 @@
 
 
 #include "MyRobo/MyRobo.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -69,6 +71,20 @@ AMyRobo::AMyRobo()
 	if (InteractionWidgetClassFinder.Succeeded())
 		InteractionWidgetClass = InteractionWidgetClassFinder.Class;
 	InteractionWidget->SetWidgetClass(InteractionWidgetClass);
+
+	TeamId = FGenericTeamId(0);
+
+	StimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSourceComponent"));
+	if (StimuliSourceComponent)
+	{
+		StimuliSourceComponent->RegisterForSense(TSubclassOf<UAISense_Sight>());
+		StimuliSourceComponent->RegisterWithPerceptionSystem();
+	}
+}
+
+FGenericTeamId AMyRobo::GetGenericTeamId() const
+{
+	return TeamId;
 }
 
 AWeapon* AMyRobo::FindNearbyWeapon()

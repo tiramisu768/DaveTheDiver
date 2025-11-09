@@ -109,3 +109,8 @@ uint16 UTask_Seek::GetInstanceMemorySize() const
 {
 	return sizeof(FSeekTaskMemory);
 }
+
+EBTNodeResult::Type UTask_Seek::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	return EBTNodeResult::Aborted;
+}

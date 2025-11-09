@@ -6,9 +6,9 @@
 #include "AIController.h"
 #include "SeaCreatureAIController.generated.h"
 
-/**
- * 
- */
+class UAIPerceptionComponent;
+class UAISenseConfig_Sight;
+
 UCLASS()
 class DTDPROJECT_API ASeaCreatureAIController : public AAIController
 {
@@ -21,15 +21,19 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<class UBlackboardData> BlackboardAsset;
 
+	FGenericTeamId TeamId;
+
 public:
 	ASeaCreatureAIController();
+	virtual FGenericTeamId GetGenericTeamId() const override;
 	void PlayBehaviorTree(APawn* InPawn);
 
 protected:
-	UPROPERTY(VisibleAnywhere, Category = "AI")
-	class UAIPerceptionComponent* PerceptionComp;
-	UPROPERTY()
-	class UAISenseConfig_Sight* SightConfig;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "AI", meta=(AllowPrivateAccess = "true"))
+	TObjectPtr<UAIPerceptionComponent> PerceptionComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr <UAISenseConfig_Sight> SightConfig;
 
 	void OnPossess(APawn* InPawn) override;
 };

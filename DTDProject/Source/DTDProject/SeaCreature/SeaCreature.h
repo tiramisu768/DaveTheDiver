@@ -45,8 +45,14 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float SlowRadius = { 300.0f }; //물고기 배회범위
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float FleeDistance = 100.0f; // 물고기 도망시작 범위
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Stat")
+	float FleeSafeDistance = 500.f;
 
 	// 속도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Acceleration = { 1500.f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float WanderSpeed = { 5.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")

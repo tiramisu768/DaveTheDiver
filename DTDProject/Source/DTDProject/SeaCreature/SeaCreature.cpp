@@ -43,7 +43,7 @@ ASeaCreature::ASeaCreature()
 
 	FishStateComponent = CreateDefaultSubobject<UFishStateComponent>(TEXT("FishStateComponent"));
 	
-	static ConstructorHelpers::FObjectFinder<UDataTable> SeaCreatureDataTableFinder(TEXT("/ Script / Engine.DataTable'/Game/BluePrint/SeaCreature/Data/DT_SeaCreatureStat.DT_SeaCreatureStat'"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> SeaCreatureDataTableFinder(TEXT("/Script/Engine.DataTable'/Game/BluePrint/SeaCreature/Data/DT_SeaCreatureStat.DT_SeaCreatureStat'"));
 	if (SeaCreatureDataTableFinder.Succeeded())
 		SeaCreatureDataTable = SeaCreatureDataTableFinder.Object;
 
@@ -83,11 +83,15 @@ void ASeaCreature::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	Data = SeaCreatureDataTable->FindRow<FSeaCreatureData>(RowName, TEXT("PinkShark"));
+	Data = SeaCreatureDataTable->FindRow<FSeaCreatureData>(RowName, TEXT(""));
 
 	if (Data)
 	{
-		UE_LOG(LogTemp, Log, TEXT("WanderRadius = %f, Speed = %f"),	Data->WanderRadius, Data->WanderSpeed);
+		if (MovementComponent)
+		{
+			MovementComponent->Acceleration = Data->Acceleration;
+			MovementComponent->Deceleration = Data->Acceleration;
+		}
 
 		//공격성물고기는 -300, 회피성물고기는 -100
 		HomeReturnDist = Data->IsAggressive? Data->WanderRadius - 300.f: Data->WanderRadius - 100.f;

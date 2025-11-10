@@ -20,6 +20,9 @@ EBTNodeResult::Type UTask_Flee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("FLEE TASK STARTED!"));
 	OwnerComp.GetBlackboardComponent()->SetValueAsFloat(TEXT("FleeStartTime"), GetWorld()->GetTimeSeconds());
+	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
+	const FSeaCreatureData* FishData = SeaCreature->GetData();
+	SeaCreature->MovementComponent->MaxSpeed = FishData->FleeSpeed;
 	return EBTNodeResult::InProgress;
 }
 
@@ -39,32 +42,11 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	// 1. 블랙보드에서 현재 타겟과 마지막으로 알려진 위치를 가져옵니다.
 	AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(GetSelectedBlackboardKey()));
 	FVector FleeFromLocation;
-	bool bHasValidLocation = false;
+	check(TargetActor);
 
-	if (TargetActor)
-	{
-		// 1a. 타겟이 보이면, 그 위치를 도망갈 기준으로 삼고, '마지막 위치'를 계속 갱신합니다.
-		FleeFromLocation = TargetActor->GetActorLocation();
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(TEXT("LastKnownTargetLocation"), FleeFromLocation);
-		bHasValidLocation = true;
-	}
-	else
-	{
-		// 1b. 타겟이 안 보이면, '마지막으로 봤던 위치'를 기준으로 삼습니다.
-		if(OwnerComp.GetBlackboardComponent()->IsVectorValueSet(TEXT("LastKnownTargetLocation")))
-		{
-			FleeFromLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("LastKnownTargetLocation"));
-			bHasValidLocation = true;
-		}
-	}
-
-	// 2. 도망갈 유효한 위치가 없으면 태스크를 실패 처리합니다.
-	if (!bHasValidLocation)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("FLEE FAILED: No valid location to flee from."));
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-		return;
-	}
+	// 1a. 타겟이 보이면, 그 위치를 도망갈 기준으로 삼고, '마지막 위치'를 계속 갱신합니다.
+	FleeFromLocation = TargetActor->GetActorLocation();
+	OwnerComp.GetBlackboardComponent()->SetValueAsVector(TEXT("LastKnownTargetLocation"), FleeFromLocation);
 
 	// 3. 현재 위치와 도망 기준점과의 거리를 계산합니다.
 	const float CurrentDistanceSq = FVector::DistSquared(SeaCreature->GetActorLocation(), FleeFromLocation);
@@ -74,6 +56,7 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("FLEE SUCCEEDED: Reached safe distance."));
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), nullptr);
 		return;
 	}
 
@@ -84,10 +67,9 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 
 	if (!Dir.IsNearlyZero())
 	{
-		SeaCreature->MovementComponent->MaxSpeed = FishData->FleeSpeed;
 		SeaCreature->AddMovementInput(Dir);
 		FRotator TargetRotation = Dir.Rotation();
-		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
+		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 1.0f));
 	}
 }
 

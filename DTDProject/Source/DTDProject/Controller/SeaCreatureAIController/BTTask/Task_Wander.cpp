@@ -37,6 +37,7 @@ EBTNodeResult::Type UTask_Wander::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 
 	if (!Dir.IsNearlyZero())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Wander Test"));
 		SeaCreature->MovementComponent->MaxSpeed = FishData->WanderSpeed;
 		SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
 		SeaCreature->AddMovementInput(Dir);

@@ -24,6 +24,13 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(AIController ? AIController->GetPawn() : nullptr);
 	if (AIController == nullptr || SeaCreature == nullptr) return;
 
+
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+	if (nullptr == BlackboardComp) return;
+	if (AMyRobo* TargetActor = Cast<AMyRobo>(BlackboardComp->GetValueAsObject(GetSelectedBlackboardKey())))
+		return;
+
+
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	if (FishData == nullptr) return;
 
@@ -36,14 +43,14 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 
 	AActor* NearestTarget = nullptr;
 	float MinDistSq = TNumericLimits<float>::Max();
-	
+
 	for (AActor* Actor : Sensed)
 	{
 		if (Cast<AMyRobo>(Actor))
 		{
 			//지금은 필요없지만, 여러 대상을 감지했을 떄를 대비해 가장 가까운대상을 찾는다
 			float DistSq = FVector::DistSquared(AIController->GetPawn()->GetActorLocation(), Actor->GetActorLocation());
-			if(DistSq<FMath::Square(FishData->FleeDistance))
+			if (DistSq < FMath::Square(FishData->FleeDistance))
 			{
 				if (DistSq < MinDistSq)
 				{
@@ -53,24 +60,18 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 			}
 		}
 	}
+	if (nullptr == NearestTarget) return;
 
 	//찾은 결과를 블랙보드에 보고한다
-	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (BlackboardComp)
-	{
+
 		//NearestTarget이 유효하면 플레이어 액터가, 보이지 않으면 nullptr이 설정된다
-		BlackboardComp->SetValueAsObject(GetSelectedBlackboardKey(), NearestTarget);
-	}
+	BlackboardComp->SetValueAsObject(GetSelectedBlackboardKey(), NearestTarget);
+	const FVector HomeLocation = BlackboardComp->GetValueAsVector(TEXT("HomeLocation"));
+	const FVector CurrentLocation = SeaCreature->GetActorLocation();
+	const float DistanceFromHome = FVector::Dist(CurrentLocation, HomeLocation);
 
-	if(BlackboardComp && SeaCreature)
-	{
-		const FVector HomeLocation = BlackboardComp->GetValueAsVector(TEXT("HomeLocation"));
-		const FVector CurrentLocation = SeaCreature->GetActorLocation();
-		const float DistanceFromHome = FVector::Dist(CurrentLocation, HomeLocation);
+	BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"), DistanceFromHome);
 
-		BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"), DistanceFromHome);
-
-		FString DistMsg = FString::Printf(TEXT("DistanceFromHome: %.1f"), DistanceFromHome);
-		GEngine->AddOnScreenDebugMessage(2, 0.0f, FColor::Yellow, DistMsg);
-	}
+	FString DistMsg = FString::Printf(TEXT("DistanceFromHome: %.1f"), DistanceFromHome);
+	GEngine->AddOnScreenDebugMessage(2, 0.0f, FColor::Yellow, DistMsg);
 }

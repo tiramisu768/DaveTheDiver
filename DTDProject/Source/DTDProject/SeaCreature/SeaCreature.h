@@ -48,7 +48,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float FleeDistance = 100.0f; // 물고기 도망시작 범위
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Stat")
-	float FleeSafeDistance = 500.f;
+	float FleeSafeDistance = 500.f; //물고기 안전거리 범위
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category ="Stat")
+	float ChaseTriggerDistance = 300.0f; //물고기 추격 범위
 
 	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -60,7 +62,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float AttackSpeed{ 10.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float SeekSpeed = { 10.0f };
+	float ChaseSpeed = { 10.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float ReturnSpeed = { 5.0f };
 };

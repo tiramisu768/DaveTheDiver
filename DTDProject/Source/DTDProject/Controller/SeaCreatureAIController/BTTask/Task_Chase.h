@@ -3,40 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
-#include "Task_Seek.generated.h"
+#include "BehaviorTree/BTTaskNode.h"
+#include "Task_Chase.generated.h"
 
-enum class ESeekState : uint8
-{
-	None,
-	MovingToGoal,
-	SearchingAtGoal,
-};
-
-struct FSeekTaskMemory
-{
-	ESeekState State = ESeekState::None;
-	FVector GoalLocation = FVector::ZeroVector;
-	float SearchTimer = 0.0f;
-};
-
+/**
+ * 
+ */
 UCLASS()
-class DTDPROJECT_API UTask_Seek : public UBTTask_BlackboardBase
+class DTDPROJECT_API UTask_Chase : public UBTTaskNode
 {
 	GENERATED_BODY()
-
 public:
-	UTask_Seek();
+	UTask_Chase();
 
-	UPROPERTY(EditAnywhere, Category = "Seek")
+	UPROPERTY(EditAnywhere, Category = "Chase")
 	float AcceptanceRadius = 150.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Seek")
+	UPROPERTY(EditAnywhere, Category = "Chase")
 	float SearchDuration = 3.0f;
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
-	virtual uint16 GetInstanceMemorySize() const override;
 	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };

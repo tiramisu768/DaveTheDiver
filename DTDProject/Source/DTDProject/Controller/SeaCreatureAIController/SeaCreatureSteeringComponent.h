@@ -21,7 +21,7 @@ public:
 
 	void InitParams(float InWanderRadius, float InSlowRadius);
 
-	FVector ComputeSeekDir(const FVector& TargetLocation) const;
+	FVector ComputeChaseDir(const FVector& TargetLocation) const;
 	FVector ComputeFleeDir(const FVector& TargetLocation) const;
 	FVector ComputeWanderDir(float DeltaTime);
 	FVector ComputeAvoidanceDir() const;

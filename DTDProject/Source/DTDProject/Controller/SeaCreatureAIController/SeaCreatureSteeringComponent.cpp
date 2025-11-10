@@ -24,7 +24,7 @@ void USeaCreatureSteeringComponent::InitParams(float InWanderRadius, float InSlo
 	SlowRadius = InSlowRadius;
 }
 
-FVector USeaCreatureSteeringComponent::ComputeSeekDir(const FVector& TargetLocation) const
+FVector USeaCreatureSteeringComponent::ComputeChaseDir(const FVector& TargetLocation) const
 {
 	return Seek(TargetLocation);
 }

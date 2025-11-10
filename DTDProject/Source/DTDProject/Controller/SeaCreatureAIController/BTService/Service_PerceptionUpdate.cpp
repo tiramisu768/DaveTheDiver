@@ -50,14 +50,29 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		{
 			//지금은 필요없지만, 여러 대상을 감지했을 떄를 대비해 가장 가까운대상을 찾는다
 			float DistSq = FVector::DistSquared(AIController->GetPawn()->GetActorLocation(), Actor->GetActorLocation());
-			if (DistSq < FMath::Square(FishData->FleeDistance))
+			if (FishData->IsAggressive)
 			{
-				if (DistSq < MinDistSq)
+				if (DistSq < FMath::Square(FishData->ChaseTriggerDistance))
 				{
-					MinDistSq = DistSq;
-					NearestTarget = Actor;
+					if (DistSq < MinDistSq)
+					{
+						MinDistSq = DistSq;
+						NearestTarget = Actor;
+					}
 				}
 			}
+			else
+			{
+				if (DistSq < FMath::Square(FishData->FleeDistance))
+				{
+					if (DistSq < MinDistSq)
+					{
+						MinDistSq = DistSq;
+						NearestTarget = Actor;
+					}
+				}
+			}
+
 		}
 	}
 	if (nullptr == NearestTarget) return;

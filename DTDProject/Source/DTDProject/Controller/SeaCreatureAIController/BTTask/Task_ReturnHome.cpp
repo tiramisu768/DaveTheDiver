@@ -51,7 +51,7 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
         return;
     }
 
-    FVector Dir = SeaCreature->SteeringComp->ComputeSeekDir(HomeLocation);
+    FVector Dir = SeaCreature->SteeringComp->ComputeChaseDir(HomeLocation);
     Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
     Dir.Normalize();
 

@@ -23,6 +23,7 @@ EBTNodeResult::Type UTask_Flee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	SeaCreature->MovementComponent->MaxSpeed = FishData->FleeSpeed;
+	SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
 	return EBTNodeResult::InProgress;
 }
 

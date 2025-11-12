@@ -9,6 +9,9 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "SeaCreature/SeaCreature.h"
 
+const FName ASeaCreatureAIController::ThreatKey = TEXT("Threat");
+const FName ASeaCreatureAIController::HomeLocationKey = TEXT("HomeLocation");
+
 ASeaCreatureAIController::ASeaCreatureAIController()
 {
 	static ConstructorHelpers::FObjectFinder<UBlackboardData> BlackboardFinder(TEXT("/Script/AIModule.BlackboardData'/Game/BluePrint/SeaCreature/AI/BB_SeaCreature.BB_SeaCreature'"));

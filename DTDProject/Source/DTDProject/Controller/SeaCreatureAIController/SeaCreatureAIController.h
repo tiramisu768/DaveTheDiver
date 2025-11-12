@@ -25,6 +25,10 @@ private:
 
 public:
 	ASeaCreatureAIController();
+
+	static const FName ThreatKey;
+	static const FName HomeLocationKey;
+
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	void PlayBehaviorTree(APawn* InPawn);
 

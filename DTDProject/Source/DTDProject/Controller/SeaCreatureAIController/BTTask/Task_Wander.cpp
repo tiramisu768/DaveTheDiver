@@ -10,24 +10,43 @@
 
 UTask_Wander::UTask_Wander()
 {
-	bNotifyTick = false;
+	bNotifyTick = true;
 	NodeName = TEXT("Wander");
 }
 
 EBTNodeResult::Type UTask_Wander::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("WANDER TASK STARTED!"));
+	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
+	const FSeaCreatureData* FishData = SeaCreature->GetData();
+	SeaCreature->MovementComponent->MaxSpeed = FishData->WanderSpeed;
+	SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
+	return EBTNodeResult::InProgress;
+}
+
+void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	if (SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr || SeaCreature->MovementComponent == nullptr)
 	{
-		return EBTNodeResult::Failed;
-		
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		return;
 	}
 
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	if (FishData == nullptr)
 	{
-		return EBTNodeResult::Failed;
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		return;
+	}
+
+	if (OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASeaCreatureAIController::ThreatKey) != nullptr)
+	{
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		return;
 	}
 
 	const float FakeDeltaTime = 0.033f;
@@ -38,14 +57,11 @@ EBTNodeResult::Type UTask_Wander::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	if (!Dir.IsNearlyZero())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Wander Test"));
-		SeaCreature->MovementComponent->MaxSpeed = FishData->WanderSpeed;
-		SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
-		SeaCreature->AddMovementInput(Dir);
-		FRotator TargetRotation = Dir.Rotation();
-		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, FakeDeltaTime, 5.0f));
-	}
 
-	return EBTNodeResult::Succeeded;
+		SeaCreature->AddMovementInput(Dir,FishData->WanderSpeed);
+		FRotator TargetRotation = Dir.Rotation();
+		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, FakeDeltaTime, 2.0f));
+	}
 }
 
 EBTNodeResult::Type UTask_Wander::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

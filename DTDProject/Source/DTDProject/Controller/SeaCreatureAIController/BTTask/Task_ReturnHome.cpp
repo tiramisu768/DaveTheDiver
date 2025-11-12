@@ -21,6 +21,10 @@ UTask_ReturnHome::UTask_ReturnHome()
 EBTNodeResult::Type UTask_ReturnHome::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
+    ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
+    const FSeaCreatureData* FishData = SeaCreature->GetData();
+    SeaCreature->MovementComponent->MaxSpeed = FishData->ReturnSpeed;
+    SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
     return EBTNodeResult::InProgress;
 }
 
@@ -30,6 +34,12 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 
     ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
     if (SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr || SeaCreature->MovementComponent == nullptr)
+    {
+        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+        return;
+    }
+
+    if (OwnerComp.GetBlackboardComponent()->GetValueAsObject(TEXT("TargetActor")) != nullptr)
     {
         FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
         return;
@@ -57,7 +67,6 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 
     if (!Dir.IsNearlyZero())
     {
-        SeaCreature->MovementComponent->MaxSpeed = FishData->ReturnSpeed;
         SeaCreature->AddMovementInput(Dir);
         FRotator TargetRotation = Dir.Rotation();
         SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));

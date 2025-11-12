@@ -69,26 +69,34 @@ void USeaCreatureSteeringComponent::UpdateWanderTarget()
 {
 	if (SeaCreatureOwner == nullptr) return;
 
-	const FVector RandomUnitPoint = FMath::VRand() * FMath::FRand();
+	const FVector ForwardVec = SeaCreatureOwner->GetActorForwardVector();
 
-	const FVector EllipsoidRadius = FVector(WanderRadius, WanderRadius, WanderRadius * 0.5f);
-	const FVector RandomOffset = RandomUnitPoint * EllipsoidRadius;
+	FVector RandomDirection = ForwardVec.RotateAngleAxis(FMath::FRandRange(-45.f, 45.f), FVector::UpVector);
 
-	// 홈 중심 구형 범위 내 랜덤 포인트
-	CurrentWanderTarget = Home + RandomOffset;
+	RandomDirection = RandomDirection.RotateAngleAxis(FMath::FRandRange(-90.f, 90.f), SeaCreatureOwner->GetActorRightVector());
+
+	FVector DesiredTarget = SeaCreatureOwner->GetActorLocation() + RandomDirection.GetSafeNormal() * WanderRadius;
+
+	const float DistFromHome = FVector::Dist(SeaCreatureOwner->GetActorLocation(), Home);
+	if (DistFromHome > WanderRadius)
+	{
+		FVector ToHomeDir = (Home - SeaCreatureOwner->GetActorLocation()).GetSafeNormal();
+		
+		DesiredTarget = SeaCreatureOwner->GetActorLocation() + (RandomDirection + ToHomeDir).GetSafeNormal() * WanderRadius;
+	}
+
+	CurrentWanderTarget = DesiredTarget;
 
 	if (ACharacterGameModeBase* GameMode = Cast<ACharacterGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Wander LimitZ: %f"), GameMode->LimitZ);
 		if (CurrentWanderTarget.Z > GameMode->LimitZ)
 		{
 			CurrentWanderTarget.Z = GameMode->LimitZ;
-			UE_LOG(LogTemp, Warning, TEXT("Adjusted Wander Target Z to LimitZ: %f"), CurrentWanderTarget.Z);
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Not Found"));
+		UE_LOG(LogTemp, Error, TEXT("Not Found GameMode in SteeringComponent"));
 	}
 }
 

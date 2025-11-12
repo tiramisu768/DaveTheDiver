@@ -8,9 +8,12 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "SeaCreature/SeaCreature.h"
+#include "GameFramework/FloatingPawnMovement.h"
 
-const FName ASeaCreatureAIController::ThreatKey = TEXT("Threat");
+const FName ASeaCreatureAIController::TargetActorKey = TEXT("TargetActor");
 const FName ASeaCreatureAIController::HomeLocationKey = TEXT("HomeLocation");
+const FName ASeaCreatureAIController::MoveDirectionKey = TEXT("MoveDirection");
+const FName ASeaCreatureAIController::IsThreatNearbyKey = TEXT("IsThreatNearby");
 
 ASeaCreatureAIController::ASeaCreatureAIController()
 {
@@ -60,7 +63,6 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 	UBlackboardComponent* BlackboardComp = Blackboard.Get();
 	if (!UseBlackboard(BlackboardAsset, BlackboardComp)) return;
 
-	// check() 대신 if문으로 안전하게 실행합니다.
 	if (!RunBehaviorTree(SeaCreature->OverrideBT))
 	{
 		UE_LOG(LogTemp, Error, TEXT("ASeaCreatureAIController::PlayBehaviorTree - Failed to run Behavior Tree for %s!"), *SeaCreature->GetName());
@@ -68,10 +70,37 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 	}
 
 	BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), SeaCreature->GetActorLocation());
+
+	const FSeaCreatureData* FishData = SeaCreature->GetData();
+	if (FishData && SightConfig)
+	{
+		SightConfig->SightRadius = FishData->SightRadius;
+		PerceptionComp->ConfigureSense(*SightConfig);
+	}
 }
 
 void ASeaCreatureAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	PlayBehaviorTree(InPawn);
+}
+
+void ASeaCreatureAIController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	/*ASeaCreature* SeaCreature = Cast<ASeaCreature>(GetPawn());
+	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+
+	if (SeaCreature && BlackboardComp)
+	{
+		FVector Dir = BlackboardComp->GetValueAsVector(MoveDirectionKey);
+		if (!Dir.IsNearlyZero())
+		{
+			SeaCreature->AddMovementInput(Dir);
+
+			FRotator TargetRot = Dir.Rotation();
+			SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRot, DeltaSeconds, 2.0f));
+		}
+	}*/
 }

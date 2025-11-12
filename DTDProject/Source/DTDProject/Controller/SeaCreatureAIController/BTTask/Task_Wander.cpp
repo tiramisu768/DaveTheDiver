@@ -29,6 +29,8 @@ void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
+	ASeaCreatureAIController* AIController = Cast<ASeaCreatureAIController>(OwnerComp.GetAIOwner());
+
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	if (SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr || SeaCreature->MovementComponent == nullptr)
 	{
@@ -43,25 +45,33 @@ void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 		return;
 	}
 
-	if (OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASeaCreatureAIController::ThreatKey) != nullptr)
+	if (UObject* TargetObject = OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASeaCreatureAIController::TargetActorKey))
 	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-		return;
+		AActor* TargetActor = Cast<AActor>(TargetObject);
+		if (TargetActor)
+		{
+			const float DistanceTarget = FVector::Dist(SeaCreature->GetActorLocation(), TargetActor->GetActorLocation());
+			if (DistanceTarget < FishData->ActionTriggerDistance)
+			{
+				FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+				return;
+			}
+		}
+
 	}
 
-	const float FakeDeltaTime = 0.033f;
-	FVector Dir = SeaCreature->SteeringComp->ComputeWanderDir(FakeDeltaTime);
+	FVector Dir = SeaCreature->SteeringComp->ComputeWanderDir(DeltaSeconds);
 	Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
 	Dir.Normalize();
 
 	if (!Dir.IsNearlyZero())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Wander Test"));
-
-		SeaCreature->AddMovementInput(Dir,FishData->WanderSpeed);
-		FRotator TargetRotation = Dir.Rotation();
-		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, FakeDeltaTime, 2.0f));
+		SeaCreature->AddMovementInput(Dir, FishData->WanderSpeed);
+		FRotator TargetRot = Dir.Rotation();
+		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRot, DeltaSeconds, 2.0f));
 	}
+	/*OwnerComp.GetBlackboardComponent()->SetValueAsVector(ASeaCreatureAIController::MoveDirectionKey, Dir.GetSafeNormal());*/
+
 }
 
 EBTNodeResult::Type UTask_Wander::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

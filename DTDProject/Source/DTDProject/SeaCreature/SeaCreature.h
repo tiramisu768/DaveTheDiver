@@ -45,12 +45,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float SlowRadius = { 300.0f }; //물고기 배회범위
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float FleeDistance = 100.0f; // 물고기 도망시작 범위
+	float SightRadius = 300.0f; // 로보 인지 범위
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Stat")
 	float FleeSafeDistance = 500.f; //물고기 안전거리 범위
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category ="Stat")
-	float ChaseTriggerDistance = 300.0f; //물고기 추격 범위
+	float ActionTriggerDistance = 150.0f; //물고기 추격/도망 시작 범위
 
 	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

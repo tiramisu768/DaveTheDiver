@@ -26,8 +26,10 @@ private:
 public:
 	ASeaCreatureAIController();
 
-	static const FName ThreatKey;
+	static const FName TargetActorKey;
 	static const FName HomeLocationKey;
+	static const FName MoveDirectionKey;
+	static const FName IsThreatNearbyKey;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	void PlayBehaviorTree(APawn* InPawn);
@@ -39,5 +41,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr <UAISenseConfig_Sight> SightConfig;
 
-	void OnPossess(APawn* InPawn) override;
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void Tick(float DeltaSeconds) override;
 };

@@ -14,6 +14,8 @@ const FName ASeaCreatureAIController::TargetActorKey = TEXT("TargetActor");
 const FName ASeaCreatureAIController::HomeLocationKey = TEXT("HomeLocation");
 const FName ASeaCreatureAIController::MoveDirectionKey = TEXT("MoveDirection");
 const FName ASeaCreatureAIController::IsThreatNearbyKey = TEXT("IsThreatNearby");
+const FName ASeaCreatureAIController::HomeReturnDistKey = TEXT("DistanceFromHome");
+const FName ASeaCreatureAIController::IsFarFromHomeKey = TEXT("IsFarFromHome");
 
 ASeaCreatureAIController::ASeaCreatureAIController()
 {
@@ -60,7 +62,7 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 		return;
 	}
 
-	UBlackboardComponent* BlackboardComp = Blackboard.Get();
+	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
 	if (!UseBlackboard(BlackboardAsset, BlackboardComp)) return;
 
 	if (!RunBehaviorTree(SeaCreature->OverrideBT))
@@ -69,14 +71,16 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 		return;
 	}
 
-	BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), SeaCreature->GetActorLocation());
-
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	if (FishData && SightConfig)
 	{
 		SightConfig->SightRadius = FishData->SightRadius;
 		PerceptionComp->ConfigureSense(*SightConfig);
 	}
+
+	BlackboardComp->SetValueAsVector(HomeLocationKey, SeaCreature->GetActorLocation());
+	BlackboardComp->SetValueAsFloat(HomeReturnDistKey, SeaCreature->GetHomeReturnDist());
+	BlackboardComp->SetValueAsBool(IsFarFromHomeKey, false);
 }
 
 void ASeaCreatureAIController::OnPossess(APawn* InPawn)
@@ -85,22 +89,3 @@ void ASeaCreatureAIController::OnPossess(APawn* InPawn)
 	PlayBehaviorTree(InPawn);
 }
 
-void ASeaCreatureAIController::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	/*ASeaCreature* SeaCreature = Cast<ASeaCreature>(GetPawn());
-	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
-
-	if (SeaCreature && BlackboardComp)
-	{
-		FVector Dir = BlackboardComp->GetValueAsVector(MoveDirectionKey);
-		if (!Dir.IsNearlyZero())
-		{
-			SeaCreature->AddMovementInput(Dir);
-
-			FRotator TargetRot = Dir.Rotation();
-			SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRot, DeltaSeconds, 2.0f));
-		}
-	}*/
-}

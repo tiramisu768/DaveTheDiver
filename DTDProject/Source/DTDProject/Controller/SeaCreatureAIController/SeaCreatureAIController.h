@@ -30,6 +30,8 @@ public:
 	static const FName HomeLocationKey;
 	static const FName MoveDirectionKey;
 	static const FName IsThreatNearbyKey;
+	static const FName HomeReturnDistKey;
+	static const FName IsFarFromHomeKey;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	void PlayBehaviorTree(APawn* InPawn);
@@ -42,5 +44,4 @@ protected:
 	TObjectPtr <UAISenseConfig_Sight> SightConfig;
 
 	virtual void OnPossess(APawn* InPawn) override;
-	virtual void Tick(float DeltaSeconds) override;
 };

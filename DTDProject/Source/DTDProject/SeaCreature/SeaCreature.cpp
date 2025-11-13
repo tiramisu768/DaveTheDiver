@@ -93,7 +93,7 @@ void ASeaCreature::BeginPlay()
 			MovementComponent->Deceleration = Data->Acceleration;
 		}
 
-		//공격성물고기는 -300, 회피성물고기는 -100
+		//공격성물고기는 900-300, 회피성물고기는 900-100
 		HomeReturnDist = Data->IsAggressive? Data->WanderRadius - 300.f: Data->WanderRadius - 100.f;
 
 		SteeringComp->InitParams(Data->WanderRadius,Data->SlowRadius);

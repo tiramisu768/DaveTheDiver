@@ -27,6 +27,17 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (nullptr == BlackboardComp) return;
 
+	// 1. 집과의 거리 체크 로직 (추가된 부분)
+	ASeaCreature* SeaCreature = Cast<ASeaCreature>( AIController->GetPawn());
+	if (SeaCreature)
+	{
+		const FVector HomeLocation = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::HomeLocationKey);
+		const float HomeReturnDistance = BlackboardComp->GetValueAsFloat(ASeaCreatureAIController::HomeReturnDistKey);
+		const float CurrentDistance = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
+
+		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsFarFromHomeKey, CurrentDistance > HomeReturnDistance);
+	}
+
 	TArray<AActor*> Sensed;
 	AIController->GetAIPerceptionComponent()->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), Sensed);
 

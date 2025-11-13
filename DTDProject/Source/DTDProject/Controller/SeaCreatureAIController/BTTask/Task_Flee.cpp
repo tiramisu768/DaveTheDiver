@@ -37,7 +37,7 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	if (TargetActor == nullptr || SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr)
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(ASeaCreatureAIController::MoveDirectionKey,FVector::ZeroVector);
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;
 	}
 

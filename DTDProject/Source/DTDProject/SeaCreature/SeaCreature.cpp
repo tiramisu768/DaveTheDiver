@@ -66,7 +66,12 @@ ASeaCreature::ASeaCreature()
 	if (AttackMontageObjectFinder.Succeeded())
 		AttackMontage = AttackMontageObjectFinder.Object;*/
 
-	AIControllerClass = ASeaCreatureAIController::StaticClass();
+	//AIControllerClass = ASeaCreatureAIController::StaticClass();
+	static ConstructorHelpers::FClassFinder<AAIController> AIControllerClassFinder(TEXT("/Game/BluePrint/SeaCreature/AI/BP_SeaCreatureAIController.BP_SeaCreatureAIController_C"));
+	if (AIControllerClassFinder.Succeeded())
+	{
+		AIControllerClass = AIControllerClassFinder.Class;
+	}
 	//EAutoPossessAI
 	//Disabled, //AIController사용안함
 	//PlacedInWorld.//게임 시작시 배치되어있는 pawn은 AIController를 소유함
@@ -97,6 +102,12 @@ void ASeaCreature::BeginPlay()
 		HomeReturnDist = Data->IsAggressive? Data->WanderRadius - 300.f: Data->WanderRadius - 100.f;
 
 		SteeringComp->InitParams(Data->WanderRadius,Data->SlowRadius);
+	}
+
+	ASeaCreatureAIController* AIController = Cast<ASeaCreatureAIController>(GetController());
+	if (AIController)
+	{
+		AIController->PlayBehaviorTree(this);
 	}
 
 	FishStateComponent->OnTakeDamage.BindLambda([this](float Percent)

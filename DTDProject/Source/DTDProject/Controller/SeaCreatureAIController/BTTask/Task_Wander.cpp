@@ -45,21 +45,6 @@ void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 		return;
 	}
 
-	if (UObject* TargetObject = OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASeaCreatureAIController::TargetActorKey))
-	{
-		AActor* TargetActor = Cast<AActor>(TargetObject);
-		if (TargetActor)
-		{
-			const float DistanceTarget = FVector::Dist(SeaCreature->GetActorLocation(), TargetActor->GetActorLocation());
-			if (DistanceTarget < FishData->ActionTriggerDistance)
-			{
-				FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-				return;
-			}
-		}
-
-	}
-
 	FVector Dir = SeaCreature->SteeringComp->ComputeWanderDir(DeltaSeconds);
 	Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
 	Dir.Normalize();

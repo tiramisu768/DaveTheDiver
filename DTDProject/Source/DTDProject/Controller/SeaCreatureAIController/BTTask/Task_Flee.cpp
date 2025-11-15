@@ -12,14 +12,12 @@ UTask_Flee::UTask_Flee()
 {
 	bNotifyTick = true;
 	NodeName = TEXT("Flee From Target");
-	BlackboardKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UTask_Flee, BlackboardKey), AActor::StaticClass());
 }
 
 EBTNodeResult::Type UTask_Flee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("FLEE TASK STARTED!"));
-	OwnerComp.GetBlackboardComponent()->SetValueAsFloat(TEXT("FleeStartTime"), GetWorld()->GetTimeSeconds());
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	SeaCreature->MovementComponent->MaxSpeed = FishData->FleeSpeed;
@@ -31,12 +29,12 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
-	AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 
-	if (TargetActor == nullptr || SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr)
+	if (BlackboardComp == nullptr || SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(ASeaCreatureAIController::MoveDirectionKey,FVector::ZeroVector);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;
 	}
@@ -48,11 +46,34 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 		return;
 	}
 
-	float Dist = FVector::Dist(SeaCreature->GetActorLocation(), TargetActor->GetActorLocation());
-	if (Dist > FishData->FleeSafeDistance)
+	bool bFleeFinished = false;
+	if (TargetActor == nullptr)
 	{
-		OwnerComp.GetBlackboardComponent()->ClearValue(ASeaCreatureAIController::TargetActorKey);
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(ASeaCreatureAIController::MoveDirectionKey, FVector::ZeroVector);
+		bFleeFinished = true;
+	}
+	else
+	{
+		float Dist = FVector::Dist(SeaCreature->GetActorLocation(), TargetActor->GetActorLocation());
+		if (Dist > FishData->FleeSafeDistance)
+		{
+			bFleeFinished = true;
+		}
+	}
+
+	if (bFleeFinished)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("FLEE TEST!"));
+		BlackboardComp->ClearValue(ASeaCreatureAIController::TargetActorKey);
+
+		const FVector HomeLocation = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::HomeLocationKey);
+		const float HomeReturnDistance = FishData->WanderRadius;
+		const float CurrentDistance = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
+
+		FString DebugMsg = FString::Printf(TEXT("Flee Finish.CD : %.2f"), CurrentDistance);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, DebugMsg);
+
+		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsFarFromHomeKey, CurrentDistance > HomeReturnDistance);
+
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return;
 	}
@@ -67,10 +88,4 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 		FRotator TargetRotation = Dir.Rotation();
 		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
 	}
-	/*OwnerComp.GetBlackboardComponent()->SetValueAsVector(ASeaCreatureAIController::MoveDirectionKey, Dir.GetSafeNormal());*/
-}
-
-EBTNodeResult::Type UTask_Flee::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
-{
-	return EBTNodeResult::Aborted;
 }

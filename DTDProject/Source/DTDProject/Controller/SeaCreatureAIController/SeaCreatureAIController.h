@@ -13,35 +13,37 @@ UCLASS()
 class DTDPROJECT_API ASeaCreatureAIController : public AAIController
 {
 	GENERATED_BODY()
-private:
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	TObjectPtr<class UBehaviorTree> PassiveBT;
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	TObjectPtr<class UBehaviorTree> AggressiveBT;
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	TObjectPtr<class UBlackboardData> BlackboardAsset;
-
-	FGenericTeamId TeamId;
 
 public:
 	ASeaCreatureAIController();
 
 	static const FName TargetActorKey;
 	static const FName HomeLocationKey;
-	static const FName MoveDirectionKey;
-	static const FName IsThreatNearbyKey;
-	static const FName HomeReturnDistKey;
 	static const FName IsFarFromHomeKey;
+	static const FName IsThreatImminentKey; // 도망쳐야 할 만큼 가까운가?
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
+
 	void PlayBehaviorTree(APawn* InPawn);
 
 protected:
+	virtual void OnPossess(APawn* InPawn) override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	TObjectPtr<class UBehaviorTree> PassiveBT;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	TObjectPtr<class UBehaviorTree> AggressiveBT;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	TObjectPtr<class UBlackboardData> BlackboardAsset;
+
+	FGenericTeamId TeamId;
+
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "AI", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<UAIPerceptionComponent> PerceptionComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr <UAISenseConfig_Sight> SightConfig;
-
-	virtual void OnPossess(APawn* InPawn) override;
 };

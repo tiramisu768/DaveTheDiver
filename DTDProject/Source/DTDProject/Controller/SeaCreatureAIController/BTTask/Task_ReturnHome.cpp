@@ -14,17 +14,18 @@ UTask_ReturnHome::UTask_ReturnHome()
 {
     bNotifyTick = true;
     NodeName = TEXT("Return Home");
-
-    BlackboardKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UTask_ReturnHome, BlackboardKey));
 }
 
 EBTNodeResult::Type UTask_ReturnHome::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("RETURNHOME TASK STARTED!"));
     ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
     const FSeaCreatureData* FishData = SeaCreature->GetData();
+
     SeaCreature->MovementComponent->MaxSpeed = FishData->ReturnSpeed;
     SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
+
     return EBTNodeResult::InProgress;
 }
 
@@ -32,14 +33,9 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 {
     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
+    UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
     ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
-    if (SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr || SeaCreature->MovementComponent == nullptr)
-    {
-        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-        return;
-    }
-
-    if (OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASeaCreatureAIController::TargetActorKey) != nullptr)
+    if (BlackboardComp==nullptr || SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr)
     {
         FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
         return;
@@ -52,13 +48,13 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
         return;
     }
 
-    FVector HomeLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(ASeaCreatureAIController::HomeLocationKey);
-	float HomeReturnDist = OwnerComp.GetBlackboardComponent()->GetValueAsFloat(ASeaCreatureAIController::HomeReturnDistKey);
-    float Dist = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
-    
-    if (Dist < HomeReturnDist)
+    const FVector HomeLocation = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::HomeLocationKey);
+    const float DistToHome = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
+
+    if (DistToHome < 100.f)
     {
-        OwnerComp.GetBlackboardComponent()->SetValueAsVector(ASeaCreatureAIController::MoveDirectionKey, FVector::ZeroVector);
+        BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsFarFromHomeKey, false);
+
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
         return;
     }
@@ -73,10 +69,4 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
         FRotator TargetRotation = Dir.Rotation();
         SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
     }
-
-}
-
-EBTNodeResult::Type UTask_ReturnHome::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
-{
-    return EBTNodeResult::Aborted;
 }

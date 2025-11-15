@@ -27,17 +27,6 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (nullptr == BlackboardComp) return;
 
-	// 1. 집과의 거리 체크 로직 (추가된 부분)
-	ASeaCreature* SeaCreature = Cast<ASeaCreature>( AIController->GetPawn());
-	if (SeaCreature)
-	{
-		const FVector HomeLocation = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::HomeLocationKey);
-		const float HomeReturnDistance = BlackboardComp->GetValueAsFloat(ASeaCreatureAIController::HomeReturnDistKey);
-		const float CurrentDistance = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
-
-		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsFarFromHomeKey, CurrentDistance > HomeReturnDistance);
-	}
-
 	TArray<AActor*> Sensed;
 	AIController->GetAIPerceptionComponent()->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), Sensed);
 
@@ -59,7 +48,18 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	}
 
 	BlackboardComp->SetValueAsObject(ASeaCreatureAIController::TargetActorKey, NearestTarget);
-	const FVector HomeLocation = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::HomeLocationKey);
-	const float DistanceFromHome = FVector::Dist(AIController->GetPawn()->GetActorLocation(), HomeLocation);
-	BlackboardComp->SetValueAsFloat(TEXT("DistanceFromHome"), DistanceFromHome);
+
+	if (NearestTarget)
+	{
+		const FSeaCreatureData* FishData = Cast<ASeaCreature>(AIController->GetPawn())->GetData();
+		if (FishData)
+		{
+			const bool bIsThreatImminent = MinDistSq < FMath::Square(FishData->ActionTriggerDistance);
+			BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsThreatImminentKey, bIsThreatImminent);
+		}
+	}
+	else
+	{
+		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsThreatImminentKey, false);
+	}
 }

@@ -37,8 +37,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	bool IsAggressive;
 
-
-
 	// 반경
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float WanderRadius = { 900.0f }; //물고기 배회범위
@@ -46,14 +44,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float SlowRadius = { 300.0f }; //물고기 배회범위
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float SightRadius = 300.0f; // 로보 인지 범위
+	float SightRadius = 1500.0f; // 로보 인지 범위
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Stat")
-	float FleeSafeDistance = 500.f; //물고기 안전거리 범위
+	float FleeSafeDistance = 1000.f; //물고기 안전거리 범위
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category ="Stat")
-	float ActionTriggerDistance = 150.0f; //물고기 추격/도망 시작 범위
+	float ActionTriggerDistance = 400.0f; //물고기 추격/도망 시작 범위
 
 	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -121,13 +118,9 @@ private:
 	FTimerHandle CollectHintTimer;
 
 
-
 public:
 
 	ASeaCreature();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BT")
-	TObjectPtr<class UBehaviorTree> OverrideBT;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCapsuleComponent> CapsuleComponent;

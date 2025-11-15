@@ -67,13 +67,6 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
         return;
     }
 
-    const FSeaCreatureData* FishData = SeaCreature->GetData();
-    if (FishData == nullptr)
-    {
-        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-        return;
-    }
-
     if (Waypoints.Num() == 0)
     {
         BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsFarFromHomeKey, false);
@@ -102,6 +95,7 @@ void UTask_ReturnHome::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 
     if (!Dir.IsNearlyZero())
     {
+        const FSeaCreatureData* FishData = SeaCreature->GetData();
         SeaCreature->AddMovementInput(Dir,FishData->ReturnSpeed);
         FRotator TargetRotation = Dir.Rotation();
         SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));

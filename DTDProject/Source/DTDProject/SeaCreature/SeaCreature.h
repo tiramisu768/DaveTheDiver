@@ -48,9 +48,11 @@ public:
 	float SightRadius = 1500.0f; // 로보 인지 범위
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Stat")
-	float FleeSafeDistance = 1000.f; //물고기 안전거리 범위
+	float SafeDistance = 1000.f; //물고기 추격/도망 중단 범위
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category ="Stat")
 	float ActionTriggerDistance = 400.0f; //물고기 추격/도망 시작 범위
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float AttackRange = 150.0f; //물고기 공격 시작 범위
 
 	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

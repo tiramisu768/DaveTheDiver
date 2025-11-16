@@ -54,7 +54,7 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	else
 	{
 		float Dist = FVector::Dist(SeaCreature->GetActorLocation(), TargetActor->GetActorLocation());
-		if (Dist > FishData->FleeSafeDistance)
+		if (Dist > FishData->SafeDistance)
 		{
 			bFleeFinished = true;
 		}

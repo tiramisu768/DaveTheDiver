@@ -11,17 +11,22 @@
 UTask_Chase::UTask_Chase()
 {
 	bNotifyTick = true;
-	NodeName = TEXT("Chase Last Known Location");
+	NodeName = TEXT("Chase");
 }
 
 EBTNodeResult::Type UTask_Chase::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	if (!OwnerComp.GetBlackboardComponent()->IsVectorValueSet(TEXT("LastKnownTargetLocation")))
+	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
+	if (SeaCreature == nullptr || SeaCreature->GetData() == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}
+
+	SeaCreature->MovementComponent->MaxSpeed = SeaCreature->GetData()->ChaseSpeed;
+	SeaCreature->MovementComponent->Acceleration = SeaCreature->GetData()->Acceleration;
+	
 	return EBTNodeResult::InProgress;
 }
 
@@ -29,44 +34,58 @@ void UTask_Chase::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 
-	if (SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr)
+	if (BlackboardComp==nullptr || SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr)
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;
 	}
 
-	const FVector TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("LastKnownTargetLocation"));
+	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
 
-	if (FVector::DistSquared(SeaCreature->GetActorLocation(), TargetLocation) < FMath::Square(100.f))
+	//타겟이 사라졌거나 너무 멀어지면 추격 포기 (Succeeded)
+	const float DistToTarget = FVector::Dist(SeaCreature->GetActorLocation(), TargetActor->GetActorLocation());
+	bool bChaseFinished = false;
+	if (TargetActor == nullptr)
 	{
+		bChaseFinished = true;
+	}
+	else
+	{
+		if (DistToTarget > SeaCreature->GetData()->SafeDistance)
+		{
+			bChaseFinished = true;
+		}
+	}
+
+	if (bChaseFinished)
+	{
+		BlackboardComp->ClearValue(ASeaCreatureAIController::TargetActorKey);
+		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsThreatImminentKey, false);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return;
 	}
 
-	const FSeaCreatureData* FishData = SeaCreature->GetData();
-	if (FishData == nullptr)
+	//타겟이 공격 범위 안에 들어오면 추격 성공 (Succeeded)
+	if (DistToTarget <= SeaCreature->GetData()->AttackRange)
 	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		// 움직임을 멈추고 성공을 반환합니다.
+		//SeaCreature->MovementComponent->StopMovementImmediately();
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return;
 	}
 
-	FVector Dir = SeaCreature->SteeringComp->ComputeChaseDir(TargetLocation);
+
+	FVector Dir = SeaCreature->SteeringComp->ComputeChaseDir(TargetActor->GetActorLocation());
 	Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
 	Dir.Normalize();
 
 	if (!Dir.IsNearlyZero())
 	{
-		SeaCreature->MovementComponent->MaxSpeed = FishData->ChaseSpeed;
-		SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
 		SeaCreature->AddMovementInput(Dir);
 		FRotator TargetRotation = Dir.Rotation();
-		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 5.0f));
+		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
 	}
-}
-
-EBTNodeResult::Type UTask_Chase::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
-{
-	return EBTNodeResult::Aborted;
 }

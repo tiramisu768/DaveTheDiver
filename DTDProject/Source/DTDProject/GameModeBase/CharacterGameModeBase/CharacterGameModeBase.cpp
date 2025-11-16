@@ -14,5 +14,5 @@ ACharacterGameModeBase::ACharacterGameModeBase()
 		DefaultPawnClass = MyRoboBPClass.Class;
 
 	PlayerControllerClass = AMyCharacterController::StaticClass();
-	HUDClass = AMyHUD::StaticClass();
+	HUDClass = nullptr;
 }

@@ -2,4 +2,11 @@
 
 
 #include "GameModeBase/LobbyGameModeBase.h"
+#include "Controller/MyCharacterController/LobbyPlayerController.h"
 
+ALobbyGameModeBase::ALobbyGameModeBase()
+{
+	PlayerControllerClass = ALobbyPlayerController::StaticClass();
+
+	HUDClass = nullptr;
+}

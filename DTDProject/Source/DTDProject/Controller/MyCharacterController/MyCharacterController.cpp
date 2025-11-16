@@ -16,9 +16,16 @@
 #include "InputActionValue.h"
 #include "UI/RoboAimUI.h"
 #include "UI/RoboWeaponUI.h"
+#include "UI/MainUI.h"
 
 AMyCharacterController::AMyCharacterController()
 {
+	static ConstructorHelpers::FClassFinder<UMainUI> MainWidgetFinder(TEXT("/Game/BluePrint/UI/BP_MainUI.BP_MainUI_C"));
+	if (MainWidgetFinder.Succeeded())
+	{
+		MainWidgetClass = MainWidgetFinder.Class;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_Move.IA_Move'"));
 	if (MoveActionFinder.Succeeded())
 	{
@@ -110,6 +117,15 @@ void AMyCharacterController::BeginPlay()
 	Super::BeginPlay();
 
 	ControlledRobo = Cast<AMyRobo>(GetCharacter());
+
+	if (MainWidgetClass)
+	{
+		MainWidgetInstance = CreateWidget<UMainUI>(this, MainWidgetClass);
+		if (MainWidgetInstance)
+		{
+			MainWidgetInstance->AddToViewport();
+		}
+	}
 }
 
 void AMyCharacterController::Tick(float DeltaTime)

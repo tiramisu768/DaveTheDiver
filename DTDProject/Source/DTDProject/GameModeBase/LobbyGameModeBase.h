@@ -13,5 +13,7 @@ UCLASS()
 class DTDPROJECT_API ALobbyGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	ALobbyGameModeBase();	
 };

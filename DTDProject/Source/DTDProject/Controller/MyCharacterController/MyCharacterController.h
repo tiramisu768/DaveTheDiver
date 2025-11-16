@@ -15,6 +15,11 @@ class DTDPROJECT_API AMyCharacterController : public APlayerController
 {
 	GENERATED_BODY()
 private:
+	TSubclassOf<class UMainUI> MainWidgetClass;
+
+	UPROPERTY()
+	class UUserWidget* MainWidgetInstance;
+
 #pragma region Input
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInputAction> MoveAction; //SWIMMING

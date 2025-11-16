@@ -52,7 +52,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category ="Stat")
 	float ActionTriggerDistance = 400.0f; //물고기 추격/도망 시작 범위
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float AttackRange = 150.0f; //물고기 공격 시작 범위
+	float AttackRange = 50.0f; //물고기 공격 시작 범위
 
 	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

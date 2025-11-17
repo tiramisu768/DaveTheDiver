@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "UI/MainUI.h"
 #include "MyCharacterController.generated.h"
 
 /**
@@ -72,6 +73,7 @@ private:
 //	//bool isHit{ true };
 public:
 	AMyCharacterController();
+	UMainUI* GetMainUI() const { return Cast<UMainUI>(MainWidgetInstance); };
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void SetupInputComponent() override;
@@ -85,7 +87,6 @@ public:
 	void MoveAimPoint(const FVector2D& MoveValue);
 	void StartAiming(const FInputActionValue& value);
 	void StopAiming(const FInputActionValue& value);
-	void UpdateAimDirection(const FInputActionValue& value);
 	void SwitchWeaponInput(const FInputActionValue& value);
 	void UseToolInput(const FInputActionValue& value);
 	void SwitchToolInput(const FInputActionValue& value);

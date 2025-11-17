@@ -4,11 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "ActorComponent/InventoryComponent.h"
 #include "MainUI.generated.h"
 
 class URoboHPBarUI;
 class URoboWeaponUI;
 class UFishRankUI;
+class URoboAimUI;
+class UWarningOxygenUI;
+class UResultTableUI;
 
 UCLASS()
 class DTDPROJECT_API UMainUI : public UUserWidget
@@ -16,6 +20,8 @@ class DTDPROJECT_API UMainUI : public UUserWidget
 	GENERATED_BODY()
 
 protected:
+	virtual void NativeConstruct() override;
+
 	//HP
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<URoboHPBarUI> HPBarWidget;
@@ -28,20 +34,19 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UFishRankUI> RankWidget;
 
-	////Warning Oxygen
-	//TSubclassOf<UUserWidget> WarningOxygenWidget;
-	//TObjectPtr<class UWarningOxygenUI> WarningOxygenUIClass;
+	//Äù½ºÆ® Á¤º¸
 
-	////Äù½ºÆ® Á¤º¸
+	//Aim
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<URoboAimUI> AimWidget;
 
-	////Aim
-	//TSubclassOf<UUserWidget> AimWidget;
-	//TObjectPtr<class URoboAimUI> RoboAimUIClass;
+	//Warning HP
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UWarningOxygenUI> WarningHPWidget;
 
-	////Result Table
-	//TSubclassOf<UUserWidget> ResultTableWidget;
-	//TObjectPtr<class UResultTableUI> ResultTableUIClass;
-
+	//Result Table
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UResultTableUI> ResultTableWidget;
 
 
 private:
@@ -57,19 +62,19 @@ public:
 
 	void OnEnterGame();*/
 
-	/*void BeginPlay() override;
-	UUserWidget* GetCurrentWidget() const { return CurrentWidget; };
-	void SetHPPercent(float Percent);
-	void SetMeters(float Meter);
+	//void BeginPlay() override;
+	//UUserWidget* GetCurrentWidget() const { return CurrentWidget; };
+	void SetHPPercent(float value);
+	void SetMeters(float value);
 	void SetWeights(float Current, float Max);
 	void ShowRankUI(const TArray<FCaughtFishInfo>& FishList);
-	void ShowOxygenWarningUI();
-	URoboWeaponUI* GetRoboWeaponUI() const { return RoboWeaponUIClass; }
+	void ShowHPWarningWidget();
+	URoboWeaponUI* GetRoboWeaponUI() const { return WeaponWidget; }
 	void PlaySwitchAnimation(int32 SelectedIndex);
-	URoboAimUI* GetRoboAimUI() const { return RoboAimUIClass; }
+	URoboAimUI* GetRoboAimUI() const { return AimWidget; }
 	void UpdateAimPos(FVector2D AimPos);
 	void ResetAimPos();
-	void ShowGameEndUI();*/
+	void ShowGameEndUI();
 
 
 };

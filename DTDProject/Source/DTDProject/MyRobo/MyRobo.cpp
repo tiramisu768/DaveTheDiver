@@ -2,6 +2,7 @@
 
 
 #include "MyRobo/MyRobo.h"
+#include "Controller/MyCharacterController/MyCharacterController.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -10,7 +11,7 @@
 #include "GameFramework/PhysicsVolume.h"
 #include "UI/RoboHPBarUI.h"		
 #include "UI/LongPressUI.h"		
-#include "HUD/MyHUD.h"
+#include "UI/MainUI.h"
 #include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
@@ -20,6 +21,8 @@
 #include "SeaCreature/SeaCreature.h"
 #include "Engine/OverlapResult.h"
 #include "Interface/InteractionObject.h"
+#include "Weapon/Weapon.h"
+#include "Object/RandomBox.h"
 
 
 // Sets default values
@@ -260,18 +263,21 @@ void AMyRobo::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	//APlayerController* controller = Cast<APlayerController>(NewController);
-	//AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD());
-	////델리게이트 등록
-	//RoboComponent->OnHPChanged.BindLambda([this, MyHUD](float value) {
-	//	MyHUD->SetHPPercent(value);
-	//	});
-	//RoboComponent->OnDepthChanged.BindLambda([this, MyHUD](float value) {
-	//	MyHUD->SetMeters(value);
-	//	});
-	//InventoryComponent->OnInventoryChanged.BindLambda([MyHUD](const TArray<FCaughtFishInfo>& FishList) {
-	//	MyHUD->ShowRankUI(FishList);
-	//	});
+	MainController = Cast<AMyCharacterController>(NewController);
+	if(MainController)
+	{
+		UMainUI* MainUI = Cast<UMainUI>(MainController->GetMainUI());
+		//델리게이트 등록
+		RoboComponent->OnHPChanged.BindLambda([this, MainUI](float value) {
+			MainUI->SetHPPercent(value);
+			});
+		RoboComponent->OnDepthChanged.BindLambda([this, MainUI](float value) {
+			MainUI->SetMeters(value);
+			});
+		InventoryComponent->OnInventoryChanged.BindLambda([MainUI](const TArray<FCaughtFishInfo>& FishList) {
+			MainUI->ShowRankUI(FishList);
+			});
+	}
 }
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
 {

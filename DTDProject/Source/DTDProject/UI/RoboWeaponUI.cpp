@@ -2,6 +2,7 @@
 
 
 #include "UI/RoboWeaponUI.h"
+#include "MainUI.h"
 
 void URoboWeaponUI::PlaySwitchAnimation(int32 SelectedIndex)
 {

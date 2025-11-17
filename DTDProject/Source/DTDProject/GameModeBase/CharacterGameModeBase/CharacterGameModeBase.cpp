@@ -5,7 +5,6 @@
 #include "CharacterGameModeBase.h"
 #include  "MyRobo/MyRobo.h"
 #include "Controller/MyCharacterController/MyCharacterController.h"
-#include "HUD/MyHUD.h"
 
 ACharacterGameModeBase::ACharacterGameModeBase()
 {

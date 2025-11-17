@@ -2,8 +2,7 @@
 
 #include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Controller/MyCharacterController/MyCharacterController.h"
-#include "HUD/MyHUD.h"
-
+#include "UI/MainUI.h"
 #include "Engine/World.h"
 
 URoboComponent::URoboComponent()
@@ -70,12 +69,12 @@ void URoboComponent::DecreaseOxygen()
 
 void URoboComponent::WarningOxygen()
 {
-	//화면에 붉은 UI 띄우기 :hud를 호출?
-	if (APlayerController* controller = GetWorld()->GetFirstPlayerController())
+	//화면에 붉은 경고 위젯 띄우기
+	if (AMyCharacterController* controller = Cast<AMyCharacterController>(GetWorld()->GetFirstPlayerController()))
 	{
-		if (AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD()))
+		if (UMainUI* MainUI = Cast<UMainUI>(controller->GetMainUI()))
 		{
-			MyHUD->ShowOxygenWarningUI();
+			MainUI->ShowHPWarningWidget();
 		}
 	}
 }
@@ -85,11 +84,11 @@ void URoboComponent::ZeroOxygen()
 	// 게임 플레이 일시 중지 :컨트롤러에? 로보에? 어디에 함수 작성하는가
 	// 산소타이머 일시 중지 :방법 찾기
 	// 획득한 물고기 UI 띄우기 :hud를 호출?
-	if (APlayerController* controller = GetWorld()->GetFirstPlayerController())
+	if (AMyCharacterController* controller = Cast<AMyCharacterController>(GetWorld()->GetFirstPlayerController()))
 	{
-		if (AMyHUD* MyHUD = Cast<AMyHUD>(controller->GetHUD()))
+		if (UMainUI* MainUI = Cast<UMainUI>(controller->GetMainUI()))
 		{
-			MyHUD->ShowGameEndUI();
+			MainUI->ShowGameEndUI();
 		}
 	}
 }

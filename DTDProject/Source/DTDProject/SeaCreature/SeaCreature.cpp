@@ -3,7 +3,6 @@
 
 #include "SeaCreature/SeaCreature.h"
 #include "MyRobo/MyRobo.h"
-#include "HUD/MyHUD.h"
 #include "ActorComponent/StateComponent/FishStateComponent.h"
 #include "ActorComponent/InventoryComponent.h"
 #include "Components/WidgetComponent.h"

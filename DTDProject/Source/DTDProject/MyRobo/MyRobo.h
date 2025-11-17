@@ -6,11 +6,12 @@
 #include "GameFramework/Character.h"
 #include "GenericTeamAgentInterface.h"
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
-#include "Object/RandomBox.h"
-#include "Weapon/Weapon.h"
 #include "MyRobo.generated.h"
 
 class UAIPerceptionStimuliSourceComponent;
+class AMyCharacterController;
+class ARandomBox;
+class AWeapon;
 
 UCLASS()
 class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify, public IGenericTeamAgentInterface
@@ -73,7 +74,8 @@ private:
 #pragma endregion
 
 protected:
-	// Called when the game starts or when spawned
+	UPROPERTY()
+	TObjectPtr<AMyCharacterController> MainController;
 	virtual void BeginPlay() override;
 
 public:	

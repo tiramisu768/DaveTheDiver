@@ -10,7 +10,6 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/World.h"
 #include "Interface/InteractionObject.h"
-#include "HUD/MyHUD.h"
 #include "Blueprint/UserWidget.h"
 #include "Interface/UINavigateInterface.h"
 #include "InputActionValue.h"
@@ -181,7 +180,7 @@ void AMyCharacterController::SetupInputComponent()
 
 void AMyCharacterController::SetGameInputMode()
 {
-	if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	/*if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		InputSystem->RemoveMappingContext(UIMappingContext);
 		InputSystem->AddMappingContext(GameMappingContext, 0);
@@ -189,12 +188,12 @@ void AMyCharacterController::SetGameInputMode()
 
 	FInputModeGameOnly GameOnlyInputMode;
 	SetInputMode(GameOnlyInputMode);
-	bShowMouseCursor = false;
+	bShowMouseCursor = false;*/
 }
 
 void AMyCharacterController::SetUIInputMode()
 {
-	if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	/*if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		InputSystem->RemoveMappingContext(GameMappingContext);
 		InputSystem->AddMappingContext(UIMappingContext, 1);
@@ -209,7 +208,7 @@ void AMyCharacterController::SetUIInputMode()
 		}
 	}
 	SetInputMode(UIOnlyInputMode);
-	bShowMouseCursor = true;
+	bShowMouseCursor = true;*/
 
 	//GetHUD()가 반환하는 포인터가 항상 AMyHUD라는 보장이 없으며, 
 	//GetCurrentWidget()이 반환하는 위젯이 항상 유효하다는 보장도 없으므로 에러가 남
@@ -244,9 +243,9 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 	}
 	else
 	{
-		AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
-		if (ControlledHUD && ControlledHUD->GetRoboAimUI())
-			ControlledHUD->UpdateAimPos(MoveValue * 5);
+		UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
+		if (MainUI && MainUI->GetRoboAimUI())
+			MainUI->UpdateAimPos(MoveValue * 5);
 	}
 }
 
@@ -284,12 +283,12 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 
 void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
 {
-	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
 	float Sensitivity = 2.5f;
 
-	if (ControlledHUD && ControlledHUD->GetRoboAimUI())
+	if (MainUI && MainUI->GetRoboAimUI())
 	{
-		URoboAimUI* AimUI = ControlledHUD->GetRoboAimUI();
+		URoboAimUI* AimUI = MainUI->GetRoboAimUI();
 		FVector2D ArcCenter = AimUI->GetArcCenter();
 		float ArcRadius = AimUI->GetArcRadius();
 
@@ -305,13 +304,13 @@ void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
 			AimScreenPos = ArcCenter + Dir;
 		}
 		
-		// HUD에 반영하려면 위치 계산
+		// MainUI에 반영하려면 위치 계산
 		FVector2D Delta = AimScreenPos - ArcCenter;
-		ControlledHUD->UpdateAimPos(AimScreenPos);
+		MainUI->UpdateAimPos(AimScreenPos);
 	}
 	else
 	{
-		// HUD 없으면 기본 동작
+		// MainUI 없으면 기본 동작
 		AimScreenPos.X += MoveValue.X * Sensitivity;
 		AimScreenPos.Y -= MoveValue.Y * Sensitivity;
 	}
@@ -321,12 +320,12 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 {
 	IsAiming = true;
 	PrevMousePosition = { -1,-1 };
-	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
-	if (ControlledHUD && ControlledHUD->GetRoboAimUI())
+	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
+	if (MainUI && MainUI->GetRoboAimUI())
 	{
-		ControlledHUD->GetRoboAimUI()->SetVisibility(ESlateVisibility::Visible);
-		AimScreenPos = ControlledHUD->GetRoboAimUI()->GetArcCenter();
-		ControlledHUD->ResetAimPos();
+		MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Visible);
+		AimScreenPos = MainUI->GetRoboAimUI()->GetArcCenter();
+		MainUI->ResetAimPos();
 	}
 
 	// 마우스 커서 숨기거나 포커스 고정할 필요가 있으면 여기서 처리
@@ -335,24 +334,24 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 void AMyCharacterController::StopAiming(const FInputActionValue& value)
 {
 	IsAiming = false;
-	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
-	if (ControlledHUD && ControlledHUD->GetRoboAimUI())
+	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
+	if (MainUI && MainUI->GetRoboAimUI())
 	{
-		ControlledHUD->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
+		MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
 	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponCount;
-	AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD());
+	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
 
-	UE_LOG(LogTemp, Warning, TEXT("ControlledHUD: %s"), *GetNameSafe(ControlledHUD));
-	UE_LOG(LogTemp, Warning, TEXT("RoboWeaponUI: %s"), *GetNameSafe(ControlledHUD ? ControlledHUD->GetRoboWeaponUI() : nullptr));
+	UE_LOG(LogTemp, Warning, TEXT("ControlledHUD: %s"), *GetNameSafe(MainUI));
+	UE_LOG(LogTemp, Warning, TEXT("RoboWeaponUI: %s"), *GetNameSafe(MainUI ? MainUI->GetRoboWeaponUI() : nullptr));
 
-	if (ControlledHUD && ControlledHUD->GetRoboWeaponUI())
+	if (MainUI && MainUI->GetRoboWeaponUI())
 	{
-		ControlledHUD->GetRoboWeaponUI()->PlaySwitchAnimation(CurrentWeaponIndex);
+		MainUI->GetRoboWeaponUI()->PlaySwitchAnimation(CurrentWeaponIndex);
 	}
 }
 
@@ -391,38 +390,38 @@ void AMyCharacterController::InteractionCompleted(const FInputActionValue& value
 
 void AMyCharacterController::OnNavigateUp()
 {
-	UE_LOG(LogTemp, Error, TEXT("AMyCharacterController::OnNavigateUp --- INPUT ACTION FIRED!"));
-	if (AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD()))
+	/*UE_LOG(LogTemp, Error, TEXT("AMyCharacterController::OnNavigateUp --- INPUT ACTION FIRED!"));
+	if (UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance))
 	{
-		UUserWidget* CurrentWidget = ControlledHUD->GetCurrentWidget();
+		UUserWidget* CurrentWidget = MainUI->GetCurrentWidget();
 		if (CurrentWidget && CurrentWidget->Implements<UUINavigateInterface>())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("AMyCharacterController::OnNavigateUp --- Executing  interface call on %s"), *CurrentWidget->GetName());
 			IUINavigateInterface::Execute_NavigateUp(CurrentWidget);
 		}
-	}
+	}*/
 }
 
 void AMyCharacterController::OnNavigateDown()
 {
-	if (AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD()))
+	/*if (UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance))
 	{
-		UUserWidget* CurrentWidget = ControlledHUD->GetCurrentWidget();
+		UUserWidget* CurrentWidget = MainUI->GetCurrentWidget();
 		if (CurrentWidget && CurrentWidget->Implements<UUINavigateInterface>())
 		{
 			IUINavigateInterface::Execute_NavigateDown(CurrentWidget);
 		}
-	}
+	}*/
 }
 
 void AMyCharacterController::OnSelectUIButton()
 {
-	if (AMyHUD* ControlledHUD = Cast<AMyHUD>(GetHUD()))
+	/*if (UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance))
 	{
-		UUserWidget* CurrentWidget = ControlledHUD->GetCurrentWidget();
+		UUserWidget* CurrentWidget = MainUI->GetCurrentWidget();
 		if (CurrentWidget && CurrentWidget->Implements<UUINavigateInterface>())
 		{
 			IUINavigateInterface::Execute_Select(CurrentWidget);
 		}
-	}
+	}*/
 }

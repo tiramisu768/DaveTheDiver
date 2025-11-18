@@ -169,10 +169,6 @@ void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RoboComponent->InitOxygen();
-
-	//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
-
 	InteractionWidget->SetHiddenInGame(true);
 }
 
@@ -264,21 +260,28 @@ void AMyRobo::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	MainController = Cast<AMyCharacterController>(NewController);
-	if(MainController)
+
+	RoboComponent->InitOxygen();
+}
+
+void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
+{
+	if (InMainUI)
 	{
-		UMainUI* MainUI = Cast<UMainUI>(MainController->GetMainUI());
 		//델리게이트 등록
-		RoboComponent->OnHPChanged.BindLambda([this, MainUI](float value) {
-			MainUI->SetHPPercent(value);
+		RoboComponent->OnHPChanged.BindLambda([this, InMainUI](float value) {
+			InMainUI->SetHPPercent(value);
 			});
-		RoboComponent->OnDepthChanged.BindLambda([this, MainUI](float value) {
-			MainUI->SetMeters(value);
+		RoboComponent->OnDepthChanged.BindLambda([this, InMainUI](float value) {
+			InMainUI->SetMeters(value);
 			});
-		InventoryComponent->OnInventoryChanged.BindLambda([MainUI](const TArray<FCaughtFishInfo>& FishList) {
-			MainUI->ShowRankUI(FishList);
+		InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
+			InMainUI->ShowRankUI(FishList);
 			});
 	}
 }
+
+
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
 {
 	if (Montage == nullptr) return;

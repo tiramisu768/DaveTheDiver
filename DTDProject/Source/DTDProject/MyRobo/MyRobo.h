@@ -10,6 +10,7 @@
 
 class UAIPerceptionStimuliSourceComponent;
 class AMyCharacterController;
+class UMainUI;
 class ARandomBox;
 class AWeapon;
 
@@ -90,6 +91,8 @@ public:
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
 	void PossessedBy(AController* NewController) override;
+
+	void setupMainUIReference(UMainUI* InMainUI);
 
 	void PlayMontageFullBody(TObjectPtr<UAnimMontage>Montage, FName SectionName = "");
 

@@ -19,7 +19,7 @@ private:
 	TSubclassOf<class UMainUI> MainWidgetClass;
 
 	UPROPERTY()
-	class UUserWidget* MainWidgetInstance;
+	class UMainUI* MainWidgetInstance;
 
 #pragma region Input
 	UPROPERTY(VisibleAnywhere)

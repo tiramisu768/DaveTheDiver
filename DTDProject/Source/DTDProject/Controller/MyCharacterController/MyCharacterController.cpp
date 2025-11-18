@@ -123,6 +123,11 @@ void AMyCharacterController::BeginPlay()
 		if (MainWidgetInstance)
 		{
 			MainWidgetInstance->AddToViewport();
+
+			if (AMyRobo* MyRobo = Cast<AMyRobo>(GetPawn()))
+			{
+				MyRobo->setupMainUIReference(MainWidgetInstance);
+			}
 		}
 	}
 }
@@ -153,6 +158,10 @@ void AMyCharacterController::Tick(float DeltaTime)
 void AMyCharacterController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+	if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		InputSystem->AddMappingContext(GameMappingContext, 0);
+	}
 
 	if (UEnhancedInputComponent* input = Cast<UEnhancedInputComponent>(InputComponent))
 	{

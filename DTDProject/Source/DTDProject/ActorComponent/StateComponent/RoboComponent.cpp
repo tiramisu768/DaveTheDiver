@@ -35,13 +35,13 @@ void URoboComponent::SetHP(float NewHP)
 	float OldHP = CurrentHP;
 	Super::SetHP(NewHP);
 
-	if (CurrentHP == 90 && OldHP > 90)
+	if (CurrentHP == 0 && OldHP > 0)
 	{
 		//게임 종료
 		ZeroOxygen();
 	}
 
-	else if (CurrentHP == 95 && OldHP > 95)
+	else if (CurrentHP == 50 && OldHP > 50)
 	{
 		//산소 경고
 		WarningOxygen();

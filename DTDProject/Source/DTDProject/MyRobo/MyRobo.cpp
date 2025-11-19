@@ -25,10 +25,8 @@
 #include "Object/RandomBox.h"
 
 
-// Sets default values
 AMyRobo::AMyRobo()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 #pragma region Component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -41,14 +39,7 @@ AMyRobo::AMyRobo()
 
 	BuoyancyComponent = CreateDefaultSubobject<UBuoyancyComponent>(TEXT("BuoyancyComponent"));
 
-	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
-	//WeaponComponent->SetupAttachment(BodyComponent, FName(TEXT("Weapon")));
-
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-
-	//SpringArm->bUsePawnControlRotation = true;
-	//bUseControllerRotationYaw = false;
-	//GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	SpringArm->bUsePawnControlRotation = true;
 	bUseControllerRotationYaw = true;
@@ -90,6 +81,67 @@ FGenericTeamId AMyRobo::GetGenericTeamId() const
 	return TeamId;
 }
 
+void AMyRobo::AddWeaponToInventory(AWeapon* WeaponToAdd)
+{
+	if (!WeaponToAdd) return;
+
+	EWeaponType Type = WeaponToAdd->GetWeaponType();
+
+	FWeaponTypeInventory* Inventory = GetInventoryForType(Type);
+
+	if (!Inventory)
+	{
+		WeaponInventory.Emplace(FWeaponTypeInventory{ Type });
+		Inventory = &WeaponInventory.Last();
+	}
+
+	if (Inventory->Weapons.Num() >= 2)
+	{
+		AWeapon* WeaponToDrop = Inventory->Weapons[0];
+		Inventory->Weapons.RemoveAt(0);
+		if (WeaponToDrop)
+		{
+			WeaponToDrop->Destroy();
+		}
+	}
+
+	Inventory->Weapons.Add(WeaponToAdd);
+	WeaponToAdd->SetOwner(this);
+	WeaponToAdd->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Weapon"));
+	WeaponToAdd->SetActorHiddenInGame(true);
+}
+
+void AMyRobo::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetActorHiddenInGame(true);
+	}
+
+	CurrentWeapon = WeaponToEquip;
+
+	if (CurrentWeapon)
+	{
+		// 새로 장착한 무기는 보이게 처리(또는 공격 / 조준 시에만 보이게 할 수도 있음)
+			// 예시: CurrentWeapon->SetActorHiddenInGame(false);
+	}
+
+	OnWeaponChanged.Broadcast(CurrentWeapon);
+}
+
+void AMyRobo::SwitchNextWeapon(EWeaponType TypeToSwitch)
+{
+	FWeaponTypeInventory* Inventory = GetInventoryForType(TypeToSwitch);
+
+	if (Inventory && Inventory->Weapons.Num() > 0)
+	{
+		Inventory->CurrentIndex = (Inventory->CurrentIndex + 1) % Inventory->Weapons.Num();
+
+		AWeapon* WeaponToEquip = Inventory->Weapons[Inventory->CurrentIndex];
+		EquipWeapon(WeaponToEquip);
+	}
+}
+
 AWeapon* AMyRobo::FindNearbyWeapon()
 {
 	FVector CheckLoc = GetMesh()->GetSocketLocation(TEXT("Weapon"));
@@ -127,41 +179,12 @@ AWeapon* AMyRobo::FindNearbyWeapon()
 	return ClosestWeapon;
 }
 
-void AMyRobo::DropCurrentWeapon()
+FWeaponTypeInventory* AMyRobo::GetInventoryForType(EWeaponType WeaponType)
 {
-	if (!CurrentWeapon) return;
-
-	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	USkeletalMeshComponent* WeaponMesh = CurrentWeapon->FindComponentByClass<USkeletalMeshComponent>();
-	if(WeaponMesh)
-	{
-		CurrentWeapon->SetActorEnableCollision(true);
-		CurrentWeapon = nullptr;
-	}
-
-	CurrentWeapon = nullptr;
-}
-
-void AMyRobo::EquipWeapon(AWeapon* NewWeapon)
-{
-	if (!NewWeapon) return;
-
-	USkeletalMeshComponent* WeaponMesh = NewWeapon->FindComponentByClass<USkeletalMeshComponent>();
-
-	if (WeaponMesh)
-	{
-		WeaponMesh->SetSimulatePhysics(false);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	//무기마다 크기가 다를 경우 코드를 세분화해서 크기 부분을 통제한다
-	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget,
-		EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, true);
-	////////여기서 무기별로 탐색해서 각 소켓에 붙여야 하나
-	NewWeapon->AttachToComponent(GetMesh(), AttachRules, TEXT("Weapon"));
-
-	CurrentWeapon = NewWeapon;
-
+	return WeaponInventory.FindByPredicate([WeaponType](const FWeaponTypeInventory& Inventory)
+		{
+			return Inventory.WeaponType == WeaponType;
+		});
 }
 
 // Called when the game starts or when spawned
@@ -170,6 +193,30 @@ void AMyRobo::BeginPlay()
 	Super::BeginPlay();
 
 	InteractionWidget->SetHiddenInGame(true);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+
+	if (DefaultMeleeWeaponClass)
+	{
+		AWeapon* MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultMeleeWeaponClass, SpawnParams);
+		AddWeaponToInventory(MeleeWeapon);
+	}
+
+	if (DefaultRangedWeaponClass)
+	{
+		AWeapon* RangedWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultRangedWeaponClass, SpawnParams);
+		AddWeaponToInventory(RangedWeapon);
+	}
+
+	if (FWeaponTypeInventory* MeleeInventory = GetInventoryForType(EWeaponType::Melee))
+	{
+		if (MeleeInventory->Weapons.Num() > 0)
+		{
+			EquipWeapon(MeleeInventory->Weapons[0]);
+		}
+	}
 }
 
 // Called every frame
@@ -308,20 +355,9 @@ void AMyRobo::PlayMeleeAttackMontage()
 		AttackIndex %= AttackSectionNames.Num();*/
 }
 
-void AMyRobo::WeaponActive()
+void AMyRobo::AttackSeaCreature()
 {
-	/*isEquip = true;
-	WeaponComponent->AttachToComponent(BodyComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
-	FName(TEXT("Weapon")));*/
 }
-
-void AMyRobo::WeaponInactive()
-{
-	//	isEquip = false;
-	//	WeaponComponent->AttachToComponent(BodyComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
-	//		FName(TEXT("Weapon")));
-}
-
 
 float AMyRobo::GetDepthBelowSurface() const
 {
@@ -434,14 +470,7 @@ void AMyRobo::HandleShortPress()
 	AWeapon* ClosestWeapon = FindNearbyWeapon();
 	if (!ClosestWeapon) return;
 
-	// 무기 장착중이라면, 무기를 버린다
-	if (CurrentWeapon)
-	{
-		DropCurrentWeapon();
-	}
-
-	//무기 장착
-	EquipWeapon(ClosestWeapon);
+	AddWeaponToInventory(ClosestWeapon);
 }
 
 void AMyRobo::UpdateInteractionProgress(float Percent)
@@ -464,7 +493,7 @@ void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 
 void AMyRobo::FireCurrentWeaponAt(const FVector& SpawnLocation, const FVector& AimDirection)
 {
-	if (CurrentWeapon && CurrentWeapon->WeaponStats && CurrentWeapon->WeaponStats->Category == EWeaponCategory::Ranged)
+	if (CurrentWeapon && CurrentWeapon->WeaponStats && CurrentWeapon->WeaponStats->Type == EWeaponType::Ranged)
 	{
 		CurrentWeapon->Attack(this, AimDirection);
 	}

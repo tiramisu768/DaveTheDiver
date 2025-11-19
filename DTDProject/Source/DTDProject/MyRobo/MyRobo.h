@@ -6,13 +6,17 @@
 #include "GameFramework/Character.h"
 #include "GenericTeamAgentInterface.h"
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
+#include "Weapon/Weapon.h"
+#include "Weapon/WeaponData.h"
 #include "MyRobo.generated.h"
 
 class UAIPerceptionStimuliSourceComponent;
 class AMyCharacterController;
 class UMainUI;
 class ARandomBox;
-class AWeapon;
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, AWeapon*, NewWeapon);
 
 UCLASS()
 class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify, public IGenericTeamAgentInterface
@@ -31,8 +35,6 @@ private:
 	TObjectPtr<class USpringArmComponent> SpringArm;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UCameraComponent> Camera;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USkeletalMeshComponent> WeaponComponent;
 	UPROPERTY(VisibleAnywhere, Category = "State")
 	TObjectPtr<class URoboComponent> RoboComponent;
 	UPROPERTY(VisibleAnywhere, Category = "Buoyancy")
@@ -54,11 +56,25 @@ private:
 #pragma endregion
 
 #pragma region Weapon
-	AWeapon* CurrentWeapon = nullptr;
+	UPROPERTY(VisibleAnywhere, Category="Weapon")
+	TObjectPtr<AWeapon> CurrentWeapon;
 
+	UPROPERTY(VisibleAnywhere, Category="Weapon")
+	TArray<FWeaponTypeInventory> WeaponInventory;
+
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	TSubclassOf<AWeapon> DefaultMeleeWeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category ="Weapon")
+	TSubclassOf<AWeapon> DefaultRangedWeaponClass;
+
+	void AddWeaponToInventory(AWeapon* WeaponToAdd);
+	void EquipWeapon(AWeapon* WeaponToEquip);
+	void SwitchNextWeapon(EWeaponType TypeToSwitch);
 	AWeapon* FindNearbyWeapon();
-	void DropCurrentWeapon();
-	void EquipWeapon(AWeapon* NewWeapon);
+
+	FWeaponTypeInventory* GetInventoryForType(EWeaponType WeaponType);
+
 #pragma endregion
 
 #pragma region Interaction
@@ -82,6 +98,9 @@ protected:
 public:	
 	AMyRobo();
 
+	UPROPERTY(BlueprintAssignable,Category="Weapon")
+	FOnWeaponChanged OnWeaponChanged;
+
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	virtual void Tick(float DeltaTime) override;
@@ -98,9 +117,7 @@ public:
 
 	void PlayMeleeAttackMontage();
 
-	void WeaponActive();
-
-	void WeaponInactive();
+	void AttackSeaCreature();
 
 	float GetDepthBelowSurface() const;
 

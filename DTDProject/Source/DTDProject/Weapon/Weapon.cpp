@@ -17,9 +17,9 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (WeaponDataTable && RowName != NAME_None)
+	if (WeaponDataTable && !RowName.IsNone())
 	{
-		WeaponStats = WeaponDataTable->FindRow<FWeaponData>(RowName, TEXT("Dagger"));
+		WeaponStats = WeaponDataTable->FindRow<FWeaponData>(RowName, TEXT(""));
 		if (WeaponStats)
 		{
 			UE_LOG(LogTemp, Log, TEXT("Loaded Weapon:%s, Damage:%f"), *WeaponStats->Name, WeaponStats->Damage);               
@@ -27,18 +27,28 @@ void AWeapon::BeginPlay()
 	}
 }
 
+EWeaponType AWeapon::GetWeaponType() const
+{
+	if (WeaponStats)
+	{
+		return WeaponStats->Type;
+	}
+
+	return EWeaponType::Melee;
+}
+
 void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDir /*= FVector::ZeroVector*/)
 {
 	if (!WeaponStats) return;
 
-	if (WeaponStats->Category == EWeaponCategory::Melee)
+	if (WeaponStats->Type == EWeaponType::Melee)
 	{
 		if (WeaponStats->AttackMontage)
 		{
 			OwnerCharacter->PlayAnimMontage(WeaponStats->AttackMontage);
 		}
 	}
-	else if (WeaponStats->Category == EWeaponCategory::Ranged)
+	else if (WeaponStats->Type == EWeaponType::Ranged)
 	{
 		if (WeaponStats->ProjectileClass)
 		{

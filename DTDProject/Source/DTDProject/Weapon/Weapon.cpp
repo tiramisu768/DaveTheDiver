@@ -2,6 +2,7 @@
 
 
 #include "Weapon/Weapon.h"
+#include "MyRobo/MyRobo.h"
 #include "GameFrameWork/Character.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -27,47 +28,47 @@ void AWeapon::BeginPlay()
 	}
 }
 
-EWeaponType AWeapon::GetWeaponType() const
+EWeaponSlot AWeapon::GetSlotType() const
 {
 	if (WeaponStats)
 	{
-		return WeaponStats->Type;
+		return WeaponStats->Slot;
 	}
 
-	return EWeaponType::Melee;
+	return EWeaponSlot::Melee;
 }
 
-void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDir /*= FVector::ZeroVector*/)
+void AWeapon::Attack(ACharacter* OwnerCharacter)
 {
-	if (!WeaponStats) return;
+	if (!WeaponStats || !OwnerCharacter) return;
 
-	if (WeaponStats->Type == EWeaponType::Melee)
-	{
-		if (WeaponStats->AttackMontage)
-		{
-			OwnerCharacter->PlayAnimMontage(WeaponStats->AttackMontage);
-		}
-	}
-	else if (WeaponStats->Type == EWeaponType::Ranged)
-	{
-		if (WeaponStats->ProjectileClass)
-		{
-			FVector MuzzleLoc = OwnerCharacter->GetActorLocation() + OwnerCharacter->GetActorForwardVector() * 100.f;
-			FRotator MuzzleRot = OwnerCharacter->GetActorRotation();
+	AMyRobo* Robo = Cast<AMyRobo>(OwnerCharacter);
 
-			// If AimDir provided, rotate to that direction
-			if (!AimDir.IsNearlyZero())
+	switch(WeaponStats->Slot)
+	{
+		case EWeaponSlot::Melee:
+			Robo->AttackTrace(); //실제 대미지를 주는 함수
+			break;
+
+		case EWeaponSlot::Harpoon:
+		case EWeaponSlot::Gun:
+			if (WeaponStats->ProjectileClass)
 			{
-				MuzzleRot = AimDir.Rotation();
+				FVector MuzzleLocation;
+				FRotator MuzzleRotation;
+				OwnerCharacter->GetActorEyesViewPoint(MuzzleLocation, MuzzleRotation);
+
+				MuzzleLocation += MuzzleRotation.Vector() * 100.0f;
+
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.Owner = OwnerCharacter;
+				SpawnParams.Instigator = OwnerCharacter->GetInstigator();
+
+				GetWorld()->SpawnActor<AActor>(WeaponStats->ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
 			}
-
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = OwnerCharacter;
-			SpawnParams.Instigator = OwnerCharacter->GetInstigator();
-
-			GetWorld()->SpawnActor<AActor>(WeaponStats->ProjectileClass, MuzzleLoc, MuzzleRot, SpawnParams);
-		}
+			break;
 	}
+	
 }
 
 // Called every frame

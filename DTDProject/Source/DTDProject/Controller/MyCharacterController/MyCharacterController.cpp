@@ -268,25 +268,9 @@ void AMyCharacterController::DashInput(const FInputActionValue& value)
 
 void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 {
-	if (IsAiming)
+	if (ControlledRobo)
 	{
-		if (ControlledRobo)
-		{
-			FVector WorldLoc, WorldDir;
-			if (DeprojectScreenPositionToWorld(AimScreenPos.X, AimScreenPos.Y, WorldLoc, WorldDir))
-			{
-				FVector BulletSpawnLocation = WorldLoc + WorldDir * 100.f;
-				FVector AimDir = WorldDir;
-				ControlledRobo->FireCurrentWeaponAt(BulletSpawnLocation, AimDir);
-			}
-		}
-	}
-	else
-	{
-		if (ControlledRobo)
-		{
-			ControlledRobo->PlayMeleeAttackMontage();
-		}
+		ControlledRobo->PerformAttack();
 	}
 }
 

@@ -8,6 +8,7 @@
 #include "UI/ResultTableUI.h"
 #include "UI/WarningOxygenUI.h"
 #include "UI/FishRankUI.h"
+#include "Weapon/Weapon.h"
 
 void UMainUI::NativeConstruct()
 {
@@ -76,6 +77,15 @@ void UMainUI::PlaySwitchAnimation(int32 SelectedIndex)
 	if (WeaponWidget)
 	{
 		WeaponWidget->PlaySwitchAnimation(SelectedIndex);
+	}
+}
+
+void UMainUI::UpdateActiveWeaponIcon(AWeapon* NewActiveWeapon)
+{
+	if (WeaponIcon && NewActiveWeapon && NewActiveWeapon->WeaponStats)
+	{
+		UTexture2D* IconTexture = NewActiveWeapon->WeaponStats->Icon.LoadSynchronous();
+		WeaponIcon->SetBrushFromTexture(IconTexture);
 	}
 }
 

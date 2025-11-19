@@ -73,7 +73,8 @@ private:
 //	//bool isHit{ true };
 public:
 	AMyCharacterController();
-	UMainUI* GetMainUI() const { return Cast<UMainUI>(MainWidgetInstance); };
+	UMainUI* GetMainUI() const { return Cast<UMainUI>(MainWidgetInstance); }
+	bool GetIsAiming() const { return IsAiming; }
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void SetupInputComponent() override;

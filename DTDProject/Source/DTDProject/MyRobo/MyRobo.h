@@ -16,7 +16,7 @@ class UMainUI;
 class ARandomBox;
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, AWeapon*, NewWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponSlotUpdated, EWeaponSlot, Slot, AWeapon*, NewWeapon);
 
 UCLASS()
 class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify, public IGenericTeamAgentInterface
@@ -57,25 +57,30 @@ private:
 
 #pragma region Weapon
 	UPROPERTY(VisibleAnywhere, Category="Weapon")
-	TObjectPtr<AWeapon> CurrentWeapon;
+	TObjectPtr<AWeapon> MeleeWeapon;
 
 	UPROPERTY(VisibleAnywhere, Category="Weapon")
-	TArray<FWeaponTypeInventory> WeaponInventory;
+	TObjectPtr<AWeapon> HarpoonWeapon;
 
-	UPROPERTY(EditDefaultsOnly, Category="Weapon")
-	TSubclassOf<AWeapon> DefaultMeleeWeaponClass;
+	UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	TObjectPtr<AWeapon> GunWeapon;
 
-	UPROPERTY(EditDefaultsOnly, Category ="Weapon")
-	TSubclassOf<AWeapon> DefaultRangedWeaponClass;
+	UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	TObjectPtr<AWeapon> ActiveRangedWeapon;
 
 	UPROPERTY()
 	TObjectPtr<AWeapon> AcquirableWeapon;
 
-	void AddWeaponToInventory(AWeapon* WeaponToAdd);
-	void EquipWeapon(AWeapon* WeaponToEquip);
-	void SwitchNextWeapon(EWeaponType TypeToSwitch);
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	TSubclassOf<AWeapon> DefaultMeleeWeaponClass;
 
-	FWeaponTypeInventory* GetInventoryForType(EWeaponType WeaponType);
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<AWeapon> DefaultHarpoonWeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category ="Weapon")
+	TSubclassOf<AWeapon> DefaultGunWeaponClass;
+
+	void PickupAcquirableWeapon();
 
 #pragma endregion
 
@@ -100,8 +105,8 @@ protected:
 public:	
 	AMyRobo();
 
-	UPROPERTY(BlueprintAssignable,Category="Weapon")
-	FOnWeaponChanged OnWeaponChanged;
+	UPROPERTY(BlueprintAssignable, Category = "Weapon")
+	FOnWeaponSlotUpdated OnWeaponSlotUpdated;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
@@ -119,11 +124,15 @@ public:
 
 	void PlayMeleeAttackMontage();
 
-	void AttackSeaCreature();
+	void PlayRangedAttackMontage();
+
+	void PerformAttack();
 
 	float GetDepthBelowSurface() const;
 
 	void AttackTrace() override;
+
+	void SwitchActiveRangedWeapon();
 
 	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable){CurrentInteractable = NewInteractable;}
 	
@@ -140,8 +149,6 @@ public:
 	void UpdateInteractionProgress(float Percent);
 
 	void FocusOnInteractionTarget(IInteractionObject* Target);
-
-	void FireCurrentWeaponAt(const FVector& SpawnLocation, const FVector& AimDirection);
 
 	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 };

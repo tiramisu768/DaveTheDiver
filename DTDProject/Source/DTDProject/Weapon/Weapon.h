@@ -28,7 +28,7 @@ public:
 	FWeaponData* WeaponStats;
 
 	UFUNCTION(BlueprintPure, Category="Weapon")
-	EWeaponType GetWeaponType() const;
+	EWeaponSlot GetSlotType() const;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
@@ -41,5 +41,5 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	virtual void Attack(ACharacter* OwnerCharacter, const FVector& AimDir = FVector::ZeroVector);
+	virtual void Attack(ACharacter* OwnerCharacter);
 };

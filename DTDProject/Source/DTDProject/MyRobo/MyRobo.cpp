@@ -142,42 +142,6 @@ void AMyRobo::SwitchNextWeapon(EWeaponType TypeToSwitch)
 	}
 }
 
-AWeapon* AMyRobo::FindNearbyWeapon()
-{
-	FVector CheckLoc = GetMesh()->GetSocketLocation(TEXT("Weapon"));
-	float SearchRadius = 150.f;
-
-	TArray<FOverlapResult> Overlaps;
-	FCollisionShape Sphere = FCollisionShape::MakeSphere(SearchRadius);
-
-	bool IsHit = GetWorld()->OverlapMultiByObjectType(
-		Overlaps,
-		CheckLoc,
-		FQuat::Identity,
-		FCollisionObjectQueryParams(ECC_GameTraceChannel8),
-		Sphere
-	);
-
-	if (!IsHit) return nullptr;
-
-	AWeapon* ClosestWeapon = nullptr;
-	float ClosestDistSq = MAX_FLT;
-
-	for (auto& Hit : Overlaps)
-	{
-		AWeapon* Weapon = Cast<AWeapon>(Hit.GetActor());
-		if (!Weapon || Weapon == CurrentWeapon) continue;
-
-		float DistSq = FVector::DistSquared(CheckLoc, Weapon->GetActorLocation());
-		if (DistSq < ClosestDistSq)
-		{
-			ClosestDistSq = DistSq;
-			ClosestWeapon = Weapon;
-		}
-	}
-
-	return ClosestWeapon;
-}
 
 FWeaponTypeInventory* AMyRobo::GetInventoryForType(EWeaponType WeaponType)
 {
@@ -271,7 +235,7 @@ void AMyRobo::Tick(float DeltaTime)
 
 			if (CurrentInteractable)
 			{
-				CurrentInteractable->Interact();
+				CurrentInteractable->Interact(this);
 			}
 
 			ShowInteractionWidget(false);
@@ -462,15 +426,22 @@ void AMyRobo::StopSpaceHold()
 	UpdateInteractionProgress(0.f);
 }
 
+void AMyRobo::SetAcquirableWeapon(AWeapon* Weapon)
+{
+	AcquirableWeapon = Weapon;
+}
+
 void AMyRobo::HandleShortPress()
 {
 	IsHolding = false;
 
-	// 근처 무기 유무 확인
-	AWeapon* ClosestWeapon = FindNearbyWeapon();
-	if (!ClosestWeapon) return;
-
-	AddWeaponToInventory(ClosestWeapon);
+	//획득 가능한 무기 확인하고 인벤토리에 추가
+	if (AcquirableWeapon)
+	{
+		AddWeaponToInventory(AcquirableWeapon);
+		AcquirableWeapon->SetOwner(this); //소유권 설정
+		AcquirableWeapon = nullptr; //획득 후 포인터 초기화
+	}
 }
 
 void AMyRobo::UpdateInteractionProgress(float Percent)

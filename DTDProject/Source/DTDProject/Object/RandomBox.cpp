@@ -41,7 +41,7 @@ void ARandomBox::Tick(float DeltaTime)
 
 	if (IsOpening)
 	{
-		OpenRandomBox(DeltaTime);
+		UpdateOpenAnimation(DeltaTime);
 	}
 	else if(IsRoboOverlap && IsOpen)
 	{
@@ -50,25 +50,54 @@ void ARandomBox::Tick(float DeltaTime)
 	}
 }
 
-void ARandomBox::Interact()
+void ARandomBox::Interact(AMyRobo* InteractingRobo)
 {
-	if (IsOpen) return;
+	if (IsOpen || IsOpening||!InteractingRobo) return;
 
-	BeginOpen();
+	if (IsOpen && IsValid(SpawnedWeapon))
+	{
+		InteractingRobo->SetAcquirableWeapon(SpawnedWeapon);
+		return;
+	}
+
+	if (!IsOpen && IsOpening)
+	{
+		CurrentInteractingRobo = InteractingRobo;
+		BeginOpenAnimation();
+	}
+
 }
+
+//void ARandomBox::Interact()
+//{
+//	if (IsOpen) return;
+//
+//	BeginOpen();
+//}
+
+void ARandomBox::ShowInteractionWidget(bool bShow)
+{
+	// 필요 시 UI 위젯 표시/숨김 로직 구현
+}
+
+void ARandomBox::StartFocus()
+{
+}
+
+void ARandomBox::EndFocus()
+{
+}
+
+
 
 void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor != this)
+	if(AMyRobo * Robo = Cast<AMyRobo>(OtherActor))
 	{
-		AMyRobo* Robo = Cast<AMyRobo>(OtherActor);
-		if (Robo)
-		{
-			IsRoboOverlap = true;
-			Robo->SetCurrentInteractable(this);
-			Robo->ShowInteractionWidget(true);
-			Robo->FocusOnInteractionTarget(this); //카메라 고정
-		}
+		IsRoboOverlap = true;
+		Robo->SetCurrentInteractable(this);
+		Robo->ShowInteractionWidget(true);
+		Robo->FocusOnInteractionTarget(this); //카메라 고정
 	}
 }
 
@@ -80,14 +109,16 @@ void ARandomBox::RandomBoxOnEndOverlap(UPrimitiveComponent* OverlappedComponent,
 		if (Robo)
 		{
 			IsRoboOverlap = false;
+			Robo->SetAcquirableWeapon(nullptr);
 			Robo->SetCurrentInteractable(nullptr);
 			Robo->ShowInteractionWidget(false);
 			Robo->FocusOnInteractionTarget(this); //카메라 고정 해제
+			CurrentInteractingRobo = nullptr;
 		}
 	}
 }
 
-void ARandomBox::BeginOpen()
+void ARandomBox::BeginOpenAnimation()
 {
 	if (IsOpen || IsOpening)
 		return;
@@ -96,7 +127,7 @@ void ARandomBox::BeginOpen()
 	GEngine->AddOnScreenDebugMessage(-6, 2.0f, FColor::Yellow, TEXT("Opening Started"));
 }
 
-void ARandomBox::OpenRandomBox(float DeltaTime)
+void ARandomBox::UpdateOpenAnimation(float DeltaTime)
 {
 	if (!DynMat) return;
 
@@ -110,25 +141,31 @@ void ARandomBox::OpenRandomBox(float DeltaTime)
 		IsOpening = false;
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Box Opened!"));
 
-		SpawnWeaponOnBox();
+		SpawnWeapon();
 	}
 }
 
-void ARandomBox::SpawnWeaponOnBox()
+void ARandomBox::SpawnWeapon()
 {
-	if (!GetWorld()) return;
+	if (!GetWorld()||WeaponClasses.Num()==0) return;
 
-	FVector SpawnLocation = BoxFrameMesh->GetComponentLocation() + FVector(0, 0, 50);
-	FRotator SpawnRotation = FRotator::ZeroRotator;
+	if (IsValid(SpawnedWeapon)) return;
 
-	TSubclassOf<AWeapon> WeaponClass = TestWeaponClass;
-	if (WeaponClass)
+	const int32 RandomIndex = FMath::RandRange(0, WeaponClasses.Num() - 1);
+	TSubclassOf<AWeapon> WeaponToSpawn = WeaponClasses[RandomIndex];
+
+	if (WeaponToSpawn)
 	{
-		AWeapon* SpawnedWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass, SpawnLocation, SpawnRotation);
-		//if (SpawnedWeapon)
-		//{
-		//	SpawnedWeapon->AttachToComponent(BoxFrameMesh, FAttachmentTransformRules::KeepWorldTransform);
-		//}
+		FVector SpawnLocation = GetActorLocation() + FVector(0, 0, 50.f);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+
+		SpawnedWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponToSpawn, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+
+		if (IsValid(SpawnedWeapon)&&IsValid(CurrentInteractingRobo))
+		{
+			CurrentInteractingRobo->SetAcquirableWeapon(SpawnedWeapon);
+		}
 	}
 }
 

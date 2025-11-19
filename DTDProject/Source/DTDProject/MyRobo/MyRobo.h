@@ -68,10 +68,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category ="Weapon")
 	TSubclassOf<AWeapon> DefaultRangedWeaponClass;
 
+	UPROPERTY()
+	TObjectPtr<AWeapon> AcquirableWeapon;
+
 	void AddWeaponToInventory(AWeapon* WeaponToAdd);
 	void EquipWeapon(AWeapon* WeaponToEquip);
 	void SwitchNextWeapon(EWeaponType TypeToSwitch);
-	AWeapon* FindNearbyWeapon();
 
 	FWeaponTypeInventory* GetInventoryForType(EWeaponType WeaponType);
 
@@ -130,6 +132,8 @@ public:
 	void StartSpaceHold();
 
 	void StopSpaceHold();
+
+	void SetAcquirableWeapon(AWeapon* Weapon);
 
 	void HandleShortPress();
 

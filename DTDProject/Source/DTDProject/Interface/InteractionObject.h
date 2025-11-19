@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "InteractionObject.generated.h"
 
+class AMyRobo;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UInteractionObject : public UInterface
@@ -13,14 +15,14 @@ class UInteractionObject : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class DTDPROJECT_API IInteractionObject
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Interact() = 0;
+	virtual void Interact(AMyRobo* InteractingRobo) = 0;
+	virtual void ShowInteractionWidget(bool bShow) = 0;
+	virtual void StartFocus() = 0;
+	virtual void EndFocus() = 0;
 };

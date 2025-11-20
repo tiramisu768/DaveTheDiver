@@ -13,6 +13,7 @@ UENUM(BlueprintType)
 enum class EWeaponSlot : uint8
 {
 	Melee,
+	Tool,
 	Harpoon,
 	Gun
 };

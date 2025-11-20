@@ -76,16 +76,17 @@ void UMainUI::PlaySwitchAnimation(int32 SelectedIndex)
 {
 	if (WeaponWidget)
 	{
-		WeaponWidget->PlaySwitchAnimation(SelectedIndex);
+		WeaponWidget->PlaySwitchRangedIconAnimation(SelectedIndex);
 	}
 }
 
-void UMainUI::UpdateActiveWeaponIcon(AWeapon* NewActiveWeapon)
+void UMainUI::OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon)
 {
-	if (WeaponIcon && NewActiveWeapon && NewActiveWeapon->WeaponStats)
+	if (WeaponWidget && NewWeapon && NewWeapon->WeaponStats)
 	{
-		UTexture2D* IconTexture = NewActiveWeapon->WeaponStats->Icon.LoadSynchronous();
-		WeaponIcon->SetBrushFromTexture(IconTexture);
+		UTexture2D* IconTexture = NewWeapon->WeaponStats->Icon.LoadSynchronous();
+		WeaponSlot = NewWeapon->GetSlotType();
+		WeaponWidget->UpdateWeaponIcon(WeaponSlot, IconTexture);
 	}
 }
 

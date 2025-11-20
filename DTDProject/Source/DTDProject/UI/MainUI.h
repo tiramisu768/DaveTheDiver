@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "ActorComponent/InventoryComponent.h"
-#include "Components/Image.h"
+#include "Weapon/WeaponData.h"
 #include "MainUI.generated.h"
 
 class URoboHPBarUI;
@@ -31,9 +31,6 @@ protected:
 	//무기
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<URoboWeaponUI> WeaponWidget;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UImage> WeaponIcon;
 
 	//물고기 정보
 	UPROPERTY(meta = (BindWidget))
@@ -77,7 +74,7 @@ public:
 	URoboWeaponUI* GetRoboWeaponUI() const { return WeaponWidget; }
 	void PlaySwitchAnimation(int32 SelectedIndex);
 	UFUNCTION()
-	void UpdateActiveWeaponIcon(AWeapon* NewActiveWeapon);
+	void OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon);
 	URoboAimUI* GetRoboAimUI() const { return AimWidget; }
 	void UpdateAimPos(FVector2D AimPos);
 	void ResetAimPos();

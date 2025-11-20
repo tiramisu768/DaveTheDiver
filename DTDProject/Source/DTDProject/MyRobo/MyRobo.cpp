@@ -129,7 +129,7 @@ void AMyRobo::BeginPlay()
 		OnWeaponSlotUpdated.Broadcast(EWeaponSlot::Gun, GunWeapon);
 	}
 
-	ActiveRangedWeapon = HarpoonWeapon;
+	ActiveRangedWeapon = MeleeWeapon;
 }
 
 // Called every frame
@@ -239,7 +239,7 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 			InMainUI->ShowRankUI(FishList);
 			});
 
-		//OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::UpdateWeaponSlotIcon);
+		OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::OnUpdateWeaponSlot);
 	}
 }
 

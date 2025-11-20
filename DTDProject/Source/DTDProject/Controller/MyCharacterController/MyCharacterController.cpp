@@ -344,7 +344,7 @@ void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 
 	if (MainUI && MainUI->GetRoboWeaponUI())
 	{
-		MainUI->GetRoboWeaponUI()->PlaySwitchAnimation(CurrentWeaponIndex);
+		MainUI->GetRoboWeaponUI()->PlaySwitchRangedIconAnimation(CurrentWeaponIndex);
 	}
 }
 

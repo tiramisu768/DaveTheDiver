@@ -2,19 +2,23 @@
 
 
 #include "Object/RandomBox.h"
-#include "RandomBox.h"
 #include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "MyRobo/MyRobo.h"
+#include "Weapon/Weapon.h"
 
 // Sets default values
 ARandomBox::ARandomBox()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	BoxFrameMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxFrameMesh"));
+
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
-	//BoxCollision->SetupAttachment(BoxFrameMesh);
+	RootComponent = BoxCollision;
 
+	BoxCollision->SetBoxExtent(FVector(110.0f, 110.0f, 90.0f));
 
+	BoxFrameMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxFrameMesh"));
+	BoxFrameMesh->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -24,8 +28,10 @@ void ARandomBox::BeginPlay()
 	BoxCollision->OnComponentBeginOverlap.AddDynamic(this, &ARandomBox::RandomBoxOnBeginOverlap);
 	BoxCollision->OnComponentEndOverlap.AddDynamic(this, &ARandomBox::RandomBoxOnEndOverlap);
 
-	UStaticMeshComponent* MeshComp = FindComponentByClass<UStaticMeshComponent>();
-	DynMat = MeshComp->CreateAndSetMaterialInstanceDynamic(0);
+	if(BoxFrameMesh)
+	{
+		DynMat = BoxFrameMesh->CreateAndSetMaterialInstanceDynamic(0);
+	}
 	if (DynMat)
 	{
 		// 초기 Brightness 값 설정
@@ -52,28 +58,12 @@ void ARandomBox::Tick(float DeltaTime)
 
 void ARandomBox::Interact(AMyRobo* InteractingRobo)
 {
-	if (IsOpen || IsOpening||!InteractingRobo) return;
+	if (IsOpen || IsOpening ||!InteractingRobo) return;
 
-	if (IsOpen && IsValid(SpawnedWeapon))
-	{
-		InteractingRobo->SetAcquirableWeapon(SpawnedWeapon);
-		return;
-	}
-
-	if (!IsOpen && IsOpening)
-	{
-		CurrentInteractingRobo = InteractingRobo;
-		BeginOpenAnimation();
-	}
-
+	IsOpening = true;
+	CurrentInteractingRobo = InteractingRobo;
+	GEngine->AddOnScreenDebugMessage(-6, 2.0f, FColor::Yellow, TEXT("Opening Started"));
 }
-
-//void ARandomBox::Interact()
-//{
-//	if (IsOpen) return;
-//
-//	BeginOpen();
-//}
 
 void ARandomBox::ShowInteractionWidget(bool bShow)
 {
@@ -92,39 +82,40 @@ void ARandomBox::EndFocus()
 
 void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OVERLAP DETECTED!!!!!!"));
 	if(AMyRobo * Robo = Cast<AMyRobo>(OtherActor))
 	{
 		IsRoboOverlap = true;
-		Robo->SetCurrentInteractable(this);
-		Robo->ShowInteractionWidget(true);
-		Robo->FocusOnInteractionTarget(this); //카메라 고정
+
+		if (IsOpen)
+		{
+			if (IsValid(SpawnedWeapon))
+			{
+				Robo->SetAcquirableWeapon(SpawnedWeapon);
+				Robo->ShowPickupWidget(true, SpawnedWeapon);
+			}
+		}
+		else
+		{
+			Robo->SetCurrentInteractable(this);
+			Robo->ShowLongPressWidget(true,this);
+			Robo->FocusOnInteractionTarget(this); //카메라 고정
+		}
 	}
 }
 
 void ARandomBox::RandomBoxOnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor && OtherActor != this)
+	if(AMyRobo * Robo = Cast<AMyRobo>(OtherActor))
 	{
-		AMyRobo* Robo = Cast<AMyRobo>(OtherActor);
-		if (Robo)
-		{
-			IsRoboOverlap = false;
-			Robo->SetAcquirableWeapon(nullptr);
-			Robo->SetCurrentInteractable(nullptr);
-			Robo->ShowInteractionWidget(false);
-			Robo->FocusOnInteractionTarget(this); //카메라 고정 해제
-			CurrentInteractingRobo = nullptr;
-		}
+		IsRoboOverlap = false;
+		Robo->SetAcquirableWeapon(nullptr);
+		Robo->SetCurrentInteractable(nullptr);
+		Robo->ShowLongPressWidget(false,nullptr);
+		Robo->ShowPickupWidget(false,nullptr);
+		Robo->FocusOnInteractionTarget(this); //카메라 고정 해제
+		CurrentInteractingRobo = nullptr;
 	}
-}
-
-void ARandomBox::BeginOpenAnimation()
-{
-	if (IsOpen || IsOpening)
-		return;
-
-	IsOpening = true;
-	GEngine->AddOnScreenDebugMessage(-6, 2.0f, FColor::Yellow, TEXT("Opening Started"));
 }
 
 void ARandomBox::UpdateOpenAnimation(float DeltaTime)

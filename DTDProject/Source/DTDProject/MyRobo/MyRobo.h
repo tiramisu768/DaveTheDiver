@@ -89,8 +89,11 @@ private:
 	UPROPERTY()
 	TScriptInterface<IInteractionObject> CurrentInteractable;
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
-	TObjectPtr<class UWidgetComponent> InteractionWidget;
-	TSubclassOf<class UUserWidget> InteractionWidgetClass;
+	TObjectPtr<class UWidgetComponent> LongPressWidget;
+	UPROPERTY(VisibleAnywhere, Category = "Interaction")
+	TObjectPtr<class UWidgetComponent> PickupWidget;
+	TSubclassOf<class UUserWidget> LongPressWidgetClass;
+	TSubclassOf<class UUserWidget> PickupWidgetClass;
 	FTimerHandle HoldTimerHandle;
 	float HoldDuration = 2.0f;
 	bool IsHolding = false;
@@ -136,7 +139,9 @@ public:
 
 	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable){CurrentInteractable = NewInteractable;}
 	
-	void ShowInteractionWidget(bool bShow);
+	void ShowLongPressWidget(bool bShow, AActor* TargetActor);
+
+	void ShowPickupWidget(bool bShow, AActor* TargetActor);
 
 	void StartSpaceHold();
 

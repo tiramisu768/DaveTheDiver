@@ -59,12 +59,21 @@ AMyRobo::AMyRobo()
 
 	RoboComponent = CreateDefaultSubobject<URoboComponent>(TEXT("RoboComponent"));
 
-	InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
-	InteractionWidget->SetupAttachment(GetRootComponent());
-	static ConstructorHelpers::FClassFinder<UUserWidget> InteractionWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_LongPress.BP_LongPress_C"));
-	if (InteractionWidgetClassFinder.Succeeded())
-		InteractionWidgetClass = InteractionWidgetClassFinder.Class;
-	InteractionWidget->SetWidgetClass(InteractionWidgetClass);
+	LongPressWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("LongPressWidget"));
+	LongPressWidget->SetupAttachment(GetRootComponent());
+	static ConstructorHelpers::FClassFinder<UUserWidget> LongPressWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_LongPress.BP_LongPress_C"));
+	if (LongPressWidgetClassFinder.Succeeded())
+		LongPressWidgetClass = LongPressWidgetClassFinder.Class;
+	LongPressWidget->SetWidgetClass(LongPressWidgetClass);
+
+	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
+	PickupWidget->SetupAttachment(GetRootComponent());
+	static ConstructorHelpers::FClassFinder<UUserWidget> PickupWidgetClassFinder(TEXT(""));
+	if (PickupWidgetClassFinder.Succeeded())
+	{
+		PickupWidgetClass = PickupWidgetClassFinder.Class;
+	}
+	PickupWidget->SetWidgetClass(PickupWidgetClass);
 
 	TeamId = FGenericTeamId(0);
 
@@ -86,7 +95,8 @@ void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InteractionWidget->SetHiddenInGame(true);
+	LongPressWidget->SetHiddenInGame(true);
+	PickupWidget->SetHiddenInGame(true);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -187,7 +197,7 @@ void AMyRobo::Tick(float DeltaTime)
 				CurrentInteractable->Interact(this);
 			}
 
-			ShowInteractionWidget(false);
+			ShowLongPressWidget(false,nullptr);
 		}
 	}
 
@@ -360,36 +370,42 @@ void AMyRobo::SwitchActiveRangedWeapon()
 	}
 }
 
-void AMyRobo::ShowInteractionWidget(bool bShow)
+void AMyRobo::ShowLongPressWidget(bool bShow, AActor* TargetActor)
 {
-	if (!InteractionWidget)
+	if (!LongPressWidget)
 		return;
 
-	if (bShow)
+	if (bShow&&TargetActor)
 	{
-		InteractionWidget->SetHiddenInGame(false);
-		AActor* InteractionActor = Cast<AActor>(InteractionObject);
-		if (InteractionActor)
-			InteractionWidget->SetWorldLocation(InteractionActor->GetActorLocation());
+		FVector TargetLocation = TargetActor->GetActorLocation();
+		FVector WidgetLocation = TargetLocation + FVector(0.0f, 0.0f, 100.0f);
+		LongPressWidget->SetWorldLocation(WidgetLocation);
+		LongPressWidget->SetHiddenInGame(false);			
 	}
 	else
 	{
-		InteractionWidget->SetHiddenInGame(true);
+		LongPressWidget->SetHiddenInGame(true);
 	}
+}
 
-	if (UUserWidget* UserWidget = InteractionWidget->GetUserWidgetObject())
+void AMyRobo::ShowPickupWidget(bool bShow, AActor* TargetActor)
+{
+	if (!PickupWidget) return;
+
+	if (bShow && TargetActor)
 	{
-		if (ULongPressUI* UI = Cast<ULongPressUI>(UserWidget))
-		{
-			UI->SetLongPressBarPercent(0.0f);
-		}
+		PickupWidget->SetWorldLocation(TargetActor->GetActorLocation());
+		PickupWidget->SetHiddenInGame(false);
 	}
-
+	else
+	{
+		PickupWidget->SetHiddenInGame(true);
+	}
 }
 
 void AMyRobo::StartSpaceHold()
 {
-	if (!CurrentInteractable)
+	if (!AcquirableWeapon && !CurrentInteractable)
 		return;
 
 	IsHolding = true;
@@ -461,14 +477,18 @@ void AMyRobo::HandleShortPress()
 {
 	IsHolding = false;
 
-	PickupAcquirableWeapon();
+	if(AcquirableWeapon)
+	{
+		PickupAcquirableWeapon();
+		return;
+	}
 }
 
 void AMyRobo::UpdateInteractionProgress(float Percent)
 {
-	if (!InteractionWidget) return;
+	if (!LongPressWidget) return;
 
-	if (UUserWidget* UserWidget = InteractionWidget->GetWidget())
+	if (UUserWidget* UserWidget = LongPressWidget->GetUserWidgetObject())
 	{
 		if (ULongPressUI* LongPress = Cast<ULongPressUI>(UserWidget))
 		{

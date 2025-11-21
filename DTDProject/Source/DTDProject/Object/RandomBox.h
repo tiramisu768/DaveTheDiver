@@ -37,18 +37,18 @@ private:
 	bool IsRoboOverlap{ false };
 	bool IsOpening{ false }; //오픈 애님 진행 여부
 
-	UPROPERTY(VisibleAnywhere, Category ="Mesh")
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> BoxFrameMesh;
 
-	UPROPERTY(VisibleAnywhere, Category ="Collision")
+	UPROPERTY(EditAnywhere, Category ="Box Properties")
 	TObjectPtr<class UBoxComponent> BoxCollision;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere,Category = "Box Properties")
 	UMaterialInstanceDynamic* DynMat;
 
 	float Brightness = 1.0f;
 
-	UPROPERTY(EditAnywhere, Category ="Weapon")
+	UPROPERTY(EditAnywhere, Category ="Box Properties")
 	TArray<TSubclassOf<AWeapon>> WeaponClasses;
 
 	UPROPERTY()
@@ -57,7 +57,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<AMyRobo> CurrentInteractingRobo;
 
-	void BeginOpenAnimation(); //로봇이 홀드완료 시 호출
 	void UpdateOpenAnimation(float DeltaTime); //밝기 애니메이션 실행
 	void SpawnWeapon();
 

@@ -7,6 +7,7 @@
 #include "Perception/AISense_Sight.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "UI/RoboHPBarUI.h"		
@@ -18,6 +19,7 @@
 #include "BuoyancyComponent.h"
 #include "WaterBodyComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Engine/OverlapResult.h"
 #include "Interface/InteractionObject.h"
@@ -60,15 +62,15 @@ AMyRobo::AMyRobo()
 	RoboComponent = CreateDefaultSubobject<URoboComponent>(TEXT("RoboComponent"));
 
 	LongPressWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("LongPressWidget"));
-	LongPressWidget->SetupAttachment(GetRootComponent());
+	//LongPressWidget->SetupAttachment(GetRootComponent());
 	static ConstructorHelpers::FClassFinder<UUserWidget> LongPressWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_LongPress.BP_LongPress_C"));
 	if (LongPressWidgetClassFinder.Succeeded())
 		LongPressWidgetClass = LongPressWidgetClassFinder.Class;
 	LongPressWidget->SetWidgetClass(LongPressWidgetClass);
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
-	PickupWidget->SetupAttachment(GetRootComponent());
-	static ConstructorHelpers::FClassFinder<UUserWidget> PickupWidgetClassFinder(TEXT(""));
+	//PickupWidget->SetupAttachment(GetRootComponent());
+	static ConstructorHelpers::FClassFinder<UUserWidget> PickupWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Pickup.BP_Pickup_C"));
 	if (PickupWidgetClassFinder.Succeeded())
 	{
 		PickupWidgetClass = PickupWidgetClassFinder.Class;
@@ -198,7 +200,35 @@ void AMyRobo::Tick(float DeltaTime)
 			}
 
 			ShowLongPressWidget(false,nullptr);
+
+			if (bIsCameraFixed)
+			{
+				FocusOnInteractionTarget(nullptr);
+			}
 		}
+	}
+
+	if (MainController)
+	{
+		APlayerCameraManager* CameraManager = MainController->PlayerCameraManager;
+		if (CameraManager)
+		{
+			FVector CameraLocation = CameraManager->GetCameraLocation();
+			if (LongPressWidget && LongPressWidget->IsVisible())
+			{
+				FVector WidgetLocation = LongPressWidget->GetComponentLocation();
+				FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(WidgetLocation, CameraLocation);
+				LongPressWidget->SetWorldRotation(LookAtRotation);
+			}
+
+			if (PickupWidget && PickupWidget->IsVisible())
+			{
+				FVector WidgetLocation = PickupWidget->GetComponentLocation();
+				FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(WidgetLocation, CameraLocation);
+				PickupWidget->SetWorldRotation(LookAtRotation);
+			}
+		}
+
 	}
 
 }
@@ -377,6 +407,7 @@ void AMyRobo::ShowLongPressWidget(bool bShow, AActor* TargetActor)
 
 	if (bShow&&TargetActor)
 	{
+		UpdateInteractionProgress(0.f);
 		FVector TargetLocation = TargetActor->GetActorLocation();
 		FVector WidgetLocation = TargetLocation + FVector(0.0f, 0.0f, 100.0f);
 		LongPressWidget->SetWorldLocation(WidgetLocation);
@@ -405,8 +436,15 @@ void AMyRobo::ShowPickupWidget(bool bShow, AActor* TargetActor)
 
 void AMyRobo::StartSpaceHold()
 {
+	//상호작용 대상 아무것도 없음
 	if (!AcquirableWeapon && !CurrentInteractable)
 		return;
+
+	//길게 누르는 상호작용일 때 카메라 고정한다
+	if (!AcquirableWeapon && CurrentInteractable)
+	{
+		FocusOnInteractionTarget(CurrentInteractable.GetInterface());
+	}
 
 	IsHolding = true;
 	HoldElapsed = 0.f;
@@ -415,6 +453,12 @@ void AMyRobo::StartSpaceHold()
 
 void AMyRobo::StopSpaceHold()
 {
+	//카메라고정 해제
+	if (bIsCameraFixed)
+	{
+		FocusOnInteractionTarget(nullptr);
+	}
+
 	if (HoldElapsed < HoldDuration)
 	{
 		HandleShortPress();
@@ -454,6 +498,22 @@ void AMyRobo::PickupAcquirableWeapon()
 
 	AcquirableWeapon->SetOwner(this);
 	AcquirableWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Weapon"));
+
+	if (UStaticMeshComponent* WeaponMesh = AcquirableWeapon->FindComponentByClass<UStaticMeshComponent>())
+	{
+		if (UStaticMesh* MeshAsset = WeaponMesh->GetStaticMesh())
+		{
+			FVector OriginalSize = MeshAsset->GetBounds().GetBox().GetSize();
+
+			float MaxOriginalSize = FMath::Max3(OriginalSize.X, OriginalSize.Y, OriginalSize.Z);
+			if (MaxOriginalSize > KINDA_SMALL_NUMBER)
+			{
+				float ScaleMultiplier = TargetWeaponSize / MaxOriginalSize;
+				AcquirableWeapon->SetActorRelativeScale3D(FVector(ScaleMultiplier));
+			}
+		}
+	}
+
 	AcquirableWeapon->SetActorHiddenInGame(true);
 
 	//UI에 특정 슬롯이 업데이트되었음을 알림
@@ -499,7 +559,31 @@ void AMyRobo::UpdateInteractionProgress(float Percent)
 
 void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 {
+	if (MainController)
+	{
+		if (Target)
+		{
+			AActor* TargetActor = Cast<AActor>(Target);
+			if (TargetActor)
+			{
+				DisableInput(MainController);
+				bIsCameraFixed = true;
 
+				MainController->SetIgnoreLookInput(true);
+
+				FVector StartLocation = Camera->GetComponentLocation();
+				FVector TargetLocation = TargetActor->GetActorLocation();
+				FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, TargetLocation);
+				MainController->SetControlRotation(LookAtRotation);
+			}
+		}
+		else
+		{
+			EnableInput(MainController);
+			bIsCameraFixed = false;
+			MainController->SetIgnoreLookInput(false);
+		}
+	}
 }
 
 #pragma region reference

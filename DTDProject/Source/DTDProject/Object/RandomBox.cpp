@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "MyRobo/MyRobo.h"
 #include "Weapon/Weapon.h"
+#include "Weapon/WeaponData.h"
+#include "Engine/DataTable.h"
 
 // Sets default values
 ARandomBox::ARandomBox()
@@ -82,7 +84,6 @@ void ARandomBox::EndFocus()
 
 void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OVERLAP DETECTED!!!!!!"));
 	if(AMyRobo * Robo = Cast<AMyRobo>(OtherActor))
 	{
 		IsRoboOverlap = true;
@@ -99,7 +100,6 @@ void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponen
 		{
 			Robo->SetCurrentInteractable(this);
 			Robo->ShowLongPressWidget(true,this);
-			Robo->FocusOnInteractionTarget(this); //카메라 고정
 		}
 	}
 }
@@ -113,7 +113,6 @@ void ARandomBox::RandomBoxOnEndOverlap(UPrimitiveComponent* OverlappedComponent,
 		Robo->SetCurrentInteractable(nullptr);
 		Robo->ShowLongPressWidget(false,nullptr);
 		Robo->ShowPickupWidget(false,nullptr);
-		Robo->FocusOnInteractionTarget(this); //카메라 고정 해제
 		CurrentInteractingRobo = nullptr;
 	}
 }
@@ -123,14 +122,13 @@ void ARandomBox::UpdateOpenAnimation(float DeltaTime)
 	if (!DynMat) return;
 
 	Brightness = FMath::Max(0.03f, Brightness - DeltaTime * 2.0f);
-	DynMat->SetScalarParameterValue(TEXT("Brightness"),Brightness);
+	DynMat->SetScalarParameterValue(TEXT("Brightness"), Brightness);
 
 	// 밝기가 최소치에 도달하면 Open 상태로 전환
 	if (Brightness <= 0.03f)
 	{
 		IsOpen = true;
 		IsOpening = false;
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Box Opened!"));
 
 		SpawnWeapon();
 	}
@@ -138,22 +136,39 @@ void ARandomBox::UpdateOpenAnimation(float DeltaTime)
 
 void ARandomBox::SpawnWeapon()
 {
-	if (!GetWorld()||WeaponClasses.Num()==0) return;
-
-	if (IsValid(SpawnedWeapon)) return;
-
-	const int32 RandomIndex = FMath::RandRange(0, WeaponClasses.Num() - 1);
-	TSubclassOf<AWeapon> WeaponToSpawn = WeaponClasses[RandomIndex];
-
-	if (WeaponToSpawn)
+	// 1. 데이터 테이블이 유효한지, 그리고 비어있지 않은지 확인합니다.
+	if (!WeaponDataTable || WeaponDataTable->GetRowMap().Num() == 0)
 	{
-		FVector SpawnLocation = GetActorLocation() + FVector(0, 0, 50.f);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("No WeaponData"));
+		return;
+	}
+// 이미 무기가 스폰되었다면 함수를 종료합니다.
+	if (IsValid(SpawnedWeapon)) return;
+// 2. 데이터 테이블의 모든 행 이름(Row Name)을 가져옵니다.
+	TArray<FName> RowNames = WeaponDataTable->GetRowNames();
+// 3. 행 이름 중 하나를 무작위로 선택합니다.
+	const FName RandomRowName = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
+// 4. 선택된 행 이름으로 데이터 테이블에서 실제 데이터(FWeaponData)를 찾아옵니다.
+	static const FString ContextString(TEXT("WeaponDataTable Context"));
+	FWeaponData* FoundWeaponData = WeaponDataTable->FindRow<FWeaponData>(RandomRowName, ContextString);
+// 5. 데이터와 데이터 안의 WeaponClass가 유효한지 확인하고 무기를 스폰합니다.
+	if (FoundWeaponData && FoundWeaponData->WeaponClass)
+	{
+		TSubclassOf<AWeapon> WeaponToSpawn = FoundWeaponData->WeaponClass;
+
+		FVector SpawnLocation = GetActorLocation();
+
+		FVector DirectionToRobo = CurrentInteractingRobo->GetActorLocation() - GetActorLocation();
+		DirectionToRobo.Z = 0;
+		DirectionToRobo.Normalize();
+		SpawnLocation += DirectionToRobo * 60.0f + FVector(0, 0, 100.f);
+
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
 
 		SpawnedWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponToSpawn, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
 
-		if (IsValid(SpawnedWeapon)&&IsValid(CurrentInteractingRobo))
+		if (IsValid(SpawnedWeapon) && IsValid(CurrentInteractingRobo))
 		{
 			CurrentInteractingRobo->SetAcquirableWeapon(SpawnedWeapon);
 		}

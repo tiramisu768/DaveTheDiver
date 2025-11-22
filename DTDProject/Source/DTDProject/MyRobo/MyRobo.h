@@ -56,6 +56,9 @@ private:
 #pragma endregion
 
 #pragma region Weapon
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	float TargetWeaponSize = 30.0f;
+
 	UPROPERTY(VisibleAnywhere, Category="Weapon")
 	TObjectPtr<AWeapon> MeleeWeapon;
 
@@ -98,6 +101,7 @@ private:
 	float HoldDuration = 2.0f;
 	bool IsHolding = false;
 	float HoldElapsed = 0.0f;
+	bool bIsCameraFixed = false;
 #pragma endregion
 
 protected:

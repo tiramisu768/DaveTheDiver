@@ -9,6 +9,7 @@
 
 class UBoxComponent;
 class AWeapon;
+class UDataTable;
 
 UCLASS()
 class DTDPROJECT_API ARandomBox : public AActor,public IInteractionObject
@@ -48,8 +49,8 @@ private:
 
 	float Brightness = 1.0f;
 
-	UPROPERTY(EditAnywhere, Category ="Box Properties")
-	TArray<TSubclassOf<AWeapon>> WeaponClasses;
+	UPROPERTY(EditAnywhere, Category = "Box Properties", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UDataTable> WeaponDataTable;
 
 	UPROPERTY()
 	TObjectPtr<AWeapon> SpawnedWeapon;

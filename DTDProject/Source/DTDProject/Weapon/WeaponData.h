@@ -25,6 +25,9 @@ struct FWeaponData : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AWeapon> WeaponClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EWeaponSlot Slot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

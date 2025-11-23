@@ -23,6 +23,15 @@ ARandomBox::ARandomBox()
 	BoxFrameMesh->SetupAttachment(RootComponent);
 }
 
+void ARandomBox::ClearSpawnedWeapon()
+{
+	SpawnedWeapon = nullptr;
+	if (CurrentInteractingRobo)
+	{
+		CurrentInteractingRobo->ShowPickupWidget(false, nullptr);
+	}
+}
+
 // Called when the game starts or when spawned
 void ARandomBox::BeginPlay()
 {
@@ -136,7 +145,6 @@ void ARandomBox::UpdateOpenAnimation(float DeltaTime)
 
 void ARandomBox::SpawnWeapon()
 {
-	// 1. 데이터 테이블이 유효한지, 그리고 비어있지 않은지 확인합니다.
 	if (!WeaponDataTable || WeaponDataTable->GetRowMap().Num() == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("No WeaponData"));
@@ -168,10 +176,23 @@ void ARandomBox::SpawnWeapon()
 
 		SpawnedWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponToSpawn, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
 
-		if (IsValid(SpawnedWeapon) && IsValid(CurrentInteractingRobo))
+		if (IsValid(SpawnedWeapon))
 		{
-			CurrentInteractingRobo->SetAcquirableWeapon(SpawnedWeapon);
+			SpawnedWeapon->RowName = RandomRowName;
+			SpawnedWeapon->PostInitializeComponents();
+
+			UE_LOG(LogTemp, Log, TEXT("[RandomBox] Weapon Spawning: %s with RowName: %s"), * SpawnedWeapon->GetName(), * RandomRowName.ToString());
+
+			if(IsValid(CurrentInteractingRobo))
+			{
+				CurrentInteractingRobo->SetAcquirableWeapon(SpawnedWeapon);
+				CurrentInteractingRobo->ShowPickupWidget(true, SpawnedWeapon);
+			}
 		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[RandomBox] Spawn failed! Row '%s' in DataTable has a null WeaponClass!"), *RandomRowName.ToString());
 	}
 }
 

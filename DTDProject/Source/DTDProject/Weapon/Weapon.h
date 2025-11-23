@@ -25,10 +25,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category ="Weapon")
 	UDataTable* WeaponDataTable;
 
-	FWeaponData* WeaponStats;
-
-	UFUNCTION(BlueprintPure, Category="Weapon")
+	UFUNCTION(BlueprintPure, Category = "Weapon")
 	EWeaponSlot GetSlotType() const;
+
+	const FWeaponData* GetWeaponStats() const { return WeaponStats; }
+
+	UFUNCTION(BlueprintPure, Category = "Weapon", meta = (DisplayName = "GetWeaponStats (Copy)"))
+	FWeaponData GetWeaponStatsCopy() const;
+
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void Attack(ACharacter* OwnerCharacter);
+
+	void AdjustSize(float TargetSize);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
@@ -39,7 +48,6 @@ protected:
 
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
-	virtual void Attack(ACharacter* OwnerCharacter);
+private:
+	FWeaponData* WeaponStats;
 };

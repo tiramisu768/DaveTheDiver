@@ -25,11 +25,13 @@
 #include "Interface/InteractionObject.h"
 #include "Weapon/Weapon.h"
 #include "Object/RandomBox.h"
+#include "Animation/AnimInstance.h"
 
 
 AMyRobo::AMyRobo()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
 #pragma region Component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
@@ -50,7 +52,7 @@ AMyRobo::AMyRobo()
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);  // 회전 속도
 #pragma endregion
 
-#pragma region	connect AnimMontage
+#pragma region	Animation
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> MeleeAttackMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/MyRobo/Animation/AM_MeleeAttack.AM_MeleeAttack'"));
 	if (MeleeAttackMontageFinder.Succeeded())
@@ -61,22 +63,23 @@ AMyRobo::AMyRobo()
 
 	RoboComponent = CreateDefaultSubobject<URoboComponent>(TEXT("RoboComponent"));
 
+#pragma region Widgets
 	LongPressWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("LongPressWidget"));
-	//LongPressWidget->SetupAttachment(GetRootComponent());
 	static ConstructorHelpers::FClassFinder<UUserWidget> LongPressWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_LongPress.BP_LongPress_C"));
 	if (LongPressWidgetClassFinder.Succeeded())
 		LongPressWidgetClass = LongPressWidgetClassFinder.Class;
 	LongPressWidget->SetWidgetClass(LongPressWidgetClass);
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
-	//PickupWidget->SetupAttachment(GetRootComponent());
 	static ConstructorHelpers::FClassFinder<UUserWidget> PickupWidgetClassFinder(TEXT("/Game/BluePrint/UI/BP_Pickup.BP_Pickup_C"));
 	if (PickupWidgetClassFinder.Succeeded())
 	{
 		PickupWidgetClass = PickupWidgetClassFinder.Class;
 	}
 	PickupWidget->SetWidgetClass(PickupWidgetClass);
+#pragma endregion
 
+#pragma region AI
 	TeamId = FGenericTeamId(0);
 
 	StimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSourceComponent"));
@@ -85,6 +88,7 @@ AMyRobo::AMyRobo()
 		StimuliSourceComponent->RegisterForSense(TSubclassOf<UAISense_Sight>());
 		StimuliSourceComponent->RegisterWithPerceptionSystem();
 	}
+#pragma endregion
 }
 
 FGenericTeamId AMyRobo::GetGenericTeamId() const
@@ -92,59 +96,6 @@ FGenericTeamId AMyRobo::GetGenericTeamId() const
 	return TeamId;
 }
 
-// Called when the game starts or when spawned
-void AMyRobo::BeginPlay()
-{
-	Super::BeginPlay();
-
-	LongPressWidget->SetHiddenInGame(true);
-	PickupWidget->SetHiddenInGame(true);
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = this;
-
-	if (DefaultMeleeWeaponClass)
-	{
-		MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultMeleeWeaponClass, SpawnParams);
-		MeleeWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Weapon"));
-		MeleeWeapon->SetActorHiddenInGame(true);
-	}
-
-	if (DefaultHarpoonWeaponClass)
-	{
-		HarpoonWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultHarpoonWeaponClass, SpawnParams);
-		HarpoonWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Weapon"));
-		HarpoonWeapon->SetActorHiddenInGame(true);
-	}
-
-	if (DefaultGunWeaponClass)
-	{
-		GunWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultGunWeaponClass, SpawnParams);
-		GunWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Weapon"));
-		GunWeapon->SetActorHiddenInGame(true);
-	}
-
-	if (MeleeWeapon)
-	{
-		// Melee 슬롯이 업데이트되었음을 알림
-		OnWeaponSlotUpdated.Broadcast(EWeaponSlot::Melee, MeleeWeapon);
-	}
-	if (HarpoonWeapon)
-	{
-		// Harpoon 슬롯이 업데이트되었음을 알림
-		OnWeaponSlotUpdated.Broadcast(EWeaponSlot::Harpoon, HarpoonWeapon);
-	}
-	if (GunWeapon)
-	{
-		// Gun 슬롯이 업데이트되었음을 알림
-		OnWeaponSlotUpdated.Broadcast(EWeaponSlot::Gun, GunWeapon);
-	}
-
-	ActiveRangedWeapon = MeleeWeapon;
-}
-
-// Called every frame
 void AMyRobo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -154,7 +105,7 @@ void AMyRobo::Tick(float DeltaTime)
 	/*if (BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty())
 	{
 		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("Out Sea"));
-		
+
 	}
 	else
 	{
@@ -199,7 +150,7 @@ void AMyRobo::Tick(float DeltaTime)
 				CurrentInteractable->Interact(this);
 			}
 
-			ShowLongPressWidget(false,nullptr);
+			ShowLongPressWidget(false, nullptr);
 
 			if (bIsCameraFixed)
 			{
@@ -210,8 +161,7 @@ void AMyRobo::Tick(float DeltaTime)
 
 	if (MainController)
 	{
-		APlayerCameraManager* CameraManager = MainController->PlayerCameraManager;
-		if (CameraManager)
+		if (APlayerCameraManager* CameraManager = MainController->PlayerCameraManager)
 		{
 			FVector CameraLocation = CameraManager->GetCameraLocation();
 			if (LongPressWidget && LongPressWidget->IsVisible())
@@ -233,7 +183,6 @@ void AMyRobo::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
 void AMyRobo::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -280,34 +229,7 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 			});
 
 		OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::OnUpdateWeaponSlot);
-	}
-}
-
-
-void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FName SectionName)
-{
-	if (Montage == nullptr) return;
-	BodyComponent->GetAnimInstance()->Montage_Play(Montage);
-
-	if (SectionName.IsNone() == false)
-	{
-		BodyComponent->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
-	}
-}
-
-void AMyRobo::PlayMeleeAttackMontage()
-{
-	if (MeleeWeapon && MeleeWeapon->WeaponStats && MeleeWeapon->WeaponStats->AttackMontage)
-	{
-		PlayMontageFullBody(MeleeWeapon->WeaponStats->AttackMontage);
-	}
-}
-
-void AMyRobo::PlayRangedAttackMontage()
-{
-	if (ActiveRangedWeapon && ActiveRangedWeapon->WeaponStats && ActiveRangedWeapon->WeaponStats->AttackMontage)
-	{
-		PlayMontageFullBody(ActiveRangedWeapon->WeaponStats->AttackMontage);
+		BroadcastCurrentWeaponStates();
 	}
 }
 
@@ -315,10 +237,14 @@ void AMyRobo::PerformAttack()
 {
 	if (!MainController) return;
 
+	GetWorld()->GetTimerManager().ClearTimer(HolsterTimerHandle);
+
 	if (MainController->GetIsAiming())
 	{
 		if (ActiveRangedWeapon)
 		{
+			CurrentWeaponState = EWeaponState::RangedAttaching;
+			UpdateWeaponAttachments();
 			PlayRangedAttackMontage();
 			ActiveRangedWeapon->Attack(this);
 		}
@@ -327,63 +253,10 @@ void AMyRobo::PerformAttack()
 	{
 		if (MeleeWeapon)
 		{
+			CurrentWeaponState = EWeaponState::MeleeAttaching;
+			UpdateWeaponAttachments();
 			PlayMeleeAttackMontage();
 			MeleeWeapon->Attack(this);
-		}
-	}
-}
-
-float AMyRobo::GetDepthBelowSurface() const
-{
-	if (!BuoyancyComponent) return 0.0f;
-
-	// 현재 캐릭터의 위치
-	//FVector ActorLocation = BuoyancyComponent->GetOwner()->GetActorLocation();
-
-	// BuoyancyComponent가 인식 중인 WaterBody 목록 가져오기
-	const auto& WaterBodies = BuoyancyComponent->GetCurrentWaterBodyComponents();
-
-	if (UWaterBodyComponent* Water = WaterBodies[0].Get())    // .Get()로 유효 포인터 획득
-	{
-		const FVector Loc = GetActorLocation();
-		FVector SurfLoc, SurfNormal, SurfVelocity;
-		float OutDepth = 0.f;
-
-		Water->GetWaterSurfaceInfoAtLocation(
-			Loc, SurfLoc, SurfNormal, SurfVelocity, OutDepth, /*bIncludeDepth=*/true);
-
-		// 수면 기준 잠수 깊이(+면 수면 아래)
-		return SurfLoc.Z - Loc.Z;
-	}
-
-	return 0.0f; // 물에 없음
-}
-
-void AMyRobo::AttackTrace()
-{
-	TArray<FHitResult> HitResult;
-	bool isHit = UKismetSystemLibrary::BoxTraceMulti(
-	this,
-	GetActorLocation(),
-	GetActorLocation() + GetActorForwardVector() * 100.0f,
-	FVector(50.0f, 50.0f, 50.0f),
-	FRotator::ZeroRotator,
-	UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel3),
-	false,
-	{},
-	EDrawDebugTrace::ForDuration,
-	HitResult,
-	true 
-	);
-	if (isHit)
-	{
-		for (const FHitResult& result : HitResult)
-		{
-			ASeaCreature* SeaCreature = Cast<ASeaCreature>(result.GetActor());
-			if (SeaCreature != nullptr)
-			{
-				SeaCreature->HitBy(RoboComponent->GetDamage(),result);
-			}
 		}
 	}
 }
@@ -398,20 +271,20 @@ void AMyRobo::SwitchActiveRangedWeapon()
 	{
 		ActiveRangedWeapon = HarpoonWeapon;
 	}
+	UpdateWeaponAttachments();
 }
 
 void AMyRobo::ShowLongPressWidget(bool bShow, AActor* TargetActor)
 {
-	if (!LongPressWidget)
-		return;
+	if (!LongPressWidget) return;
 
-	if (bShow&&TargetActor)
+	if (bShow && TargetActor)
 	{
 		UpdateInteractionProgress(0.f);
 		FVector TargetLocation = TargetActor->GetActorLocation();
 		FVector WidgetLocation = TargetLocation + FVector(0.0f, 0.0f, 100.0f);
 		LongPressWidget->SetWorldLocation(WidgetLocation);
-		LongPressWidget->SetHiddenInGame(false);			
+		LongPressWidget->SetHiddenInGame(false);
 	}
 	else
 	{
@@ -425,6 +298,8 @@ void AMyRobo::ShowPickupWidget(bool bShow, AActor* TargetActor)
 
 	if (bShow && TargetActor)
 	{
+		FVector TargetLocation = TargetActor->GetActorLocation();
+		FVector WidgetLocation = TargetLocation + FVector(0.0f, 0.0f, 100.0f);
 		PickupWidget->SetWorldLocation(TargetActor->GetActorLocation());
 		PickupWidget->SetHiddenInGame(false);
 	}
@@ -471,74 +346,194 @@ void AMyRobo::StopSpaceHold()
 void AMyRobo::SetAcquirableWeapon(AWeapon* Weapon)
 {
 	AcquirableWeapon = Weapon;
+	if (Weapon)
+	{
+		// --- 로그 추가: 획득 가능한 무기가 설정되었음을 기록합니다. ---
+		UE_LOG(LogTemp, Log, TEXT("[MyRobo] Acquirable weapon set: %s"), *Weapon->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("[MyRobo] Acquirable weapon cleared."));
+	}
 }
 
-void AMyRobo::PickupAcquirableWeapon()
+void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 {
-	if (!AcquirableWeapon) return;
-
-	EWeaponSlot SlotToFill = AcquirableWeapon->GetSlotType();
-	AWeapon* OldWeapon = nullptr;
-
-	switch (SlotToFill)
+	if (MainController)
 	{
-	case EWeaponSlot::Melee:
-		OldWeapon = MeleeWeapon;
-		MeleeWeapon = AcquirableWeapon;
-		break;
-	case EWeaponSlot::Harpoon:
-		OldWeapon = HarpoonWeapon;
-		HarpoonWeapon = AcquirableWeapon;
-		break;
-	case EWeaponSlot::Gun:
-		OldWeapon = GunWeapon;
-		GunWeapon = AcquirableWeapon;
-		break;
-	}
-
-	AcquirableWeapon->SetOwner(this);
-	AcquirableWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Weapon"));
-
-	if (UStaticMeshComponent* WeaponMesh = AcquirableWeapon->FindComponentByClass<UStaticMeshComponent>())
-	{
-		if (UStaticMesh* MeshAsset = WeaponMesh->GetStaticMesh())
+		if (Target)
 		{
-			FVector OriginalSize = MeshAsset->GetBounds().GetBox().GetSize();
-
-			float MaxOriginalSize = FMath::Max3(OriginalSize.X, OriginalSize.Y, OriginalSize.Z);
-			if (MaxOriginalSize > KINDA_SMALL_NUMBER)
+			AActor* TargetActor = Cast<AActor>(Target);
+			if (TargetActor)
 			{
-				float ScaleMultiplier = TargetWeaponSize / MaxOriginalSize;
-				AcquirableWeapon->SetActorRelativeScale3D(FVector(ScaleMultiplier));
+				DisableInput(MainController);
+				bIsCameraFixed = true;
+				MainController->SetIgnoreLookInput(true); //마우스 정지
+
+				FVector StartLocation = Camera->GetComponentLocation();
+				FVector TargetLocation = TargetActor->GetActorLocation();
+				FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, TargetLocation);
+				MainController->SetControlRotation(LookAtRotation);
+			}
+		}
+		else
+		{
+			EnableInput(MainController);
+			bIsCameraFixed = false;
+			MainController->SetIgnoreLookInput(false); //마우스 정지해제
+		}
+	}
+}
+
+void AMyRobo::BroadcastCurrentWeaponStates()
+{
+	if (MeleeWeapon)
+	{
+		// Melee 슬롯이 업데이트되었음을 알림
+		OnWeaponSlotUpdated.Broadcast(EWeaponSlot::Melee, MeleeWeapon);
+	}
+	if (HarpoonWeapon)
+	{
+		// Harpoon 슬롯이 업데이트되었음을 알림
+		OnWeaponSlotUpdated.Broadcast(EWeaponSlot::Harpoon, HarpoonWeapon);
+	}
+	if (GunWeapon)
+	{
+		// Gun 슬롯이 업데이트되었음을 알림
+		OnWeaponSlotUpdated.Broadcast(EWeaponSlot::Gun, GunWeapon);
+	}
+}
+
+void AMyRobo::AttackTrace()
+{
+	TArray<FHitResult> HitResult;
+	bool isHit = UKismetSystemLibrary::BoxTraceMulti(
+		this,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * 100.0f,
+		FVector(50.0f, 50.0f, 50.0f),
+		FRotator::ZeroRotator,
+		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel3),
+		false,
+		{},
+		EDrawDebugTrace::ForDuration,
+		HitResult,
+		true
+	);
+	if (isHit)
+	{
+		for (const FHitResult& result : HitResult)
+		{
+			ASeaCreature* SeaCreature = Cast<ASeaCreature>(result.GetActor());
+			if (SeaCreature != nullptr)
+			{
+				SeaCreature->HitBy(RoboComponent->GetDamage(), result);
 			}
 		}
 	}
+}
 
-	AcquirableWeapon->SetActorHiddenInGame(true);
+void AMyRobo::BeginPlay()
+{
+	Super::BeginPlay();
 
-	//UI에 특정 슬롯이 업데이트되었음을 알림
-	OnWeaponSlotUpdated.Broadcast(SlotToFill, AcquirableWeapon);
+	LongPressWidget->SetHiddenInGame(true);
+	PickupWidget->SetHiddenInGame(true);
 
-	if (OldWeapon == ActiveRangedWeapon)
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+
+	if (DefaultMeleeWeaponClass)
 	{
-		ActiveRangedWeapon = AcquirableWeapon;
+		MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultMeleeWeaponClass, SpawnParams);
+		if(MeleeWeapon)
+		{
+			MeleeWeapon->RowName = TEXT("Melee");
+			MeleeWeapon->PostInitializeComponents();
+			MeleeWeapon->AdjustSize(TargetWeaponSize);
+			MeleeWeapon->SetActorHiddenInGame(true);
+		}
 	}
 
-	if (OldWeapon)
+	if (DefaultHarpoonWeaponClass)
 	{
-		OldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		//랜덤상자 위로 이동시키는 로직 추가해야함
+		HarpoonWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultHarpoonWeaponClass, SpawnParams);
+		if (HarpoonWeapon)
+		{
+			HarpoonWeapon->RowName = TEXT("Harpoon");
+			HarpoonWeapon->PostInitializeComponents();
+			HarpoonWeapon->AdjustSize(TargetWeaponSize);
+			HarpoonWeapon->SetActorHiddenInGame(true);
+		}
 	}
 
-	AcquirableWeapon = nullptr;
+	if (DefaultGunWeaponClass)
+	{
+		GunWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultGunWeaponClass, SpawnParams);
+		if (GunWeapon)
+		{
+			GunWeapon->RowName = TEXT("Gun");
+			GunWeapon->PostInitializeComponents();
+			GunWeapon->AdjustSize(TargetWeaponSize);
+			GunWeapon->SetActorHiddenInGame(true);
+		}
+	}
+
+	ActiveRangedWeapon = HarpoonWeapon;
+	CurrentWeaponState = EWeaponState::Unarmed;
+}
+
+void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName)
+{
+	if (Montage == nullptr) return;
+
+	if (UAnimInstance* AnimInstance = BodyComponent->GetAnimInstance())
+	{
+		if (!AnimInstance->Montage_IsPlaying(Montage))
+		{
+			AnimInstance->Montage_Play(Montage);
+
+			if (EndDelegate.IsBound())
+			{
+				AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
+			}
+
+			if (SectionName.IsNone() == false)
+			{
+				AnimInstance->Montage_JumpToSection(SectionName, Montage);
+			}
+		}
+	}
+}
+
+void AMyRobo::PlayMeleeAttackMontage()
+{
+	if (MeleeWeapon && MeleeWeapon->GetWeaponStats() && MeleeWeapon->GetWeaponStats()->AttackMontage)
+	{
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
+		PlayMontageFullBody(MeleeWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
+	}
+}
+
+void AMyRobo::PlayRangedAttackMontage()
+{
+	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AttackMontage)
+	{
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
+		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
+	}
 }
 
 void AMyRobo::HandleShortPress()
 {
 	IsHolding = false;
 
-	if(AcquirableWeapon)
+	if (AcquirableWeapon)
 	{
+		UE_LOG(LogTemp, Log, TEXT("[MyRobo] Short press detected. Attempting to pick up %s."), *AcquirableWeapon->GetName());
 		PickupAcquirableWeapon();
 		return;
 	}
@@ -557,33 +552,129 @@ void AMyRobo::UpdateInteractionProgress(float Percent)
 	}
 }
 
-void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
+void AMyRobo::PickupAcquirableWeapon()
 {
-	if (MainController)
+	if (!AcquirableWeapon) return;
+
+	FVector DropLocation = AcquirableWeapon->GetActorLocation();
+
+	EWeaponSlot SlotToFill = AcquirableWeapon->GetSlotType();
+	AWeapon* OldWeapon = nullptr;
+
+	UE_LOG(LogTemp, Log, TEXT("[MyRobo] PickupAcquirableWeapon started for slot: %s"), *UEnum::GetValueAsString(SlotToFill));
+
+	switch (SlotToFill)
 	{
-		if (Target)
-		{
-			AActor* TargetActor = Cast<AActor>(Target);
-			if (TargetActor)
-			{
-				DisableInput(MainController);
-				bIsCameraFixed = true;
-
-				MainController->SetIgnoreLookInput(true);
-
-				FVector StartLocation = Camera->GetComponentLocation();
-				FVector TargetLocation = TargetActor->GetActorLocation();
-				FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, TargetLocation);
-				MainController->SetControlRotation(LookAtRotation);
-			}
-		}
-		else
-		{
-			EnableInput(MainController);
-			bIsCameraFixed = false;
-			MainController->SetIgnoreLookInput(false);
-		}
+	case EWeaponSlot::Melee:
+		OldWeapon = MeleeWeapon;
+		MeleeWeapon = AcquirableWeapon;
+		break;
+	case EWeaponSlot::Harpoon:
+		OldWeapon = HarpoonWeapon;
+		HarpoonWeapon = AcquirableWeapon;
+		break;
+	case EWeaponSlot::Gun:
+		OldWeapon = GunWeapon;
+		GunWeapon = AcquirableWeapon;
+		break;
 	}
+
+	AcquirableWeapon->SetOwner(this);
+	AcquirableWeapon->AdjustSize(TargetWeaponSize);
+	AcquirableWeapon->SetActorHiddenInGame(true);
+
+	UE_LOG(LogTemp, Log, TEXT("[MyRobo] Broadcasting OnWeaponSlotUpdated for slot %s with new weapon %s."), *UEnum::GetValueAsString(SlotToFill), *AcquirableWeapon->GetName());
+	//UI에 특정 슬롯이 업데이트되었음을 알림
+	OnWeaponSlotUpdated.Broadcast(SlotToFill, AcquirableWeapon);
+
+	if (OldWeapon == ActiveRangedWeapon)
+	{
+		ActiveRangedWeapon = AcquirableWeapon;
+	}
+
+	if (OldWeapon)
+	{
+		OldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		OldWeapon->SetActorLocation(DropLocation);
+		OldWeapon->SetActorHiddenInGame(false);
+	}
+
+	if (ARandomBox* Box = Cast<ARandomBox>(AcquirableWeapon->GetOwner()))
+	{
+		Box->ClearSpawnedWeapon();
+	}
+
+	AcquirableWeapon = nullptr;
+}
+
+void AMyRobo::UpdateWeaponAttachments()
+{
+	if (MeleeWeapon) MeleeWeapon->SetActorHiddenInGame(true);
+	if (HarpoonWeapon) HarpoonWeapon->SetActorHiddenInGame(true);
+	if (GunWeapon) GunWeapon->SetActorHiddenInGame(true);
+
+	switch (CurrentWeaponState)
+	{
+	case EWeaponState::Unarmed:
+		break;
+
+	case EWeaponState::MeleeAttaching:
+		if (MeleeWeapon)
+		{
+			MeleeWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocketName);
+			MeleeWeapon->SetActorHiddenInGame(false);
+		}
+		break;
+
+	case EWeaponState::RangedAttaching:
+		if (ActiveRangedWeapon)
+		{
+			ActiveRangedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocketName);
+			ActiveRangedWeapon->SetActorHiddenInGame(false);
+		}
+		break;
+	}
+}
+
+void AMyRobo::StartHolsterTimer()
+{
+	GetWorld()->GetTimerManager().SetTimer(HolsterTimerHandle, this, &AMyRobo::HolsterWeapons, 3.0f, false);
+}
+
+void AMyRobo::HolsterWeapons()
+{
+	CurrentWeaponState = EWeaponState::Unarmed;
+	UpdateWeaponAttachments();
+}
+
+void AMyRobo::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	StartHolsterTimer();
+}
+
+float AMyRobo::GetDepthBelowSurface() const
+{
+	if (!BuoyancyComponent) return 0.0f;
+
+	// 현재 캐릭터의 위치
+	//FVector ActorLocation = BuoyancyComponent->GetOwner()->GetActorLocation();
+
+	// BuoyancyComponent가 인식 중인 WaterBody 목록 가져오기
+	const auto& WaterBodies = BuoyancyComponent->GetCurrentWaterBodyComponents();
+
+	if (UWaterBodyComponent* Water = WaterBodies[0].Get())    // .Get()로 유효 포인터 획득
+	{
+		const FVector Loc = GetActorLocation();
+		FVector SurfLoc, SurfNormal, SurfVelocity;
+		float OutDepth = 0.f;
+
+		Water->GetWaterSurfaceInfoAtLocation(
+			Loc, SurfLoc, SurfNormal, SurfVelocity, OutDepth, /*bIncludeDepth=*/true);
+
+		// 수면 기준 잠수 깊이(+면 수면 아래)
+		return SurfLoc.Z - Loc.Z;
+	}
+	return 0.0f; // 물에 없음
 }
 
 #pragma region reference

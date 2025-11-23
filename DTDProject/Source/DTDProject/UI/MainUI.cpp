@@ -9,6 +9,7 @@
 #include "UI/WarningOxygenUI.h"
 #include "UI/FishRankUI.h"
 #include "Weapon/Weapon.h"
+#include "Components/Image.h"
 
 void UMainUI::NativeConstruct()
 {
@@ -82,11 +83,27 @@ void UMainUI::PlaySwitchAnimation(int32 SelectedIndex)
 
 void UMainUI::OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon)
 {
-	if (WeaponWidget && NewWeapon && NewWeapon->WeaponStats)
+	if (!NewWeapon || !WeaponWidget) return;
+
+	// --- 로그 추가: MainUI가 이벤트를 수신했음을 기록합니다. ---
+	UE_LOG(LogTemp, Log, TEXT("[MainUI] OnUpdateWeaponSlot received for slot %s."), *UEnum::GetValueAsString(WeaponSlot));
+
+	if (const FWeaponData* WeaponData = NewWeapon->GetWeaponStats())
 	{
-		UTexture2D* IconTexture = NewWeapon->WeaponStats->Icon.LoadSynchronous();
-		WeaponSlot = NewWeapon->GetSlotType();
-		WeaponWidget->UpdateWeaponIcon(WeaponSlot, IconTexture);
+		if (UTexture2D* IconTexture = WeaponData->Icon.LoadSynchronous())
+		{
+			// --- 로그 추가: WeaponWidget에 아이콘 업데이트를 요청함을 기록합니다. ---
+			UE_LOG(LogTemp, Log, TEXT("[MainUI] Forwarding icon update to WeaponWidget."));
+			WeaponWidget->UpdateWeaponIcon(WeaponSlot, IconTexture);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[MainUI] IconTexture is null for weapon %s."), *NewWeapon->GetName());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[MainUI] WeaponData is null for weapon %s."), *NewWeapon->GetName());
 	}
 }
 

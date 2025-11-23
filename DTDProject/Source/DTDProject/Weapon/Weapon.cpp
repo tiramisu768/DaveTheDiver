@@ -5,6 +5,7 @@
 #include "MyRobo/MyRobo.h"
 #include "GameFrameWork/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -18,13 +19,9 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (WeaponDataTable && !RowName.IsNone())
+	if (WeaponDataTable)
 	{
 		WeaponStats = WeaponDataTable->FindRow<FWeaponData>(RowName, TEXT(""));
-		if (WeaponStats)
-		{
-			UE_LOG(LogTemp, Log, TEXT("Loaded Weapon:%s, Damage:%f"), *WeaponStats->Name, WeaponStats->Damage);               
-		}
 	}
 }
 
@@ -69,6 +66,33 @@ void AWeapon::Attack(ACharacter* OwnerCharacter)
 			break;
 	}
 	
+}
+
+void AWeapon::AdjustSize(float TargetSize)
+{
+	if (UStaticMeshComponent* WeaponMesh = FindComponentByClass<UStaticMeshComponent>())
+	{
+		if (UStaticMesh* MeshAsset = WeaponMesh->GetStaticMesh())
+		{
+			FVector OriginalSize = MeshAsset->GetBounds().GetBox().GetSize();
+			float MaxOriginalSize = FMath::Max3(OriginalSize.X, OriginalSize.Y, OriginalSize.Z);
+
+			if (MaxOriginalSize > KINDA_SMALL_NUMBER)
+			{
+				float ScaleMultiplier = TargetSize / MaxOriginalSize;
+				SetActorRelativeScale3D(FVector(ScaleMultiplier));
+			}
+		}
+	}
+}
+
+FWeaponData AWeapon::GetWeaponStatsCopy() const
+{
+	if (WeaponStats)
+	{
+		return *WeaponStats;
+	}
+	return FWeaponData();
 }
 
 // Called every frame

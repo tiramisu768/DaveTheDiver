@@ -31,28 +31,43 @@ void URoboWeaponUI::PlaySwitchRangedIconAnimation(int32 SelectedIndex)
 
 void URoboWeaponUI::UpdateWeaponIcon(EWeaponSlot WeaponSlot, UTexture2D* Icon)
 {
-	UImage* TargetIcon = nullptr;
+	if (!Icon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[RoboWeaponUI] Received null icon for slot %s."), *UEnum::GetValueAsString(WeaponSlot));
+		return;
+	}
+
+	// --- 로그 추가: 아이콘 업데이트를 시작함을 기록합니다. ---
+	UE_LOG(LogTemp, Log, TEXT("[RoboWeaponUI] Updating icon for slot: %s"), *UEnum::GetValueAsString(WeaponSlot));
 
 	switch (WeaponSlot)
 	{
 	case EWeaponSlot::Melee:
-		TargetIcon = MeleeWeaponIcon;
-		break;
-	case EWeaponSlot::Tool:
-		FirstToolIcon = SecondToolIcon;
-		TargetIcon = FirstToolIcon;
+		if (MeleeWeaponIcon)
+		{
+			MeleeWeaponIcon->SetBrushFromTexture(Icon);
+			MeleeWeaponIcon->SetVisibility(ESlateVisibility::Visible);
+			// --- 로그 추가: 성공 ---
+			UE_LOG(LogTemp, Log, TEXT("[RoboWeaponUI] MeleeWeaponIcon updated successfully."));
+		}
 		break;
 	case EWeaponSlot::Harpoon:
-		TargetIcon = HarpoonWeaponIcon;
+		if (HarpoonWeaponIcon)
+		{
+			HarpoonWeaponIcon->SetBrushFromTexture(Icon);
+			HarpoonWeaponIcon->SetVisibility(ESlateVisibility::Visible);
+			// --- 로그 추가: 성공 ---
+			UE_LOG(LogTemp, Log, TEXT("[RoboWeaponUI] HarpoonWeaponIcon updated successfully."));
+		}
 		break;
 	case EWeaponSlot::Gun:
-		TargetIcon = GunWeaponIcon;
+		if (GunWeaponIcon)
+		{
+			GunWeaponIcon->SetBrushFromTexture(Icon);
+			GunWeaponIcon->SetVisibility(ESlateVisibility::Visible);
+			// --- 로그 추가: 성공 ---
+			UE_LOG(LogTemp, Log, TEXT("[RoboWeaponUI] GunWeaponIcon updated successfully."));
+		}
 		break;
-	}
-
-	if (TargetIcon && Icon)
-	{
-		TargetIcon->SetBrushFromTexture(Icon);
-		//TargetIcon->SetVisibility(ESlateVisibility::Visible);
 	}
 }

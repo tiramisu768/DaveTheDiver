@@ -49,5 +49,5 @@ struct FWeaponData : public FTableRowBase
 	UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> ProjectileClass; //Range 전용
+	TSubclassOf<AActor> BulletData; //Range 전용
 };

@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "MyRobo/MyRobo.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "Interface/InteractionObject.h"
 #include "Blueprint/UserWidget.h"
@@ -332,19 +333,33 @@ void AMyCharacterController::StopAiming(const FInputActionValue& value)
 	{
 		MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	if (ControlledRobo)
+	{
+		FVector WorldLocation, WorldDirection;
+		bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
+
+		if (bSuccess)
+		{
+			ControlledRobo->FireRangedWeapon(WorldDirection);
+		}
+	}
 }
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
-	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponCount;
 	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
-
-	UE_LOG(LogTemp, Warning, TEXT("ControlledHUD: %s"), *GetNameSafe(MainUI));
-	UE_LOG(LogTemp, Warning, TEXT("RoboWeaponUI: %s"), *GetNameSafe(MainUI ? MainUI->GetRoboWeaponUI() : nullptr));
 
 	if (MainUI && MainUI->GetRoboWeaponUI())
 	{
 		MainUI->GetRoboWeaponUI()->PlaySwitchRangedIconAnimation(CurrentWeaponIndex);
+	}
+
+	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponCount;
+
+	if (ControlledRobo)
+	{
+		ControlledRobo->SwitchActiveRangedWeapon();
 	}
 }
 

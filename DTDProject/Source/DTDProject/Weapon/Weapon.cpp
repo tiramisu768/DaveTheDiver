@@ -6,6 +6,7 @@
 #include "GameFrameWork/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
+#include "Weapon/Bullet.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -49,7 +50,7 @@ void AWeapon::Attack(ACharacter* OwnerCharacter)
 
 		case EWeaponSlot::Harpoon:
 		case EWeaponSlot::Gun:
-			if (WeaponStats->ProjectileClass)
+			if (WeaponStats->BulletData)
 			{
 				FVector MuzzleLocation;
 				FRotator MuzzleRotation;
@@ -61,7 +62,7 @@ void AWeapon::Attack(ACharacter* OwnerCharacter)
 				SpawnParams.Owner = OwnerCharacter;
 				SpawnParams.Instigator = OwnerCharacter->GetInstigator();
 
-				GetWorld()->SpawnActor<AActor>(WeaponStats->ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+				GetWorld()->SpawnActor<AActor>(WeaponStats->BulletData, MuzzleLocation, MuzzleRotation, SpawnParams);
 			}
 			break;
 	}
@@ -82,6 +83,43 @@ void AWeapon::AdjustSize(float TargetSize)
 				float ScaleMultiplier = TargetSize / MaxOriginalSize;
 				SetActorRelativeScale3D(FVector(ScaleMultiplier));
 			}
+		}
+	}
+}
+
+void AWeapon::Fire(const FVector& AimDirection)
+{
+	if (!WeaponStats || !WeaponStats->BulletData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Bullet no in %s"), *GetName());
+		return;
+	}
+
+	UWorld* World = GetWorld();
+
+	UStaticMeshComponent* WeaponMesh = FindComponentByClass<UStaticMeshComponent>();
+
+	if (World && WeaponMesh)
+	{
+		FVector SpawnLocation = WeaponMesh->GetSocketLocation("Muzzle");
+		FRotator SpawnRotation = AimDirection.Rotation();
+
+		FActorSpawnParameters SpawnParam;
+		SpawnParam.Owner = GetOwner();
+		SpawnParam.Instigator = Cast<APawn>(GetOwner());
+
+		ABullet* SpawnedBullet = World->SpawnActor<ABullet>(WeaponStats->BulletData, SpawnLocation, SpawnRotation, SpawnParam);
+
+		if (SpawnedBullet)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Fired Bullet: %s"), *SpawnedBullet->GetName());
+		}
+	}
+	else
+	{
+		if (!WeaponMesh)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("WeaponMesh No in %s"), *GetName());
 		}
 	}
 }

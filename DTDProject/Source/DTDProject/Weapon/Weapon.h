@@ -39,12 +39,17 @@ public:
 
 	void AdjustSize(float TargetSize);
 
+	virtual void Fire(const FVector& AimDirection);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UCapsuleComponent* CapsuleComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	USkeletalMeshComponent* MeshComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<class ABullet> BulletClass;
 
 	virtual void BeginPlay() override;
 

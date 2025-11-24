@@ -274,6 +274,14 @@ void AMyRobo::SwitchActiveRangedWeapon()
 	UpdateWeaponAttachments();
 }
 
+void AMyRobo::FireRangedWeapon(const FVector& AimDirection)
+{
+	if (ActiveRangedWeapon)
+	{
+		ActiveRangedWeapon->Fire(AimDirection);
+	}
+}
+
 void AMyRobo::ShowLongPressWidget(bool bShow, AActor* TargetActor)
 {
 	if (!LongPressWidget) return;
@@ -299,8 +307,8 @@ void AMyRobo::ShowPickupWidget(bool bShow, AActor* TargetActor)
 	if (bShow && TargetActor)
 	{
 		FVector TargetLocation = TargetActor->GetActorLocation();
-		FVector WidgetLocation = TargetLocation + FVector(0.0f, 0.0f, 100.0f);
-		PickupWidget->SetWorldLocation(TargetActor->GetActorLocation());
+		FVector WidgetLocation = TargetLocation + FVector(0.0f, 0.0f, 20.0f);
+		PickupWidget->SetWorldLocation(WidgetLocation);
 		PickupWidget->SetHiddenInGame(false);
 	}
 	else
@@ -450,11 +458,14 @@ void AMyRobo::BeginPlay()
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = this;
 
+	USkeletalMeshComponent* CharacterMesh = GetMesh();
+
 	if (DefaultMeleeWeaponClass)
 	{
 		MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultMeleeWeaponClass, SpawnParams);
 		if(MeleeWeapon)
 		{
+			MeleeWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, MeleeWeaponSocketName);
 			MeleeWeapon->RowName = TEXT("Melee");
 			MeleeWeapon->PostInitializeComponents();
 			MeleeWeapon->AdjustSize(TargetWeaponSize);
@@ -467,6 +478,7 @@ void AMyRobo::BeginPlay()
 		HarpoonWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultHarpoonWeaponClass, SpawnParams);
 		if (HarpoonWeapon)
 		{
+			HarpoonWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, HarpoonWeaponSocketName);
 			HarpoonWeapon->RowName = TEXT("Harpoon");
 			HarpoonWeapon->PostInitializeComponents();
 			HarpoonWeapon->AdjustSize(TargetWeaponSize);
@@ -479,6 +491,7 @@ void AMyRobo::BeginPlay()
 		GunWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultGunWeaponClass, SpawnParams);
 		if (GunWeapon)
 		{
+			GunWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, GunWeaponSocketName);
 			GunWeapon->RowName = TEXT("Gun");
 			GunWeapon->PostInitializeComponents();
 			GunWeapon->AdjustSize(TargetWeaponSize);
@@ -629,7 +642,7 @@ void AMyRobo::UpdateWeaponAttachments()
 	case EWeaponState::MeleeAttaching:
 		if (MeleeWeapon)
 		{
-			MeleeWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocketName);
+			MeleeWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MeleeWeaponSocketName);
 			MeleeWeapon->SetActorHiddenInGame(false);
 		}
 		break;
@@ -637,8 +650,20 @@ void AMyRobo::UpdateWeaponAttachments()
 	case EWeaponState::RangedAttaching:
 		if (ActiveRangedWeapon)
 		{
-			ActiveRangedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocketName);
-			ActiveRangedWeapon->SetActorHiddenInGame(false);
+			FName SocketToAttach;
+			if (ActiveRangedWeapon == HarpoonWeapon)
+			{
+				SocketToAttach = HarpoonWeaponSocketName;
+			}
+			else if (ActiveRangedWeapon == GunWeapon)
+			{
+				SocketToAttach = GunWeaponSocketName;
+			}
+			if(!SocketToAttach.IsNone())
+			{
+				ActiveRangedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketToAttach);
+				ActiveRangedWeapon->SetActorHiddenInGame(false);
+			}
 		}
 		break;
 	}

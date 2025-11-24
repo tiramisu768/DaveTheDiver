@@ -48,7 +48,7 @@ void URoboAimUI::UpdateAimPos(FVector2D AimPos)
                 CanvasSlot->SetPosition(ArcCenter + Direction * ArcRadius);
             }
             // 위치 로그 출력
-            UE_LOG(LogTemp, Warning, TEXT("Overlay_Arrow Pos: X=%f, Y=%f"), AimPos.X, AimPos.Y);
+           /* UE_LOG(LogTemp, Warning, TEXT("Overlay_Arrow Pos: X=%f, Y=%f"), AimPos.X, AimPos.Y);*/
         }
     }
 }

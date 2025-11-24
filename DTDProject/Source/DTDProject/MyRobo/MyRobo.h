@@ -54,6 +54,8 @@ public:
 
 	void SwitchActiveRangedWeapon();
 
+	void FireRangedWeapon(const FVector& AimDirection);
+
 	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable) { CurrentInteractable = NewInteractable; }
 
 	void ShowLongPressWidget(bool bShow, AActor* TargetActor);
@@ -100,7 +102,13 @@ protected:
 
 #pragma region Weapon
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FName HandSocketName = TEXT("Weapon");
+	FName MeleeWeaponSocketName = TEXT("MeleeWeaponSocket");
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName HarpoonWeaponSocketName = TEXT("HarpoonWeaponSocket");
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName GunWeaponSocketName = TEXT("GunWeaponSocket");
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Weapon")
 	float TargetWeaponSize = 30.0f;

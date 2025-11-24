@@ -19,6 +19,7 @@ class DTDPROJECT_API ARandomBox : public AActor,public IInteractionObject
 public:
 	ARandomBox();
 	void ClearSpawnedWeapon();
+	void SetSpawnedWeapon(AWeapon* NewWeapon);
 
 protected:
 

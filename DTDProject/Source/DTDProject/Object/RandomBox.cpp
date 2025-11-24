@@ -32,6 +32,15 @@ void ARandomBox::ClearSpawnedWeapon()
 	}
 }
 
+void ARandomBox::SetSpawnedWeapon(AWeapon* NewWeapon)
+{
+	SpawnedWeapon = NewWeapon;
+	if (SpawnedWeapon)
+	{
+		SpawnedWeapon->SetOwner(this);
+	}
+}
+
 // Called when the game starts or when spawned
 void ARandomBox::BeginPlay()
 {

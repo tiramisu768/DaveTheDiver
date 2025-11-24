@@ -9,6 +9,7 @@
 #include "Weapon/Weapon.h"
 #include "Weapon/WeaponData.h"
 #include "Interface/InteractionObject.h"
+#include "ActorComponent/InventoryComponent.h"
 #include "MyRobo.generated.h"
 
 class UAIPerceptionStimuliSourceComponent;

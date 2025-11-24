@@ -345,10 +345,16 @@ void AMyRobo::StopSpaceHold()
 
 void AMyRobo::SetAcquirableWeapon(AWeapon* Weapon)
 {
-	AcquirableWeapon = Weapon;
-	if (Weapon)
+	if (AcquirableWeapon)
 	{
-		// --- 로그 추가: 획득 가능한 무기가 설정되었음을 기록합니다. ---
+		ShowPickupWidget(false, AcquirableWeapon);
+	}
+
+	AcquirableWeapon = Weapon;
+
+	if (AcquirableWeapon)
+	{
+		ShowPickupWidget(true, AcquirableWeapon);
 		UE_LOG(LogTemp, Log, TEXT("[MyRobo] Acquirable weapon set: %s"), *Weapon->GetName());
 	}
 	else
@@ -556,6 +562,8 @@ void AMyRobo::PickupAcquirableWeapon()
 {
 	if (!AcquirableWeapon) return;
 
+	ARandomBox* BoxOwner = Cast<ARandomBox>(AcquirableWeapon->GetOwner());
+
 	FVector DropLocation = AcquirableWeapon->GetActorLocation();
 
 	EWeaponSlot SlotToFill = AcquirableWeapon->GetSlotType();
@@ -592,19 +600,19 @@ void AMyRobo::PickupAcquirableWeapon()
 		ActiveRangedWeapon = AcquirableWeapon;
 	}
 
-	if (OldWeapon)
+	if (OldWeapon && BoxOwner)
 	{
 		OldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		OldWeapon->SetActorLocation(DropLocation);
 		OldWeapon->SetActorHiddenInGame(false);
+		BoxOwner->SetSpawnedWeapon(OldWeapon);
 	}
-
-	if (ARandomBox* Box = Cast<ARandomBox>(AcquirableWeapon->GetOwner()))
+	else if (BoxOwner)
 	{
-		Box->ClearSpawnedWeapon();
+		BoxOwner->ClearSpawnedWeapon();
 	}
 
-	AcquirableWeapon = nullptr;
+	SetAcquirableWeapon(nullptr);
 }
 
 void AMyRobo::UpdateWeaponAttachments()

@@ -54,8 +54,6 @@ public:
 
 	void SwitchActiveRangedWeapon();
 
-	void FireRangedWeapon(const FVector& AimDirection);
-
 	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable) { CurrentInteractable = NewInteractable; }
 
 	void ShowLongPressWidget(bool bShow, AActor* TargetActor);

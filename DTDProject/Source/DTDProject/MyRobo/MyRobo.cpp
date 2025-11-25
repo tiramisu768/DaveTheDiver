@@ -289,14 +289,6 @@ void AMyRobo::SwitchActiveRangedWeapon()
 	UpdateWeaponAttachments();
 }
 
-void AMyRobo::FireRangedWeapon(const FVector& AimDirection)
-{
-	if (ActiveRangedWeapon)
-	{
-		ActiveRangedWeapon->Fire(AimDirection);
-	}
-}
-
 void AMyRobo::ShowLongPressWidget(bool bShow, AActor* TargetActor)
 {
 	if (!LongPressWidget) return;

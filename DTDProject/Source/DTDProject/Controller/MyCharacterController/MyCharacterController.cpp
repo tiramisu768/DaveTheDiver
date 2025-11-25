@@ -271,7 +271,20 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 {
 	if (ControlledRobo)
 	{
-		ControlledRobo->PerformAttack();
+		if (IsAiming)
+		{
+			FVector WorldLocation, WorldDirection;
+			bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
+
+			if (bSuccess)
+			{
+				ControlledRobo->PerformAttack(WorldDirection);
+			}
+		}
+		else
+		{
+			ControlledRobo->PerformAttack();
+		}
 	}
 }
 
@@ -332,17 +345,6 @@ void AMyCharacterController::StopAiming(const FInputActionValue& value)
 	if (MainUI && MainUI->GetRoboAimUI())
 	{
 		MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
-	}
-
-	if (ControlledRobo)
-	{
-		FVector WorldLocation, WorldDirection;
-		bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
-
-		if (bSuccess)
-		{
-			ControlledRobo->FireRangedWeapon(WorldDirection);
-		}
 	}
 }
 

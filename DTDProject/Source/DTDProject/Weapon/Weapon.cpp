@@ -36,7 +36,7 @@ EWeaponSlot AWeapon::GetSlotType() const
 	return EWeaponSlot::Melee;
 }
 
-void AWeapon::Attack(ACharacter* OwnerCharacter)
+void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDirection)
 {
 	if (!WeaponStats || !OwnerCharacter) return;
 
@@ -139,4 +139,5 @@ void AWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
 

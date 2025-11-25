@@ -59,6 +59,21 @@ AMyRobo::AMyRobo()
 	{
 		MeleeAttackMontage = MeleeAttackMontageFinder.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Melee2AttackMontageFinder(TEXT(""));
+	if (Melee2AttackMontageFinder.Succeeded())
+	{
+		Melee2AttackMontage = Melee2AttackMontageFinder.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Melee3AttackMontageFinder(TEXT(""));
+	if (Melee3AttackMontageFinder.Succeeded())
+	{
+		Melee3AttackMontage = Melee3AttackMontageFinder.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> RangedAttackMontageFinder(TEXT(""));
+	if (RangedAttackMontageFinder.Succeeded())
+	{
+		RangedAttackMontage = RangedAttackMontageFinder.Object;
+	}
 #pragma endregion
 
 	RoboComponent = CreateDefaultSubobject<URoboComponent>(TEXT("RoboComponent"));
@@ -233,7 +248,7 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 	}
 }
 
-void AMyRobo::PerformAttack()
+void AMyRobo::PerformAttack(const FVector& AimDirection)
 {
 	if (!MainController) return;
 
@@ -246,7 +261,7 @@ void AMyRobo::PerformAttack()
 			CurrentWeaponState = EWeaponState::RangedAttaching;
 			UpdateWeaponAttachments();
 			PlayRangedAttackMontage();
-			ActiveRangedWeapon->Attack(this);
+			ActiveRangedWeapon->Attack(this,AimDirection);
 		}
 	}
 	else
@@ -530,9 +545,23 @@ void AMyRobo::PlayMeleeAttackMontage()
 {
 	if (MeleeWeapon && MeleeWeapon->GetWeaponStats() && MeleeWeapon->GetWeaponStats()->AttackMontage)
 	{
+		UAnimMontage* MeleeMontage;
+		if (MeleeWeapon->GetWeaponStats()->AttackMontage == MeleeAttackMontage)
+		{
+			MeleeMontage = MeleeAttackMontage;
+		}
+		else if (MeleeWeapon->GetWeaponStats()->AttackMontage == Melee2AttackMontage)
+		{
+			MeleeMontage = Melee2AttackMontage;
+		}
+		else if (MeleeWeapon->GetWeaponStats()->AttackMontage == Melee3AttackMontage)
+		{
+			MeleeMontage = Melee3AttackMontage;
+		}
+
 		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
-		PlayMontageFullBody(MeleeWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
+		PlayMontageFullBody(MeleeMontage, EndDelegate);
 	}
 }
 

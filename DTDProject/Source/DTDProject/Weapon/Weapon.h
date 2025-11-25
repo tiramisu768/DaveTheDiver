@@ -35,7 +35,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack(ACharacter* OwnerCharacter);
+	virtual void Attack(ACharacter* OwnerCharacter, const FVector& AimDirection=FVector::ZeroVector);
 
 	void AdjustSize(float TargetSize);
 

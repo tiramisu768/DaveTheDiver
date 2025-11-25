@@ -50,7 +50,7 @@ public:
 
 	void setupMainUIReference(UMainUI* InMainUI);
 
-	void PerformAttack();
+	void PerformAttack(const FVector& AimDirection = FVector::ZeroVector);
 
 	void SwitchActiveRangedWeapon();
 
@@ -192,8 +192,12 @@ protected:
 #pragma region Animation
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> MeleeAttackMontage;
-	//bool isMeleeAttack{ false };
-	//bool isEquip{ false };
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> Melee2AttackMontage;
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> Melee3AttackMontage;
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> RangedAttackMontage;
 #pragma endregion
 
 #pragma region Water

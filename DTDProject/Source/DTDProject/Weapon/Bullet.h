@@ -6,17 +6,27 @@
 #include "GameFramework/Actor.h"
 #include "Bullet.generated.h"
 
+class USkeletalMeshComponent;
+class UProjectileMovementComponent;
+
 UCLASS()
 class DTDPROJECT_API ABullet : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ABullet();
 
 protected:
-	// Called when the game starts or when spawned
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Components")
+	TObjectPtr<USkeletalMeshComponent> BulletMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category="Components")
+	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normallmpulse, const FHitResult& Hit);
+
 	virtual void BeginPlay() override;
 
 public:	

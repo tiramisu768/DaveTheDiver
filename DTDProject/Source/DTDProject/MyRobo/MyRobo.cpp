@@ -69,11 +69,7 @@ AMyRobo::AMyRobo()
 	{
 		Melee3AttackMontage = Melee3AttackMontageFinder.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> RangedAttackMontageFinder(TEXT(""));
-	if (RangedAttackMontageFinder.Succeeded())
-	{
-		RangedAttackMontage = RangedAttackMontageFinder.Object;
-	}
+
 #pragma endregion
 
 	RoboComponent = CreateDefaultSubobject<URoboComponent>(TEXT("RoboComponent"));
@@ -248,31 +244,33 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 	}
 }
 
+void AMyRobo::PerformAttack()
+{
+	if (!MainController) return;
+
+	GetWorld()->GetTimerManager().ClearTimer(HolsterTimerHandle);
+
+	if (MeleeWeapon)
+	{
+		CurrentWeaponState = EWeaponState::MeleeAttaching;
+		UpdateWeaponAttachments();
+		PlayMeleeAttackMontage();
+		MeleeWeapon->Attack(this);
+	}
+}
+
 void AMyRobo::PerformAttack(const FVector& AimDirection)
 {
 	if (!MainController) return;
 
 	GetWorld()->GetTimerManager().ClearTimer(HolsterTimerHandle);
 
-	if (MainController->GetIsAiming())
+	if (ActiveRangedWeapon)
 	{
-		if (ActiveRangedWeapon)
-		{
-			CurrentWeaponState = EWeaponState::RangedAttaching;
-			UpdateWeaponAttachments();
-			PlayRangedAttackMontage();
-			ActiveRangedWeapon->Attack(this,AimDirection);
-		}
-	}
-	else
-	{
-		if (MeleeWeapon)
-		{
-			CurrentWeaponState = EWeaponState::MeleeAttaching;
-			UpdateWeaponAttachments();
-			PlayMeleeAttackMontage();
-			MeleeWeapon->Attack(this);
-		}
+		CurrentWeaponState = EWeaponState::RangedAttaching;
+		UpdateWeaponAttachments();
+		PlayRangedAttackMontage();
+		ActiveRangedWeapon->Attack(this, AimDirection);
 	}
 }
 
@@ -287,6 +285,20 @@ void AMyRobo::SwitchActiveRangedWeapon()
 		ActiveRangedWeapon = HarpoonWeapon;
 	}
 	UpdateWeaponAttachments();
+}
+
+AWeapon* AMyRobo::GetActiveWeapon() const
+{
+	if (CurrentWeaponState == EWeaponState::MeleeAttaching)
+	{
+		return MeleeWeapon;
+	}
+	if (CurrentWeaponState == EWeaponState::RangedAttaching)
+	{
+		return ActiveRangedWeapon;
+	}
+
+	return nullptr;
 }
 
 void AMyRobo::ShowLongPressWidget(bool bShow, AActor* TargetActor)
@@ -564,6 +576,24 @@ void AMyRobo::PlayRangedAttackMontage()
 		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
 		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
+	}
+	else
+	{
+		if (!ActiveRangedWeapon)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("No Weapon"));
+		}
+		else if (!ActiveRangedWeapon->GetWeaponStats())
+		{
+			// GetName()을 사용하기 위해 FString::Printf 사용
+			FString ErrorMsg = FString::Printf(TEXT("Ranged Attack Fail: GetWeaponStats() is NULL for [%s]. Check RowName in BeginPlay!"), *ActiveRangedWeapon->GetName());
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, ErrorMsg);
+		}
+		else if (!ActiveRangedWeapon->GetWeaponStats()->AttackMontage)
+		{
+			FString ErrorMsg = FString::Printf(TEXT("Ranged Attack Fail: AttackMontage is NULL in Data Table for [%s]."), *ActiveRangedWeapon->GetName());
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, ErrorMsg);
+		}
 	}
 }
 

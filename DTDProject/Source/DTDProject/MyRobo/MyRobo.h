@@ -50,9 +50,14 @@ public:
 
 	void setupMainUIReference(UMainUI* InMainUI);
 
-	void PerformAttack(const FVector& AimDirection = FVector::ZeroVector);
+	void PerformAttack();
+
+	void PerformAttack(const FVector& AimDirection);
 
 	void SwitchActiveRangedWeapon();
+
+	UFUNCTION(BlueprintCallable,Category="Weapon")
+	AWeapon* GetActiveWeapon() const;
 
 	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable) { CurrentInteractable = NewInteractable; }
 
@@ -194,8 +199,6 @@ protected:
 	TObjectPtr<UAnimMontage> Melee2AttackMontage;
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> Melee3AttackMontage;
-	UPROPERTY()
-	TObjectPtr<UAnimMontage> RangedAttackMontage;
 #pragma endregion
 
 #pragma region Water

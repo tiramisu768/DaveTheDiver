@@ -2,13 +2,35 @@
 
 
 #include "Weapon/Bullet.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
-// Sets default values
 ABullet::ABullet()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
+	BulletMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Bullet Mesh"));
+	RootComponent = BulletMesh;
+	BulletMesh->SetCollisionProfileName(TEXT("Projectile"));
+	BulletMesh->SetNotifyRigidBodyCollision(true);
+
+	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement"));
+	ProjectileMovement->InitialSpeed = 3000.f;
+	ProjectileMovement->MaxSpeed = 3000.f;
+	ProjectileMovement->bRotationFollowsVelocity = true;
+	ProjectileMovement->ProjectileGravityScale = 0.0f;
+
+	InitialLifeSpan = 5.0f;
+}
+
+void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normallmpulse, const FHitResult& Hit)
+{
+	if (OtherActor && OtherActor != this && OtherActor != GetOwner())
+	{
+		//피격 이펙트(파티클,소리)재생코드추가예정
+		//총알파괴
+		Destroy();
+	}
 }
 
 // Called when the game starts or when spawned
@@ -16,6 +38,7 @@ void ABullet::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	BulletMesh->OnComponentHit.AddDynamic(this, &ABullet::OnHit);
 }
 
 // Called every frame

@@ -278,11 +278,25 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 
 			if (bSuccess)
 			{
-				ControlledRobo->PerformAttack(WorldDirection);
+				FVector Start = WorldLocation;
+				FVector End = Start + (WorldDirection * 10000.f);
+				FHitResult HitResult;
+				FCollisionQueryParams QueryParams;
+				QueryParams.AddIgnoredActor(ControlledRobo);
+				if (AWeapon* CurrentWeapon = ControlledRobo->GetActiveWeapon())
+				{
+					QueryParams.AddIgnoredActor(CurrentWeapon);
+				}
+
+				GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
+
+				FVector TargetLocation = HitResult.bBlockingHit ? HitResult.Location : End;
+
+				ControlledRobo->PerformAttack(TargetLocation);
 			}
 		}
 		else
-		{
+		{   //근접 공격
 			ControlledRobo->PerformAttack();
 		}
 	}

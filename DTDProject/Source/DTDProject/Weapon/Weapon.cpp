@@ -44,26 +44,37 @@ void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDirection)
 {
 	if (!WeaponStats || !OwnerCharacter) return;
 
-	AMyRobo* Robo = Cast<AMyRobo>(OwnerCharacter);
-
 	switch(WeaponStats->Slot)
 	{
 		case EWeaponSlot::Melee:
-			Robo->AttackTrace(); //실제 대미지를 주는 함수
+			if(AMyRobo* Robo = Cast<AMyRobo>(OwnerCharacter))
+			{
+				Robo->AttackTrace(); //근접 공격은 트레이스로 판정
+			}
 			break;
 
 		case EWeaponSlot::Harpoon:
 		case EWeaponSlot::Gun:
 			if (WeaponMesh && WeaponStats->BulletData)
 			{
+				UWorld* World = GetWorld();
+				if (!World) return;
+
 				FVector SpawnLocation = WeaponMesh->GetSocketLocation("Muzzle");
 				FRotator SpawnRotation = AimDirection.Rotation();
 
 				FActorSpawnParameters SpawnParam;
 				SpawnParam.Owner = GetOwner();
 				SpawnParam.Instigator = Cast<APawn>(GetOwner());
+				SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-				GetWorld()->SpawnActor<AActor>(WeaponStats->BulletData,SpawnLocation, SpawnRotation, SpawnParam);
+				ABullet* SpawnedBullet = World->SpawnActor<ABullet>(WeaponStats->BulletData,SpawnLocation, SpawnRotation, SpawnParam);
+
+				if (SpawnedBullet)
+				{
+					const FVector NewScale(0.0003f);
+					SpawnedBullet->SetActorScale3D(NewScale);
+				}
 			}
 			break;
 	}

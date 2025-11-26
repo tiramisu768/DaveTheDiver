@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
-#include "Components/CapsuleComponent.h"
 #include "Weapon/WeaponData.h"
 #include "Weapon.generated.h"
 

@@ -577,24 +577,7 @@ void AMyRobo::PlayRangedAttackMontage()
 		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
 		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
 	}
-	else
-	{
-		if (!ActiveRangedWeapon)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("No Weapon"));
-		}
-		else if (!ActiveRangedWeapon->GetWeaponStats())
-		{
-			// GetName()을 사용하기 위해 FString::Printf 사용
-			FString ErrorMsg = FString::Printf(TEXT("Ranged Attack Fail: GetWeaponStats() is NULL for [%s]. Check RowName in BeginPlay!"), *ActiveRangedWeapon->GetName());
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, ErrorMsg);
-		}
-		else if (!ActiveRangedWeapon->GetWeaponStats()->AttackMontage)
-		{
-			FString ErrorMsg = FString::Printf(TEXT("Ranged Attack Fail: AttackMontage is NULL in Data Table for [%s]."), *ActiveRangedWeapon->GetName());
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, ErrorMsg);
-		}
-	}
+
 }
 
 void AMyRobo::HandleShortPress()

@@ -689,10 +689,10 @@ void AMyRobo::UpdateWeaponAttachments()
 			{
 				SocketToAttach = HarpoonWeaponSocketName;
 			}
-			else if (ActiveRangedWeapon == GunWeapon)
+			/*else if (ActiveRangedWeapon == GunWeapon)
 			{
 				SocketToAttach = GunWeaponSocketName;
-			}
+			}*/
 			if(!SocketToAttach.IsNone())
 			{
 				ActiveRangedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketToAttach);

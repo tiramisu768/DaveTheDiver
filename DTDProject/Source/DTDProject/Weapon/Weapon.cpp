@@ -13,9 +13,13 @@ AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	ParentMesh = CreateDefaultSubobject<USceneComponent>(TEXT("ParentMesh"));
+
+	RootComponent = ParentMesh;
+
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
 
-	RootComponent = WeaponMesh;
+	WeaponMesh->SetupAttachment(ParentMesh);
 
 }
 

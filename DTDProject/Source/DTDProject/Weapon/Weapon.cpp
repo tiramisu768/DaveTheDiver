@@ -19,7 +19,7 @@ AWeapon::AWeapon()
 
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
 
-	WeaponMesh->SetupAttachment(ParentMesh);
+	WeaponMesh->SetupAttachment(RootComponent);
 
 }
 
@@ -83,24 +83,6 @@ void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDirection)
 			break;
 	}
 	
-}
-
-void AWeapon::AdjustSize(float TargetSize)
-{
-	if (WeaponMesh)
-	{
-		if (UStaticMesh* MeshAsset = WeaponMesh->GetStaticMesh())
-		{
-			FVector OriginalSize = MeshAsset->GetBounds().GetBox().GetSize();
-			float MaxOriginalSize = FMath::Max3(OriginalSize.X, OriginalSize.Y, OriginalSize.Z);
-
-			if (MaxOriginalSize > KINDA_SMALL_NUMBER)
-			{
-				float ScaleMultiplier = TargetSize / MaxOriginalSize;
-				SetActorRelativeScale3D(FVector(ScaleMultiplier));
-			}
-		}
-	}
 }
 
 FWeaponData AWeapon::GetWeaponStatsCopy() const

@@ -108,13 +108,10 @@ protected:
 	FName MeleeWeaponSocketName = TEXT("MeleeWeaponSocket");
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FName HarpoonWeaponSocketName = TEXT("HarpoonWeaponSocket");
+	FName RangedWeaponSocketName = TEXT("RangedWeaponSocket");
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FName GunWeaponSocketName = TEXT("GunWeaponSocket");
-
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Weapon")
-	float TargetWeaponSize = 30.0f;
+	FName XWeaponSocketName = TEXT("XWeaponSocket");
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<AWeapon> DefaultMeleeWeaponClass;

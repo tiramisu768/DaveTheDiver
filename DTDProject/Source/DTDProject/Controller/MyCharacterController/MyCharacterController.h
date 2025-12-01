@@ -61,9 +61,11 @@ private:
 	bool isMoveInput{ false };
 #pragma endregion
 	//Aim 상태 관리
-	bool IsAiming;
+	bool IsAttacking;
 	FVector AimDirection;
 	FVector2D AimScreenPos = FVector2D(960.f, 540.f);
+
+	bool IsAiming;
 
 	//무기 선택 상태 관리
 	int32 CurrentWeaponIndex = 0;
@@ -74,6 +76,7 @@ private:
 public:
 	AMyCharacterController();
 	UMainUI* GetMainUI() const { return Cast<UMainUI>(MainWidgetInstance); }
+	bool GetIsAttacking() const { return IsAttacking; }
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void SetupInputComponent() override;

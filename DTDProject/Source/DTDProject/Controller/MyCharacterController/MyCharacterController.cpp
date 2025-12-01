@@ -229,6 +229,7 @@ void AMyCharacterController::SetUIInputMode()
 void AMyCharacterController::MoveInput(const FInputActionValue& value)
 {
 	isMoveInput = true;
+	IsAttacking = true;
 	FVector2D MoveValue = value.Get<FVector2D>();
 	if (ControlledRobo)
 	{
@@ -240,6 +241,7 @@ void AMyCharacterController::MoveInput(const FInputActionValue& value)
 void AMyCharacterController::MoveEndInput(const FInputActionValue& value)
 {
 	isMoveInput = false;
+	IsAttacking = false;
 }
 
 void AMyCharacterController::LookInput(const FInputActionValue& value)
@@ -271,33 +273,36 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 {
 	if (ControlledRobo)
 	{
-		if (IsAiming)
+		if(!IsAttacking)
 		{
-			FVector WorldLocation, WorldDirection;
-			bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
-
-			if (bSuccess)
+			if (IsAiming)
 			{
-				FVector Start = WorldLocation;
-				FVector End = Start + (WorldDirection * 10000.f);
-				FHitResult HitResult;
-				FCollisionQueryParams QueryParams;
-				QueryParams.AddIgnoredActor(ControlledRobo);
-				if (AWeapon* CurrentWeapon = ControlledRobo->GetActiveWeapon())
+				FVector WorldLocation, WorldDirection;
+				bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
+
+				if (bSuccess)
 				{
-					QueryParams.AddIgnoredActor(CurrentWeapon);
+					FVector Start = WorldLocation;
+					FVector End = Start + (WorldDirection * 10000.f);
+					FHitResult HitResult;
+					FCollisionQueryParams QueryParams;
+					QueryParams.AddIgnoredActor(ControlledRobo);
+					if (AWeapon* CurrentWeapon = ControlledRobo->GetActiveWeapon())
+					{
+						QueryParams.AddIgnoredActor(CurrentWeapon);
+					}
+
+					GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
+
+					FVector TargetLocation = HitResult.bBlockingHit ? HitResult.Location : End;
+
+					ControlledRobo->PerformAttack(TargetLocation);
 				}
-
-				GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
-
-				FVector TargetLocation = HitResult.bBlockingHit ? HitResult.Location : End;
-
-				ControlledRobo->PerformAttack(TargetLocation);
 			}
-		}
-		else
-		{   //근접 공격
-			ControlledRobo->PerformAttack();
+			else
+			{   //근접 공격
+				ControlledRobo->PerformAttack();
+			}
 		}
 	}
 }
@@ -340,6 +345,7 @@ void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
 void AMyCharacterController::StartAiming(const FInputActionValue& value)
 {
 	IsAiming = true;
+	IsAttacking = false;
 	PrevMousePosition = { -1,-1 };
 	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
 	if (MainUI && MainUI->GetRoboAimUI())
@@ -360,6 +366,7 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 void AMyCharacterController::StopAiming(const FInputActionValue& value)
 {
 	IsAiming = false;
+	IsAttacking = true;
 	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
 	if (MainUI && MainUI->GetRoboAimUI())
 	{

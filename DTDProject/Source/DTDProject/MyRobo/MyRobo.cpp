@@ -280,7 +280,7 @@ void AMyRobo::PerformAttack(const FVector& AimDirection)
 	if (ActiveRangedWeapon)
 	{
 		RangedTargetLocation = AimDirection;
-		StopAnimMontage(0.1f);
+		StopAnimMontage();
 		PlayRangedAttackMontage();
 	}
 }
@@ -602,19 +602,17 @@ void AMyRobo::PlayRangedStopAimMontage()
 	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AimMontage)
 	{
 		FOnMontageEnded EndDelegate;
-		EndDelegate.BindUObject(this, &AMyRobo::OnStopAimMontageEnded);
+		//EndDelegate.BindUObject(this, &AMyRobo::OnStopAimMontageEnded);
 		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AimMontage, EndDelegate, NAME_None, -1.0f); //NAME_None : 특정 세션으로 점프하지말고, 그냥 처음부터 재생해라.
 	}
-	else
-	{
-		// 만약 '무기 내리기' 몽타주가 없다면, 바로 무기를 집어넣는 타이머를 시작
-		StartHolsterTimer();
-	}
+
+	// 만약 '무기 내리기' 몽타주가 없다면, 바로 무기를 집어넣는 타이머를 시작
+	StartHolsterTimer();
 }
 
 void AMyRobo::PlayRangedAttackMontage()
 {
-	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AttackMontage)
+	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AttackMontage && MainController->GetIsAttacking() == false)
 	{
 		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);

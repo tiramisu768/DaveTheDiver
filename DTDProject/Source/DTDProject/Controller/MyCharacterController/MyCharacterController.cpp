@@ -349,6 +349,11 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 		MainUI->ResetAimPos();
 	}
 
+	if (ControlledRobo)
+	{
+		ControlledRobo->StartRangedAim();
+	}
+
 	// 마우스 커서 숨기거나 포커스 고정할 필요가 있으면 여기서 처리
 }
 
@@ -359,6 +364,11 @@ void AMyCharacterController::StopAiming(const FInputActionValue& value)
 	if (MainUI && MainUI->GetRoboAimUI())
 	{
 		MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (ControlledRobo)
+	{
+		ControlledRobo->StopRangedAim();
 	}
 }
 

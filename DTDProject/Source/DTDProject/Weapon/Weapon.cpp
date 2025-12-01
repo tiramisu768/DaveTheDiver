@@ -76,7 +76,8 @@ void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDirection)
 
 				if (SpawnedBullet)
 				{
-					const FVector NewScale(0.0003f);
+					//const FVector NewScale(0.0003f);
+					const FVector NewScale(0.03f);
 					SpawnedBullet->SetActorScale3D(NewScale);
 				}
 			}

@@ -50,9 +50,16 @@ public:
 
 	void setupMainUIReference(UMainUI* InMainUI);
 
+	void StartRangedAim();
+
+	void StopRangedAim();
+
 	void PerformAttack();
 
 	void PerformAttack(const FVector& AimDirection);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void FireProjectile();
 
 	void SwitchActiveRangedWeapon();
 
@@ -132,11 +139,17 @@ protected:
 #pragma endregion
 
 #pragma region Internal Functions
-	void PlayMontageFullBody(TObjectPtr<UAnimMontage>Montage, FOnMontageEnded& EndDelegate, FName SectionName = "");
+	void PlayMontageFullBody(TObjectPtr<UAnimMontage>Montage, FOnMontageEnded& EndDelegate, FName SectionName = "", float PlayRate = 1.0f);
 
 	void PlayMeleeAttackMontage();
 
+	void PlayRangedAimMontage();
+
+	void PlayRangedStopAimMontage();
+
 	void PlayRangedAttackMontage();
+
+	void StopAnimMontage(float BlendOutTime = 0.25f);
 
 	void HandleShortPress();
 
@@ -152,6 +165,9 @@ protected:
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void OnStopAimMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	float GetDepthBelowSurface() const;
 #pragma endregion
@@ -174,6 +190,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<AWeapon> AcquirableWeapon;
+
+	FVector RangedTargetLocation;
 #pragma endregion
 
 #pragma region Interaction

@@ -244,6 +244,18 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 	}
 }
 
+void AMyRobo::StartRangedAim()
+{
+	CurrentWeaponState = EWeaponState::RangedAttaching;
+	UpdateWeaponAttachments();
+	PlayRangedAimMontage();
+}
+
+void AMyRobo::StopRangedAim()
+{
+	PlayRangedStopAimMontage();
+}
+
 void AMyRobo::PerformAttack()
 {
 	if (!MainController) return;
@@ -267,10 +279,17 @@ void AMyRobo::PerformAttack(const FVector& AimDirection)
 
 	if (ActiveRangedWeapon)
 	{
-		CurrentWeaponState = EWeaponState::RangedAttaching;
-		UpdateWeaponAttachments();
+		RangedTargetLocation = AimDirection;
+		StopAnimMontage(0.1f);
 		PlayRangedAttackMontage();
-		ActiveRangedWeapon->Attack(this, AimDirection);
+	}
+}
+// AnimNotify에서 호출될 실제 발사 함수
+void AMyRobo::FireProjectile()
+{
+	if (ActiveRangedWeapon)
+	{
+		ActiveRangedWeapon->Attack(this, RangedTargetLocation);
 	}
 }
 
@@ -519,24 +538,27 @@ void AMyRobo::BeginPlay()
 	CurrentWeaponState = EWeaponState::Unarmed;
 }
 
-void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName)
+void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName, float PlayRate)
 {
 	if (Montage == nullptr) return;
 
 	if (UAnimInstance* AnimInstance = BodyComponent->GetAnimInstance())
 	{
-		if (!AnimInstance->Montage_IsPlaying(Montage))
+		if (PlayRate<0.0f || !AnimInstance->Montage_IsPlaying(Montage))
 		{
-			AnimInstance->Montage_Play(Montage);
+			const float Duration = AnimInstance->Montage_Play(Montage,PlayRate);
 
-			if (EndDelegate.IsBound())
+			if(Duration>0.f)
 			{
-				AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
-			}
+				if (EndDelegate.IsBound())
+				{
+					AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
+				}
 
-			if (SectionName.IsNone() == false)
-			{
-				AnimInstance->Montage_JumpToSection(SectionName, Montage);
+				if (SectionName.IsNone() == false)
+				{
+					AnimInstance->Montage_JumpToSection(SectionName, Montage);
+				}
 			}
 		}
 	}
@@ -566,6 +588,30 @@ void AMyRobo::PlayMeleeAttackMontage()
 	}
 }
 
+void AMyRobo::PlayRangedAimMontage()
+{
+	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AimMontage)
+	{
+		FOnMontageEnded EndDelegate;
+		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AimMontage, EndDelegate, FName("Default"));
+	}
+}
+
+void AMyRobo::PlayRangedStopAimMontage()
+{
+	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AimMontage)
+	{
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AMyRobo::OnStopAimMontageEnded);
+		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AimMontage, EndDelegate, NAME_None, -1.0f); //NAME_None : 특정 세션으로 점프하지말고, 그냥 처음부터 재생해라.
+	}
+	else
+	{
+		// 만약 '무기 내리기' 몽타주가 없다면, 바로 무기를 집어넣는 타이머를 시작
+		StartHolsterTimer();
+	}
+}
+
 void AMyRobo::PlayRangedAttackMontage()
 {
 	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AttackMontage)
@@ -575,6 +621,14 @@ void AMyRobo::PlayRangedAttackMontage()
 		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
 	}
 
+}
+
+void AMyRobo::StopAnimMontage(float BlendOutTime)
+{
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->StopAllMontages(BlendOutTime);
+	}
 }
 
 void AMyRobo::HandleShortPress()
@@ -703,7 +757,18 @@ void AMyRobo::HolsterWeapons()
 
 void AMyRobo::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	StartHolsterTimer();
+	if (bInterrupted)
+	{
+		StartHolsterTimer();
+	}
+}
+
+void AMyRobo::OnStopAimMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (bInterrupted)
+	{
+		StartHolsterTimer();
+	}
 }
 
 float AMyRobo::GetDepthBelowSurface() const

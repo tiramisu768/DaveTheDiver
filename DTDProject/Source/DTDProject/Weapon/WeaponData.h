@@ -46,6 +46,9 @@ struct FWeaponData : public FTableRowBase
 	float AttackSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* AimMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

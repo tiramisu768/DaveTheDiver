@@ -271,38 +271,42 @@ void AMyCharacterController::DashInput(const FInputActionValue& value)
 
 void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 {
+	if (IsAttacking)
+	{
+		return;
+	}
+
 	if (ControlledRobo)
 	{
-		if(!IsAttacking)
+		if (IsAiming)
 		{
-			if (IsAiming)
+			FVector WorldLocation, WorldDirection;
+			bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
+
+			if (bSuccess)
 			{
-				FVector WorldLocation, WorldDirection;
-				bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
-
-				if (bSuccess)
+				FVector Start = WorldLocation;
+				FVector End = Start + (WorldDirection * 10000.f);
+				FHitResult HitResult;
+				FCollisionQueryParams QueryParams;
+				QueryParams.AddIgnoredActor(ControlledRobo);
+				if (AWeapon* CurrentWeapon = ControlledRobo->GetActiveWeapon())
 				{
-					FVector Start = WorldLocation;
-					FVector End = Start + (WorldDirection * 10000.f);
-					FHitResult HitResult;
-					FCollisionQueryParams QueryParams;
-					QueryParams.AddIgnoredActor(ControlledRobo);
-					if (AWeapon* CurrentWeapon = ControlledRobo->GetActiveWeapon())
-					{
-						QueryParams.AddIgnoredActor(CurrentWeapon);
-					}
-
-					GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
-
-					FVector TargetLocation = HitResult.bBlockingHit ? HitResult.Location : End;
-
-					ControlledRobo->PerformAttack(TargetLocation);
+					QueryParams.AddIgnoredActor(CurrentWeapon);
 				}
+
+				GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
+
+				FVector TargetLocation = HitResult.bBlockingHit ? HitResult.Location : End;
+
+				IsAttacking = true;
+				ControlledRobo->PerformAttack(TargetLocation);
 			}
-			else
-			{   //근접 공격
-				ControlledRobo->PerformAttack();
-			}
+		}
+		else
+		{   //근접 공격
+			IsAttacking = true;
+			ControlledRobo->PerformAttack();
 		}
 	}
 }
@@ -365,8 +369,18 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 
 void AMyCharacterController::StopAiming(const FInputActionValue& value)
 {
+	if (IsAttacking)
+	{
+		IsAiming = false;
+		UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
+		if (MainUI && MainUI->GetRoboAimUI())
+		{
+			MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
+		}
+		return;
+	}
+
 	IsAiming = false;
-	IsAttacking = true;
 	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
 	if (MainUI && MainUI->GetRoboAimUI())
 	{

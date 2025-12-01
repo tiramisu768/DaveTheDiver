@@ -612,7 +612,7 @@ void AMyRobo::PlayRangedStopAimMontage()
 
 void AMyRobo::PlayRangedAttackMontage()
 {
-	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AttackMontage && MainController->GetIsAttacking() == false)
+	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AttackMontage )
 	{
 		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
@@ -755,6 +755,11 @@ void AMyRobo::HolsterWeapons()
 
 void AMyRobo::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
+	if (MainController)
+	{
+		MainController->SetIsAttacking(false);
+	}
+
 	if (bInterrupted)
 	{
 		StartHolsterTimer();

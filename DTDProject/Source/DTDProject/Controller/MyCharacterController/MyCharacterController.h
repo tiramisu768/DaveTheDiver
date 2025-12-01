@@ -77,6 +77,7 @@ public:
 	AMyCharacterController();
 	UMainUI* GetMainUI() const { return Cast<UMainUI>(MainWidgetInstance); }
 	bool GetIsAttacking() const { return IsAttacking; }
+	void SetIsAttacking(bool bNewState) { IsAttacking = bNewState; }
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void SetupInputComponent() override;

@@ -31,11 +31,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon", meta = (DisplayName = "GetWeaponStats (Copy)"))
 	FWeaponData GetWeaponStatsCopy() const;
 
+	FVector GetMuzzleLocation() const;
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void Attack(ACharacter* OwnerCharacter, const FVector& AimDirection=FVector::ZeroVector);
-
-	void AdjustSize(float TargetSize);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

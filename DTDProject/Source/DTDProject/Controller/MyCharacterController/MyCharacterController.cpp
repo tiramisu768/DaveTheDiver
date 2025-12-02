@@ -295,9 +295,32 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 					QueryParams.AddIgnoredActor(CurrentWeapon);
 				}
 
-				GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
+				bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
+
+				DrawDebugLine(
+					GetWorld(),
+					Start,
+					End,
+					FColor::Red,
+					false,
+					2.0f,
+					0,
+					1.0f
+				);
 
 				FVector TargetLocation = HitResult.bBlockingHit ? HitResult.Location : End;
+
+				if (bHit)
+				{
+					DrawDebugPoint(
+						GetWorld(),
+						HitResult.ImpactPoint,
+						20.0f,
+						FColor::Green,
+						false,
+						2.0f
+					);
+				}
 
 				IsAttacking = true;
 				ControlledRobo->PerformAttack(TargetLocation);
@@ -355,7 +378,10 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 	if (MainUI && MainUI->GetRoboAimUI())
 	{
 		MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Visible);
-		AimScreenPos = MainUI->GetRoboAimUI()->GetArcCenter();
+		int32 ViewportX, ViewportY;
+		GetViewportSize(ViewportX, ViewportY);
+		//AimScreenPos = MainUI->GetRoboAimUI()->GetArcCenter();
+		AimScreenPos = FVector2D(ViewportX / 2.0f, ViewportY / 2.0f);
 		MainUI->ResetAimPos();
 	}
 

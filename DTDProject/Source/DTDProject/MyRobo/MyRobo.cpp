@@ -289,7 +289,9 @@ void AMyRobo::FireProjectile()
 {
 	if (ActiveRangedWeapon)
 	{
-		ActiveRangedWeapon->Attack(this, RangedTargetLocation);
+		const FVector MuzzleLocation = ActiveRangedWeapon->GetMuzzleLocation();
+		const FVector FireDirection = (RangedTargetLocation - MuzzleLocation).GetSafeNormal();
+		ActiveRangedWeapon->Attack(this, FireDirection);
 	}
 }
 

@@ -76,8 +76,7 @@ void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDirection)
 
 				if (SpawnedBullet)
 				{
-					//const FVector NewScale(0.0003f);
-					const FVector NewScale(0.03f);
+					const FVector NewScale(0.003f);
 					SpawnedBullet->SetActorScale3D(NewScale);
 				}
 			}
@@ -93,6 +92,17 @@ FWeaponData AWeapon::GetWeaponStatsCopy() const
 		return *WeaponStats;
 	}
 	return FWeaponData();
+}
+
+FVector AWeapon::GetMuzzleLocation() const
+{
+	if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
+	{
+		return WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Weapon '%s' is No Muzzle socket."), *GetName());
+	return GetActorLocation();
 }
 
 // Called every frame

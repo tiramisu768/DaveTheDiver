@@ -280,6 +280,15 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 	{
 		if (IsAiming)
 		{
+		/*	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
+			if (!MainUI || !MainUI->GetRoboAimUI())
+			{
+				return;
+			}
+
+			URoboAimUI* AimUI = MainUI->GetRoboAimUI();
+			FVector2D ScreenPosition = AimUI->GetCachedGeometry().GetAbsolutePosition();*/
+
 			FVector WorldLocation, WorldDirection;
 			bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
 

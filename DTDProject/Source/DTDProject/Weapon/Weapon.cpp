@@ -2,11 +2,12 @@
 
 
 #include "Weapon/Weapon.h"
+#include "Weapon/Bullet.h"
 #include "MyRobo/MyRobo.h"
 #include "GameFrameWork/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
-#include "Weapon/Bullet.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -73,7 +74,15 @@ void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& FireDirection)
 
 				if (SpawnedBullet)
 				{
-					const FVector NewScale(0.0003f);
+					SpawnedBullet->Damage = WeaponStats->Damage;
+
+					if (UProjectileMovementComponent* ProjMove = SpawnedBullet->FindComponentByClass<UProjectileMovementComponent>())
+					{
+						ProjMove->InitialSpeed = WeaponStats->ProjectileSpeed;
+						ProjMove->MaxSpeed = WeaponStats->ProjectileSpeed;
+					}
+
+					const FVector NewScale(0.003f);
 					SpawnedBullet->SetActorScale3D(NewScale);
 				}
 			}

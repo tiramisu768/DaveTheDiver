@@ -43,7 +43,10 @@ struct FWeaponData : public FTableRowBase
 	float Range;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AttackSpeed;
+	float FireRate; //초당 발사 수
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ProjectileSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* AimMontage;

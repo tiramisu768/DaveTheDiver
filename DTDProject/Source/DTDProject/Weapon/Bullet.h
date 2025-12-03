@@ -25,7 +25,7 @@ protected:
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normallmpulse, const FHitResult& Hit);
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	virtual void BeginPlay() override;
 
@@ -33,4 +33,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	float Damage;
 };

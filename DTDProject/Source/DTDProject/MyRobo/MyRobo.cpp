@@ -289,39 +289,44 @@ void AMyRobo::FireProjectile()
 {
 	if (!ActiveRangedWeapon || !MainController) return;
 
-	FVector WorldLocation, WorldDirection;
-	bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(MainController, RangedTargetScreenPosition, WorldLocation, WorldDirection);
+	// 1. 플레이어의 '진짜 조준 방향'을 컨트롤러로부터 직접 가져옵니다.
+	//    이것이 카메라의 각도와 무관한, 플레이어의 순수한 의도입니다.
+	const FRotator ControlRotation = MainController->GetControlRotation();
+	const FVector ControlDirection = ControlRotation.Vector();
 
-	if (bSuccess)
+	// 2. 광선의 시작점은 '카메라 위치'로 설정하여, 플레이어의 시야에서 장애물에 가려지는지를 확인합니다.
+	const FVector TraceStart = MainController->PlayerCameraManager->GetCameraLocation();
+
+	// 3. 광선의 끝점은 카메라 위치에서 '컨트롤러의 조준 방향'으로 길게 뻗어나갑니다.
+	const FVector TraceEnd = TraceStart + (ControlDirection * 10000.f);
+
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.AddIgnoredActor(ActiveRangedWeapon);
+
+	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
+
+	FVector FinalTargetLocation;
+	if (HitResult.bBlockingHit)
 	{
-		FVector TraceStart = MainController->PlayerCameraManager->GetCameraLocation();
-		FVector TraceEnd = TraceStart + (WorldDirection * 10000.f);
-
-		FHitResult HitResult;
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(this);
-		QueryParams.AddIgnoredActor(ActiveRangedWeapon);
-
-		GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
-
-		FVector FinalTargetLocation = HitResult.bBlockingHit ? HitResult.Location : TraceEnd;
-
-		const FVector MuzzleLocation = ActiveRangedWeapon->GetMuzzleLocation();
-		FVector FireDirection = (FinalTargetLocation - MuzzleLocation).GetSafeNormal();
-
-		DrawDebugLine(
-		GetWorld(),
-			MuzzleLocation,
-			MuzzleLocation+FireDirection*5000.f,
-			FColor::Green,
-			false,
-			2.0f,
-			0,
-			1.f
-		);
-
-		ActiveRangedWeapon->Attack(this, FireDirection);
+		FinalTargetLocation = HitResult.Location;
 	}
+	else
+	{
+		FinalTargetLocation = TraceEnd;
+	}
+
+	DrawDebugSphere(GetWorld(), FinalTargetLocation, 25.f, 12, FColor::Red, false, 2.0f);
+	DrawDebugLine(GetWorld(), TraceStart, FinalTargetLocation, FColor::Blue, false, 2.0f, 0, 1.f);
+
+	const FVector MuzzleLocation = ActiveRangedWeapon->GetMuzzleLocation();
+	// 최종 발사 방향은 '총구 위치'에서 '최종 목표 지점'을 향하는 방향입니다.
+	FVector FireDirection = (FinalTargetLocation - MuzzleLocation).GetSafeNormal();
+
+	DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + FireDirection * 5000.f, FColor::Green, false, 2.0f, 0, 1.f);
+
+	ActiveRangedWeapon->Attack(this, FireDirection);
 }
 
 void AMyRobo::SwitchActiveRangedWeapon()

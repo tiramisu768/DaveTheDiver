@@ -20,10 +20,13 @@ private:
 	FVector2D ArcCenter = FVector2D(0, 0);
 	float ArcRadius = 150.f;
 public:
-	void ResetAimPos();
+
 	void NativeConstruct();
 	void SetArcInfo(FVector2D Center, float Radius) { ArcCenter = Center; ArcRadius = Radius; }
+	void ResetAimPos();
 	void UpdateAimPos(FVector2D AimPos);
+	FVector2D GetCrosshairScreenPosition() const;
 	FVector2D GetArcCenter() const { return ArcCenter; }
 	float GetArcRadius() const { return ArcRadius; }
+	class UImage* GetImageArrow() const { return Image_Arrow; }
 };

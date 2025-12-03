@@ -44,45 +44,42 @@ EWeaponSlot AWeapon::GetSlotType() const
 	return EWeaponSlot::Melee;
 }
 
-void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& AimDirection)
+void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& FireDirection)
 {
 	if (!WeaponStats || !OwnerCharacter) return;
 
-	switch(WeaponStats->Slot)
+	switch (WeaponStats->Slot)
 	{
 		case EWeaponSlot::Melee:
-			if(AMyRobo* Robo = Cast<AMyRobo>(OwnerCharacter))
-			{
-				Robo->AttackTrace(); //근접 공격은 트레이스로 판정
-			}
 			break;
 
 		case EWeaponSlot::Harpoon:
 		case EWeaponSlot::Gun:
+		{
 			if (WeaponMesh && WeaponStats->BulletData)
 			{
 				UWorld* World = GetWorld();
 				if (!World) return;
 
-				FVector SpawnLocation = WeaponMesh->GetSocketLocation("Muzzle");
-				FRotator SpawnRotation = AimDirection.Rotation();
+				FVector SpawnLocation = GetMuzzleLocation();
+				FRotator SpawnRotation = FireDirection.Rotation();
 
-				FActorSpawnParameters SpawnParam;
-				SpawnParam.Owner = GetOwner();
-				SpawnParam.Instigator = Cast<APawn>(GetOwner());
-				SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.Owner = GetOwner();
+				SpawnParams.Instigator = Cast<APawn>(GetOwner());
+				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-				ABullet* SpawnedBullet = World->SpawnActor<ABullet>(WeaponStats->BulletData,SpawnLocation, SpawnRotation, SpawnParam);
+				ABullet* SpawnedBullet = World->SpawnActor<ABullet>(WeaponStats->BulletData, SpawnLocation, SpawnRotation, SpawnParams);
 
 				if (SpawnedBullet)
 				{
-					const FVector NewScale(0.003f);
+					const FVector NewScale(0.03f);
 					SpawnedBullet->SetActorScale3D(NewScale);
 				}
 			}
 			break;
+		}
 	}
-	
 }
 
 FWeaponData AWeapon::GetWeaponStatsCopy() const

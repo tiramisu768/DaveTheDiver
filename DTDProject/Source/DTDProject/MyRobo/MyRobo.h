@@ -56,7 +56,7 @@ public:
 
 	void PerformAttack();
 
-	void PerformAttack(const FVector& AimDirection);
+	void PerformAttack(const FVector2D& ScreenPosition);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void FireProjectile();
@@ -191,7 +191,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AWeapon> AcquirableWeapon;
 
-	FVector RangedTargetLocation;
+	FVector2D RangedTargetScreenPosition;
 #pragma endregion
 
 #pragma region Interaction

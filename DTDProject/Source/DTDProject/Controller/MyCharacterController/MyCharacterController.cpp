@@ -14,9 +14,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Interface/UINavigateInterface.h"
 #include "InputActionValue.h"
-#include "UI/RoboAimUI.h"
-#include "UI/RoboWeaponUI.h"
 #include "UI/MainUI.h"
+#include "Components/Image.h"
 
 AMyCharacterController::AMyCharacterController()
 {
@@ -188,44 +187,6 @@ void AMyCharacterController::SetupInputComponent()
 	}
 }
 
-void AMyCharacterController::SetGameInputMode()
-{
-	/*if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		InputSystem->RemoveMappingContext(UIMappingContext);
-		InputSystem->AddMappingContext(GameMappingContext, 0);
-	}
-
-	FInputModeGameOnly GameOnlyInputMode;
-	SetInputMode(GameOnlyInputMode);
-	bShowMouseCursor = false;*/
-}
-
-void AMyCharacterController::SetUIInputMode()
-{
-	/*if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		InputSystem->RemoveMappingContext(GameMappingContext);
-		InputSystem->AddMappingContext(UIMappingContext, 1);
-	}
-
-	FInputModeUIOnly UIOnlyInputMode;
-	if (AMyHUD* controlledHUD = Cast<AMyHUD>(GetHUD()))
-	{
-		if (UUserWidget* CurrentWidget = controlledHUD->GetCurrentWidget())
-		{
-			UIOnlyInputMode.SetWidgetToFocus(CurrentWidget->TakeWidget());
-		}
-	}
-	SetInputMode(UIOnlyInputMode);
-	bShowMouseCursor = true;*/
-
-	//GetHUD()가 반환하는 포인터가 항상 AMyHUD라는 보장이 없으며, 
-	//GetCurrentWidget()이 반환하는 위젯이 항상 유효하다는 보장도 없으므로 에러가 남
-	//UIOnlyInputMode.SetWidgetToFocus(GetHUD()->GetCurrentWidget()->TakeWidget());
-
-}
-
 void AMyCharacterController::MoveInput(const FInputActionValue& value)
 {
 	isMoveInput = true;
@@ -255,9 +216,10 @@ void AMyCharacterController::LookInput(const FInputActionValue& value)
 	}
 	else
 	{
-		UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
-		if (MainUI && MainUI->GetRoboAimUI())
-			MainUI->UpdateAimPos(MoveValue * 5);
+		if (MainWidgetInstance)
+		{
+			MainWidgetInstance->UpdateAimPos(MoveValue * 5.0f);
+		}
 	}
 }
 
@@ -271,69 +233,20 @@ void AMyCharacterController::DashInput(const FInputActionValue& value)
 
 void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 {
-	if (IsAttacking)
-	{
-		return;
-	}
+	if (IsAttacking) return;
 
 	if (ControlledRobo)
 	{
 		if (IsAiming)
 		{
-		/*	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
-			if (!MainUI || !MainUI->GetRoboAimUI())
+			if(MainWidgetInstance)
 			{
-				return;
-			}
-
-			URoboAimUI* AimUI = MainUI->GetRoboAimUI();
-			FVector2D ScreenPosition = AimUI->GetCachedGeometry().GetAbsolutePosition();*/
-
-			FVector WorldLocation, WorldDirection;
-			bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(this, AimScreenPos, WorldLocation, WorldDirection);
-
-			if (bSuccess)
-			{
-				FVector Start = WorldLocation;
-				FVector End = Start + (WorldDirection * 10000.f);
-				FHitResult HitResult;
-				FCollisionQueryParams QueryParams;
-				QueryParams.AddIgnoredActor(ControlledRobo);
-				if (AWeapon* CurrentWeapon = ControlledRobo->GetActiveWeapon())
-				{
-					QueryParams.AddIgnoredActor(CurrentWeapon);
-				}
-
-				bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
-
-				DrawDebugLine(
-					GetWorld(),
-					Start,
-					End,
-					FColor::Red,
-					false,
-					2.0f,
-					0,
-					1.0f
-				);
-
-				FVector TargetLocation = HitResult.bBlockingHit ? HitResult.Location : End;
-
-				if (bHit)
-				{
-					DrawDebugPoint(
-						GetWorld(),
-						HitResult.ImpactPoint,
-						20.0f,
-						FColor::Green,
-						false,
-						2.0f
-					);
-				}
+				FVector2D ScreenPosition = MainWidgetInstance->GetCrosshairScreenPosition();
 
 				IsAttacking = true;
-				ControlledRobo->PerformAttack(TargetLocation);
+				ControlledRobo->PerformAttack(ScreenPosition);
 			}
+			
 		}
 		else
 		{   //근접 공격
@@ -343,56 +256,15 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 	}
 }
 
-void AMyCharacterController::MoveAimPoint(const FVector2D& MoveValue)
-{
-	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
-	float Sensitivity = 2.5f;
-
-	if (MainUI && MainUI->GetRoboAimUI())
-	{
-		URoboAimUI* AimUI = MainUI->GetRoboAimUI();
-		FVector2D ArcCenter = AimUI->GetArcCenter();
-		float ArcRadius = AimUI->GetArcRadius();
-
-		AimScreenPos.X += MoveValue.X * Sensitivity;
-		AimScreenPos.Y -= MoveValue.Y * Sensitivity; // Y축 반전
-
-		// arc 내부에 있도록 clamp
-		FVector2D Dir = AimScreenPos - ArcCenter;
-		float Dist = Dir.Size();
-		if (Dist > ArcRadius)
-		{
-			Dir = Dir.GetSafeNormal() * ArcRadius;
-			AimScreenPos = ArcCenter + Dir;
-		}
-		
-		// MainUI에 반영하려면 위치 계산
-		FVector2D Delta = AimScreenPos - ArcCenter;
-		MainUI->UpdateAimPos(AimScreenPos);
-	}
-	else
-	{
-		// MainUI 없으면 기본 동작
-		AimScreenPos.X += MoveValue.X * Sensitivity;
-		AimScreenPos.Y -= MoveValue.Y * Sensitivity;
-	}
-}
-
 void AMyCharacterController::StartAiming(const FInputActionValue& value)
 {
 	IsAiming = true;
 	IsAttacking = false;
-	PrevMousePosition = { -1,-1 };
-	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
-	if (MainUI && MainUI->GetRoboAimUI())
+
+	if (MainWidgetInstance)
 	{
-		MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Visible);
-		int32 ViewportX, ViewportY;
-		GetViewportSize(ViewportX, ViewportY);
-		//AimScreenPos = MainUI->GetRoboAimUI()->GetArcCenter();
-		AimScreenPos = FVector2D(ViewportX / 2.0f, ViewportY / 2.0f);
-		MainUI->ResetAimPos();
-	}
+		MainWidgetInstance->StartAiming();
+    }
 
 	if (ControlledRobo)
 	{
@@ -404,37 +276,31 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 
 void AMyCharacterController::StopAiming(const FInputActionValue& value)
 {
+	IsAiming = false;
+
+	if (MainWidgetInstance)
+	{
+		MainWidgetInstance->StopAiming();
+	}
+
 	if (IsAttacking)
 	{
-		IsAiming = false;
-		UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
-		if (MainUI && MainUI->GetRoboAimUI())
-		{
-			MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
-		}
 		return;
 	}
-
-	IsAiming = false;
-	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
-	if (MainUI && MainUI->GetRoboAimUI())
+	else
 	{
-		MainUI->GetRoboAimUI()->SetVisibility(ESlateVisibility::Hidden);
-	}
-
-	if (ControlledRobo)
-	{
-		ControlledRobo->StopRangedAim();
+		if (ControlledRobo)
+		{
+			ControlledRobo->StopRangedAim();
+		}
 	}
 }
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
-	UMainUI* MainUI = Cast<UMainUI>(MainWidgetInstance);
-
-	if (MainUI && MainUI->GetRoboWeaponUI())
+	if (MainWidgetInstance)
 	{
-		MainUI->GetRoboWeaponUI()->PlaySwitchRangedIconAnimation(CurrentWeaponIndex);
+		MainWidgetInstance->PlaySwitchAnimation(CurrentWeaponIndex);
 	}
 
 	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponCount;

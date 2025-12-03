@@ -4,22 +4,17 @@
 #include "UI/RoboAimUI.h"
 #include "Components/Image.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/PanelWidget.h"
 
 void URoboAimUI::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    FVector2D ViewportSize;
-
-    if (GEngine && GEngine->GameViewport)
+    if (Image_Arrow)
     {
-        GEngine->GameViewport->GetViewportSize(ViewportSize);
-
-        ArcCenter = ViewportSize * 0.5f;
-        if (Image_Arrow)
+        if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Image_Arrow->Slot))
         {
-            UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Image_Arrow->Slot);
-            ArcCenter = CanvasSlot->GetPosition();
+            CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
         }
     }
 }
@@ -28,27 +23,40 @@ void URoboAimUI::ResetAimPos()
 {
     if (Image_Arrow)
     {
-        UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Image_Arrow->Slot);
-        CanvasSlot->SetPosition(ArcCenter);
+        if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Image_Arrow->Slot))
+        {
+            CanvasSlot->SetPosition(FVector2D::ZeroVector);
+        }
     }
 }
 
-void URoboAimUI::UpdateAimPos(FVector2D AimPos)
+void URoboAimUI::UpdateAimPos(FVector2D MoveDelta)
+{
+    if (Image_Arrow)
+    {   
+        if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Image_Arrow->Slot))
+        {         
+            FVector2D CurrentPos = CanvasSlot->GetPosition();
+            CurrentPos += MoveDelta;
+
+            if (CurrentPos.Length() > ArcRadius)
+            {
+                CurrentPos = CurrentPos.GetSafeNormal() * ArcRadius;
+            }
+
+            CanvasSlot->SetPosition(CurrentPos);
+            // 위치 로그 출력
+            GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, FString::Printf(TEXT("AbsoluteNewPos:%s "), *CurrentPos.ToString()));
+        }
+    }
+}
+
+FVector2D URoboAimUI::GetCrosshairScreenPosition() const
 {
     if (Image_Arrow)
     {
-        UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Image_Arrow->Slot);
-        if (CanvasSlot)
-        {
-            CanvasSlot->SetPosition(CanvasSlot->GetPosition() + AimPos);
-            FVector2D Direction = CanvasSlot->GetPosition() - ArcCenter;
-            if (Direction.Length() > ArcRadius)
-            {
-                Direction.Normalize();
-                CanvasSlot->SetPosition(ArcCenter + Direction * ArcRadius);
-            }
-            // 위치 로그 출력
-           /* UE_LOG(LogTemp, Warning, TEXT("Overlay_Arrow Pos: X=%f, Y=%f"), AimPos.X, AimPos.Y);*/
-        }
+        const FGeometry& ArrowGeometry = Image_Arrow->GetCachedGeometry();
+        return ArrowGeometry.GetAbsolutePosition() + (ArrowGeometry.GetLocalSize() / 2.0f);
     }
+    return FVector2D::ZeroVector;
 }

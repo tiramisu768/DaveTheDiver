@@ -20,6 +20,7 @@
 #include "WaterBodyComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "SeaCreature/SeaCreature.h"
 #include "Engine/OverlapResult.h"
 #include "Interface/InteractionObject.h"
@@ -267,11 +268,10 @@ void AMyRobo::PerformAttack()
 		CurrentWeaponState = EWeaponState::MeleeAttaching;
 		UpdateWeaponAttachments();
 		PlayMeleeAttackMontage();
-		MeleeWeapon->Attack(this);
 	}
 }
 
-void AMyRobo::PerformAttack(const FVector& AimDirection)
+void AMyRobo::PerformAttack(const FVector2D& ScreenPosition)
 {
 	if (!MainController) return;
 
@@ -279,7 +279,7 @@ void AMyRobo::PerformAttack(const FVector& AimDirection)
 
 	if (ActiveRangedWeapon)
 	{
-		RangedTargetLocation = AimDirection;
+		RangedTargetScreenPosition = ScreenPosition;
 		StopAnimMontage();
 		PlayRangedAttackMontage();
 	}
@@ -287,10 +287,39 @@ void AMyRobo::PerformAttack(const FVector& AimDirection)
 // AnimNotify에서 호출될 실제 발사 함수
 void AMyRobo::FireProjectile()
 {
-	if (ActiveRangedWeapon)
+	if (!ActiveRangedWeapon || !MainController) return;
+
+	FVector WorldLocation, WorldDirection;
+	bool bSuccess = UGameplayStatics::DeprojectScreenToWorld(MainController, RangedTargetScreenPosition, WorldLocation, WorldDirection);
+
+	if (bSuccess)
 	{
+		FVector TraceStart = MainController->PlayerCameraManager->GetCameraLocation();
+		FVector TraceEnd = TraceStart + (WorldDirection * 10000.f);
+
+		FHitResult HitResult;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+		QueryParams.AddIgnoredActor(ActiveRangedWeapon);
+
+		GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
+
+		FVector FinalTargetLocation = HitResult.bBlockingHit ? HitResult.Location : TraceEnd;
+
 		const FVector MuzzleLocation = ActiveRangedWeapon->GetMuzzleLocation();
-		const FVector FireDirection = (RangedTargetLocation - MuzzleLocation).GetSafeNormal();
+		FVector FireDirection = (FinalTargetLocation - MuzzleLocation).GetSafeNormal();
+
+		DrawDebugLine(
+		GetWorld(),
+			MuzzleLocation,
+			MuzzleLocation+FireDirection*5000.f,
+			FColor::Green,
+			false,
+			2.0f,
+			0,
+			1.f
+		);
+
 		ActiveRangedWeapon->Attack(this, FireDirection);
 	}
 }

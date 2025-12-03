@@ -107,11 +107,32 @@ void UMainUI::OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon)
 	}
 }
 
-void UMainUI::UpdateAimPos(FVector2D AimPos)
+void UMainUI::StartAiming()
 {
 	if (AimWidget)
 	{
-		AimWidget->UpdateAimPos(AimPos);
+		AimWidget->SetVisibility(ESlateVisibility::Visible);
+		AimWidget->ResetAimPos();
+	}
+}
+
+void UMainUI::StopAiming()
+{
+	if (AimWidget)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("[MainUI] AimWidget is valid. Hiding widget."));
+		}
+		AimWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMainUI::UpdateAimPos(FVector2D MoveDelta)
+{
+	if (AimWidget)
+	{
+		AimWidget->UpdateAimPos(MoveDelta);
 	}
 }
 
@@ -121,6 +142,15 @@ void UMainUI::ResetAimPos()
 	{
 		AimWidget->ResetAimPos();
 	}
+}
+
+FVector2D UMainUI::GetCrosshairScreenPosition() const
+{
+	if (AimWidget)
+	{
+		return AimWidget->GetCrosshairScreenPosition();
+	}
+	return FVector2D::ZeroVector;
 }
 
 void UMainUI::ShowGameEndUI()

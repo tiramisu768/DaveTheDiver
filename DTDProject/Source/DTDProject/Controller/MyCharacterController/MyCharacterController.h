@@ -63,7 +63,7 @@ private:
 	//Aim 상태 관리
 	bool IsAttacking;
 	FVector AimDirection;
-	FVector2D AimScreenPos = FVector2D(960.f, 540.f);
+	FVector2D AimScreenPos;
 
 	bool IsAiming;
 
@@ -81,14 +81,11 @@ public:
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void SetupInputComponent() override;
-	void SetGameInputMode();
-	void SetUIInputMode();
 	void MoveInput(const FInputActionValue& value);
 	void MoveEndInput(const FInputActionValue& value);
 	void LookInput(const FInputActionValue& value);
 	void DashInput(const FInputActionValue& value);
 	void MeleeAttackInput(const FInputActionValue& value);
-	void MoveAimPoint(const FVector2D& MoveValue);
 	void StartAiming(const FInputActionValue& value);
 	void StopAiming(const FInputActionValue& value);
 	void SwitchWeaponInput(const FInputActionValue& value);

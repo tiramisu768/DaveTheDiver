@@ -54,6 +54,7 @@ protected:
 private:
 	/*UPROPERTY()
 	UUserWidget* CurrentWidget;*/
+	void ResetAimPos();
 
 public:
 	/*UFUNCTION(BlueprintCallable)
@@ -76,8 +77,10 @@ public:
 	UFUNCTION()
 	void OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon);
 	URoboAimUI* GetRoboAimUI() const { return AimWidget; }
-	void UpdateAimPos(FVector2D AimPos);
-	void ResetAimPos();
+	void StartAiming();
+	void StopAiming();
+	void UpdateAimPos(FVector2D MoveDelta);
+	FVector2D GetCrosshairScreenPosition()const;
 	void ShowGameEndUI();
 
 

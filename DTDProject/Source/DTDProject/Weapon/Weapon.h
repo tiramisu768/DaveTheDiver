@@ -35,7 +35,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack(ACharacter* OwnerCharacter, const FVector& AimDirection=FVector::ZeroVector);
+	virtual void Attack(ACharacter* OwnerCharacter, const FVector& FireDirection = FVector::ZeroVector);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

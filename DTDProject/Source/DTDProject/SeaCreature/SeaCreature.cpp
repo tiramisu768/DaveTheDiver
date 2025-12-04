@@ -19,6 +19,11 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
 #include "Animation/AnimInstance.h"
+#include "AIController.h"
+#include "BrainComponent.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISense_Sight.h"
+#include "Perception/AISense_Hearing.h"
 
 ASeaCreature::ASeaCreature()
 {
@@ -98,9 +103,9 @@ void ASeaCreature::BeginPlay()
 		}
 
 		//공격성물고기는 900-300, 회피성물고기는 900-100
-		HomeReturnDist = Data->IsAggressive? Data->WanderRadius - 300.f: Data->WanderRadius - 100.f;
+		HomeReturnDist = Data->IsAggressive ? Data->WanderRadius - 300.f : Data->WanderRadius - 100.f;
 
-		SteeringComp->InitParams(Data->WanderRadius,Data->SlowRadius);
+		SteeringComp->InitParams(Data->WanderRadius, Data->SlowRadius);
 	}
 
 	ASeaCreatureAIController* AIController = Cast<ASeaCreatureAIController>(GetController());
@@ -159,20 +164,20 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 	/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
 		HitResult.Normal.Rotation(), true);*/
 
-	//if (HitEffect)
-	//{
-	//	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-	//		GetWorld(),
-	//		HitEffect,
-	//		HitResult.Location,
-	//		HitResult.Normal.Rotation(),   // 방향
-	//		FVector(1.0f),                 // 스케일
-	//		true                           // AutoDestroy
-	//	);
-	//}
+		//if (HitEffect)
+		//{
+		//	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		//		GetWorld(),
+		//		HitEffect,
+		//		HitResult.Location,
+		//		HitResult.Normal.Rotation(),   // 방향
+		//		FVector(1.0f),                 // 스케일
+		//		true                           // AutoDestroy
+		//	);
+		//}
 
 	if (FishStateComponent->IsDead())
-	{	
+	{
 		Die();
 	}
 	else
@@ -189,6 +194,24 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 
 void ASeaCreature::Die()
 {
+	if (AAIController* AICon = Cast<AAIController>(GetController()))
+	{
+		AICon->StopMovement();
+		if (AICon->BrainComponent)
+		{
+			AICon->BrainComponent->StopLogic("Dead");
+		}
+		AICon->UnPossess();
+	}
+
+	bUseControllerRotationYaw = false;
+
+	if (UAIPerceptionComponent* Perception = FindComponentByClass<UAIPerceptionComponent>())
+	{
+		Perception->SetSenseEnabled(UAISense_Sight::StaticClass(), false);
+		Perception->SetSenseEnabled(UAISense_Hearing::StaticClass(), false);
+	}
+
 	EnableCollectTrigger(true);
 	//사망직전 파닥파닥 애님
 	if (DeathFlapMontage && Mesh && Mesh->GetAnimInstance())

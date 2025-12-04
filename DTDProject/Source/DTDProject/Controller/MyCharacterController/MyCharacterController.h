@@ -97,5 +97,7 @@ public:
 	void OnNavigateUp();
 	void OnNavigateDown();
 	void OnSelectUIButton();
+
+	FVector FireStartPostion();
 //	bool GetIsMoveInput() const { return isMoveInput; }
 };

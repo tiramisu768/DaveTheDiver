@@ -295,9 +295,17 @@ void AMyRobo::FireProjectile()
 	const FVector ControlDirection = ControlRotation.Vector();
 
 	// 2. 광선의 시작점은 '카메라 위치'로 설정하여, 플레이어의 시야에서 장애물에 가려지는지를 확인합니다.
-	const FVector TraceStart = MainController->PlayerCameraManager->GetCameraLocation();
+
+	FVector TraceStart = MainController->FireStartPostion();
+	FVector ForwardVector = MainController->GetControlRotation().RotateVector(FVector::ForwardVector);
+	TraceStart += ForwardVector * 100.f;
+	DrawDebugSphere(GetWorld(), TraceStart, 25.f, 12, FColor::Emerald, false, 2.0f);
+	DrawDebugDirectionalArrow(GetWorld(), TraceStart, TraceStart + ForwardVector * 1000.f, 50.f, FColor::Red,false,10.f);
+	//const FVector TraceStart = MainController->PlayerCameraManager->GetCameraLocation();
 
 	// 3. 광선의 끝점은 카메라 위치에서 '컨트롤러의 조준 방향'으로 길게 뻗어나갑니다.
+	const FVector EndVector = TraceStart + (ForwardVector * 1000.f);
+	FVector FireDirectionTest = EndVector.GetSafeNormal();
 	const FVector TraceEnd = TraceStart + (ControlDirection * 10000.f);
 
 	FHitResult HitResult;
@@ -326,7 +334,7 @@ void AMyRobo::FireProjectile()
 
 	DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + FireDirection * 5000.f, FColor::Green, false, 2.0f, 0, 1.f);
 
-	ActiveRangedWeapon->Attack(this, FireDirection);
+	ActiveRangedWeapon->Attack(this, FireDirectionTest);
 }
 
 void AMyRobo::SwitchActiveRangedWeapon()

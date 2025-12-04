@@ -15,6 +15,7 @@
 #include "Interface/UINavigateInterface.h"
 #include "InputActionValue.h"
 #include "UI/MainUI.h"
+#include "UI/RoboAimUI.h"
 #include "Components/Image.h"
 
 AMyCharacterController::AMyCharacterController()
@@ -380,4 +381,13 @@ void AMyCharacterController::OnSelectUIButton()
 			IUINavigateInterface::Execute_Select(CurrentWidget);
 		}
 	}*/
+}
+
+FVector AMyCharacterController::FireStartPostion()
+{
+	UImage* AimUI = MainWidgetInstance->GetRoboAimUI()->GetImageArrow();
+	FVector2D ScreenPosition = AimUI->GetCachedGeometry().GetAbsolutePosition();
+	FVector WorldLocation, WorldDirection;
+	DeprojectScreenPositionToWorld(ScreenPosition.X, ScreenPosition.Y, WorldLocation, WorldDirection);
+	return WorldLocation;
 }

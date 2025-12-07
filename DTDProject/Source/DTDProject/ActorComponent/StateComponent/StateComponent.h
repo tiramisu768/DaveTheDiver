@@ -15,9 +15,9 @@ class DTDPROJECT_API UStateComponent : public UActorComponent
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "State")
-	float CurrentHP{ 100.0f };
+	float CurrentHP{ 10.0f };
 	UPROPERTY(EditAnywhere, Category = "State")
-	float MaxHP{ 100.0f };
+	float MaxHP{ 10.0f };
 	UPROPERTY(EditAnywhere, Category = "State")
 	float Damage{ 10.0f };
 

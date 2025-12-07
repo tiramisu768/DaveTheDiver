@@ -23,8 +23,13 @@ ADamagePopup::ADamagePopup()
 void ADamagePopup::BeginPlay()
 {
 	Super::BeginPlay();
-
 	
+	GetWorld()->GetTimerManager().SetTimer(
+		HideTimerHandle, 
+		this, 
+		&ADamagePopup::HidePopup, 
+		HideInterval, 
+		false);
 }
 
 // Called every frame
@@ -32,11 +37,6 @@ void ADamagePopup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void ADamagePopup::HideDamagePopup()
-{
-	GetWorld()->GetTimerManager().SetTimer(HideTimerHandle, this, &ADamagePopup::HidePopup, HideInterval, true);
 }
 
 void ADamagePopup::HidePopup()

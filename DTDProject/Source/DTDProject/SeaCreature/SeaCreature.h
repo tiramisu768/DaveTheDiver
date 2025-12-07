@@ -27,6 +27,9 @@ public:
 	TObjectPtr<class USkeletalMesh> Mesh;
 
 	// ¸ùÅ¸Áê
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat")
+	TSubclassOf<UAnimInstance> AnimClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	TObjectPtr<UAnimMontage> HitbyMontage;
 

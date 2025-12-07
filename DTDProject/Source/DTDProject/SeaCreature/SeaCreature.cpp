@@ -27,7 +27,6 @@
 
 ASeaCreature::ASeaCreature()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
@@ -51,12 +50,9 @@ ASeaCreature::ASeaCreature()
 	if (SeaCreatureDataTableFinder.Succeeded())
 		SeaCreatureDataTable = SeaCreatureDataTableFinder.Object;
 
-	FishHPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FishHPBarWidget"));
-	FishHPBarWidget->SetupAttachment(GetRootComponent());
-	//static ConstructorHelpers::FClassFinder<UUserWidget> FishHPBarWidgetClassFinder(TEXT(""));
-	//if (FishHPBarWidgetClassFinder.Succeeded())
-	//	FishHPBarWidget->SetWidgetClass(FishHPBarWidgetClassFinder.Class);
-	FishHPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	static ConstructorHelpers::FClassFinder<ADamagePopup> DamageWidgetClassFinder(TEXT("/Game/BluePrint/SeaCreature/UI/BP_DamagePopup.BP_DamagePopup_C"));
+	if (DamageWidgetClassFinder.Succeeded())
+		SpawnDamagePopupClass = DamageWidgetClassFinder.Class;
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>DeathFlapMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Death.AM_Death'"));
 	if (DeathFlapMontageObjectFinder.Succeeded())
@@ -70,7 +66,6 @@ ASeaCreature::ASeaCreature()
 	if (AttackMontageObjectFinder.Succeeded())
 		AttackMontage = AttackMontageObjectFinder.Object;*/
 
-	//AIControllerClass = ASeaCreatureAIController::StaticClass();
 	static ConstructorHelpers::FClassFinder<AAIController> AIControllerClassFinder(TEXT("/Game/BluePrint/SeaCreature/AI/BP_SeaCreatureAIController.BP_SeaCreatureAIController_C"));
 	if (AIControllerClassFinder.Succeeded())
 	{
@@ -96,6 +91,11 @@ void ASeaCreature::BeginPlay()
 
 	if (Data)
 	{
+		if (Data->AnimClass)
+		{
+			GetMesh()->SetAnimInstanceClass(Data->AnimClass);
+		}
+
 		if (MovementComponent)
 		{
 			MovementComponent->Acceleration = Data->Acceleration;
@@ -290,6 +290,9 @@ void ASeaCreature::CollectSeaCreature(AActor* OtherActor)
 {
 	EnableCollectTrigger(false);
 
+	GetWorld()->GetTimerManager().ClearTimer(DeathRotateTimerHandle);
+	DeathRotateTimerHandle.Invalidate();
+
 	// 루팅 로직(아이템 지급)
 	if(AMyRobo* robo = Cast<AMyRobo>(OtherActor))
 	{
@@ -358,17 +361,18 @@ void ASeaCreature::SpawnDamagePopup(float DamageAmount)
 	/*float HeightOffset = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 0.3f;
 	FVector SpawnLoc = GetActorLocation() + FVector(0.f, 0.f, HeightOffset);*/
 	ADamagePopup* damagePopup = GetWorld()->SpawnActor<ADamagePopup>(SpawnDamagePopupClass, GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
-	if (nullptr == damagePopup) return;
 
-	USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(damagePopup-> SimpleDamageWidget->GetWidget());
-	if (SimpleDamageUI)
+	if(damagePopup)
 	{
-		SimpleDamageUI->SetDamageText(FishStateComponent->GetDamage());
+		if (damagePopup->SimpleDamageWidget)
+		{
+			USimpleDamageUI* SimpleDamageUI = Cast<USimpleDamageUI>(damagePopup->SimpleDamageWidget->GetWidget());
+			if (SimpleDamageUI)
+			{
+				SimpleDamageUI->SetDamageText(DamageAmount);
+			}
+		}
 	}
-	//////////////추후 오브젝트풀링으로 수정/////////////////
-	damagePopup->HideDamagePopup();
-
-	
 }
 
 FSeaCreatureData::FSeaCreatureData()

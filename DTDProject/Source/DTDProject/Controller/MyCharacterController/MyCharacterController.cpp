@@ -383,11 +383,22 @@ void AMyCharacterController::OnSelectUIButton()
 	}*/
 }
 
-FVector AMyCharacterController::FireStartPostion()
+bool AMyCharacterController::FireStartPostion(FVector& WorldPosition, FVector& WorldDirection)
 {
 	UImage* AimUI = MainWidgetInstance->GetRoboAimUI()->GetImageArrow();
 	FVector2D ScreenPosition = AimUI->GetCachedGeometry().GetAbsolutePosition();
-	FVector WorldLocation, WorldDirection;
-	DeprojectScreenPositionToWorld(ScreenPosition.X, ScreenPosition.Y, WorldLocation, WorldDirection);
-	return WorldLocation;
+	TSharedPtr<SWidget> AimWidget = AimUI->GetCachedWidget();
+	if (AimWidget.IsValid())
+	{
+		FWidgetPath Path;
+		TSharedPtr<SWindow> Window = FSlateApplication::Get().FindWidgetWindow(AimWidget.ToSharedRef());
+		if (Window.IsValid())
+		{
+			FVector2D WindowLeftTopPosition = Window->GetPositionInScreen();
+			ScreenPosition -= WindowLeftTopPosition;
+			DeprojectScreenPositionToWorld(ScreenPosition.X, ScreenPosition.Y, WorldPosition, WorldDirection);
+			return true;
+		}
+	}
+	return false;
 }

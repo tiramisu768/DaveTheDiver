@@ -41,7 +41,7 @@ public:
 	void OnNavigateDown();
 	void OnSelectUIButton();
 
-	FVector FireStartPostion();
+	bool FireStartPostion(FVector& WorldPosition, FVector& WorldDirection);
 	//	bool GetIsMoveInput() const { return isMoveInput; }
 
 private:

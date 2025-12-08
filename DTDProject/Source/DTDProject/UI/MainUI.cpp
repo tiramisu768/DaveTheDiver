@@ -55,12 +55,11 @@ void UMainUI::SetWeights(float Current, float Max)
 	}
 }
 
-void UMainUI::ShowRankUI(const TArray<FCaughtFishInfo>& FishList)
+void UMainUI::ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo, float SustainTime)
 {
-	if(RankWidget)
+	if (RankWidget)
 	{
-		/*RankWidget->UpdateFishRankList(FishList);
-		RankWidget->UpdateAndShow();*/
+		RankWidget->ShowFishCollected(FishInfo, SustainTime);
 	}
 }
 

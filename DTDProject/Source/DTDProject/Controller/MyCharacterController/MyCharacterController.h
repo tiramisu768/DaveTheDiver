@@ -15,6 +15,35 @@ UCLASS()
 class DTDPROJECT_API AMyCharacterController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	AMyCharacterController();
+	UMainUI* GetMainUI() const { return Cast<UMainUI>(MainWidgetInstance); }
+	bool GetIsAttacking() const { return IsAttacking; }
+	void SetIsAttacking(bool bNewState) { IsAttacking = bNewState; }
+	void BeginPlay() override;
+	void Tick(float DeltaTime) override;
+	void SetupInputComponent() override;
+	void MoveInput(const FInputActionValue& value);
+	void MoveEndInput(const FInputActionValue& value);
+	void LookInput(const FInputActionValue& value);
+	void DashInput(const FInputActionValue& value);
+	void MeleeAttackInput(const FInputActionValue& value);
+	void StartAiming(const FInputActionValue& value);
+	void StopAiming(const FInputActionValue& value);
+	void SwitchWeaponInput(const FInputActionValue& value);
+	void UseToolInput(const FInputActionValue& value);
+	void SwitchToolInput(const FInputActionValue& value);
+	/*void EquipInput(const FInputActionValue& value);*/
+	void InteractionStarted(const FInputActionValue& value);
+	void InteractionCompleted(const FInputActionValue& value);
+	void OnNavigateUp();
+	void OnNavigateDown();
+	void OnSelectUIButton();
+
+	FVector FireStartPostion();
+	//	bool GetIsMoveInput() const { return isMoveInput; }
+
 private:
 	TSubclassOf<class UMainUI> MainWidgetClass;
 
@@ -73,31 +102,4 @@ private:
 
 	FVector2D PrevMousePosition{-1,-1};
 //	//bool isHit{ true };
-public:
-	AMyCharacterController();
-	UMainUI* GetMainUI() const { return Cast<UMainUI>(MainWidgetInstance); }
-	bool GetIsAttacking() const { return IsAttacking; }
-	void SetIsAttacking(bool bNewState) { IsAttacking = bNewState; }
-	void BeginPlay() override;
-	void Tick(float DeltaTime) override;
-	void SetupInputComponent() override;
-	void MoveInput(const FInputActionValue& value);
-	void MoveEndInput(const FInputActionValue& value);
-	void LookInput(const FInputActionValue& value);
-	void DashInput(const FInputActionValue& value);
-	void MeleeAttackInput(const FInputActionValue& value);
-	void StartAiming(const FInputActionValue& value);
-	void StopAiming(const FInputActionValue& value);
-	void SwitchWeaponInput(const FInputActionValue& value);
-	void UseToolInput(const FInputActionValue& value);
-	void SwitchToolInput(const FInputActionValue& value);
-	/*void EquipInput(const FInputActionValue& value);*/
-	void InteractionStarted(const FInputActionValue& value);
-	void InteractionCompleted(const FInputActionValue& value);
-	void OnNavigateUp();
-	void OnNavigateDown();
-	void OnSelectUIButton();
-
-	FVector FireStartPostion();
-//	bool GetIsMoveInput() const { return isMoveInput; }
 };

@@ -21,6 +21,23 @@ class DTDPROJECT_API UMainUI : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	void SetHPPercent(float value);
+	void SetMeters(float value);
+	void SetWeights(float Current, float Max);
+	void ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo, float SustainTime);
+	void ShowHPWarningWidget();
+	URoboWeaponUI* GetRoboWeaponUI() const { return WeaponWidget; }
+	void PlaySwitchAnimation(int32 SelectedIndex);
+	UFUNCTION()
+	void OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon);
+	URoboAimUI* GetRoboAimUI() const { return AimWidget; }
+	void StartAiming();
+	void StopAiming();
+	void UpdateAimPos(FVector2D MoveDelta);
+	FVector2D GetCrosshairScreenPosition()const;
+	void ShowGameEndUI();
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -52,36 +69,5 @@ protected:
 
 
 private:
-	/*UPROPERTY()
-	UUserWidget* CurrentWidget;*/
 	void ResetAimPos();
-
-public:
-	/*UFUNCTION(BlueprintCallable)
-	void ShowLobbyUI();
-
-	UFUNCTION(BlueprintCallable)
-	void ShowMainUI();
-
-	void OnEnterGame();*/
-
-	//void BeginPlay() override;
-	//UUserWidget* GetCurrentWidget() const { return CurrentWidget; };
-	void SetHPPercent(float value);
-	void SetMeters(float value);
-	void SetWeights(float Current, float Max);
-	void ShowRankUI(const TArray<FCaughtFishInfo>& FishList);
-	void ShowHPWarningWidget();
-	URoboWeaponUI* GetRoboWeaponUI() const { return WeaponWidget; }
-	void PlaySwitchAnimation(int32 SelectedIndex);
-	UFUNCTION()
-	void OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon);
-	URoboAimUI* GetRoboAimUI() const { return AimWidget; }
-	void StartAiming();
-	void StopAiming();
-	void UpdateAimPos(FVector2D MoveDelta);
-	FVector2D GetCrosshairScreenPosition()const;
-	void ShowGameEndUI();
-
-
 };

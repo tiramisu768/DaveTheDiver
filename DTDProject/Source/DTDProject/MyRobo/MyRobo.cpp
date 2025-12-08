@@ -9,10 +9,9 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/PhysicsVolume.h"
-#include "UI/RoboHPBarUI.h"		
-#include "UI/LongPressUI.h"		
+#include "GameFramework/PhysicsVolume.h"	
 #include "UI/MainUI.h"
+#include "UI/LongPressUI.h"
 #include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
@@ -225,20 +224,24 @@ void AMyRobo::PossessedBy(AController* NewController)
 	RoboComponent->InitOxygen();
 }
 
+//델리게이트 등록
 void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 {
 	if (InMainUI)
 	{
-		//델리게이트 등록
 		RoboComponent->OnHPChanged.BindLambda([this, InMainUI](float value) {
 			InMainUI->SetHPPercent(value);
 			});
 		RoboComponent->OnDepthChanged.BindLambda([this, InMainUI](float value) {
 			InMainUI->SetMeters(value);
 			});
-		InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
-			InMainUI->ShowRankUI(FishList);
+		InventoryComponent->OnFishCollected.BindLambda([InMainUI](const FCaughtFishInfo& FishInfo) {
+			InMainUI->ShowCollectedFishNotification(FishInfo, 3.0f);
 			});
+		//최종 결과 보여줄 때
+		/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
+			InMainUI->ShowCollectedFishNotification(FishList,3.0f);
+			});*/
 
 		OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::OnUpdateWeaponSlot);
 		BroadcastCurrentWeaponStates();

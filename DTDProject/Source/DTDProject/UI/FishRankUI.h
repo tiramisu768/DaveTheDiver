@@ -7,20 +7,23 @@
 #include "ActorComponent/InventoryComponent.h"
 #include "FishRankUI.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class DTDPROJECT_API UFishRankUI : public UResponsiveUI
 {
 	GENERATED_BODY()
-private:
-	UPROPERTY(meta =(BindWidget))
-	TObjectPtr<class UTextBlock> Text_FishName;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> Text_FishGrade;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> Text_FishWeight;
 public:
-	void UpdateAndShow(const FCaughtFishInfo& FishInfo,float SustainTime);
+	void ShowFishCollected(const FCaughtFishInfo& FishInfo, float SustainTime);
+
+protected:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> FishIcon;
+
+	UPROPERTY(meta =(BindWidget))
+	TObjectPtr<class UTextBlock> FishNameText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> FishGradeText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> FishWeightText;
 };

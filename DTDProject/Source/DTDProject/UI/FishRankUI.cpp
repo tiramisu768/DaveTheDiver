@@ -2,21 +2,26 @@
 
 
 #include "UI/FishRankUI.h"
+#include "Components/Image.h"
 #include "Components/TextBlock.h"
 
-void UFishRankUI::UpdateAndShow(const FCaughtFishInfo& FishInfo, float SustainTime)
+void UFishRankUI::ShowFishCollected(const FCaughtFishInfo& FishInfo, float SustainTime)
 {
-	if (Text_FishName)
+	if (FishNameText)
 	{
-		Text_FishName->SetText(FText::FromString(FishInfo.FishName));
+		FishNameText->SetText(FText::FromString(FishInfo.FishName));
 	}
-	if (Text_FishGrade)
+	if (FishGradeText)
 	{
-		Text_FishGrade->SetText(FText::FromString(FString::Printf(TEXT("%d"), FishInfo.Grade)));
+		FishGradeText->SetText(FText::FromString(FString::Printf(TEXT("%d"), FishInfo.Grade)));
 	}
-	if (Text_FishWeight)
+	if (FishWeightText)
 	{
-		Text_FishWeight->SetText(FText::FromString(FString::Printf(TEXT("%.2f kg"), FishInfo.Weight)));
+		FishWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.2f kg"), FishInfo.Weight)));
+	}
+	if (FishIcon)
+	{
+
 	}
 
 	ShowUIAnim(SustainTime);

@@ -12,7 +12,7 @@ class DTDPROJECT_API UFishRankUI : public UResponsiveUI
 {
 	GENERATED_BODY()
 public:
-	void ShowFishCollected(const FCaughtFishInfo& FishInfo, float SustainTime);
+	void ShowFishCollected(const FCaughtFishInfo& FishInfo);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

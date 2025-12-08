@@ -235,9 +235,13 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 		RoboComponent->OnDepthChanged.BindLambda([this, InMainUI](float value) {
 			InMainUI->SetMeters(value);
 			});
-		InventoryComponent->OnFishCollected.BindLambda([InMainUI](const FCaughtFishInfo& FishInfo) {
+		if (InventoryComponent)
+		{
+			InventoryComponent->OnFishCollected.AddUObject(InMainUI, &UMainUI::ShowCollectedFishNotification);
+		}
+		/*InventoryComponent->OnFishCollected.BindLambda([InMainUI](const FCaughtFishInfo& FishInfo) {
 			InMainUI->ShowCollectedFishNotification(FishInfo, 3.0f);
-			});
+			});*/
 		//최종 결과 보여줄 때
 		/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
 			InMainUI->ShowCollectedFishNotification(FishList,3.0f);

@@ -28,8 +28,8 @@ struct FCaughtFishInfo
 	//FName DataTableRowName;
 };
 
-DECLARE_DELEGATE_OneParam(FOnFishCollectedSignature, const FCaughtFishInfo&);
-DECLARE_DELEGATE_OneParam(FOnInventoryChangedSignature, const TArray<FCaughtFishInfo>&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFishCollectedSignature, const FCaughtFishInfo&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryChangedSignature, const TArray<FCaughtFishInfo>&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DTDPROJECT_API UInventoryComponent : public UActorComponent

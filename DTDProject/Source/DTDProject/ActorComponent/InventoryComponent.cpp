@@ -18,6 +18,6 @@ void UInventoryComponent::BeginPlay()
 void UInventoryComponent::AddCaughtFish(const FCaughtFishInfo& Info)
 {
 	CaughtFishList.Add(Info);
-	OnFishCollected.ExecuteIfBound(Info);
+	OnFishCollected.Broadcast(Info);
 }
 

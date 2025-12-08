@@ -5,7 +5,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 
-void UFishRankUI::ShowFishCollected(const FCaughtFishInfo& FishInfo, float SustainTime)
+void UFishRankUI::ShowFishCollected(const FCaughtFishInfo& FishInfo)
 {
 	if (FishNameText)
 	{
@@ -24,5 +24,5 @@ void UFishRankUI::ShowFishCollected(const FCaughtFishInfo& FishInfo, float Susta
 
 	}
 
-	ShowUIAnim(SustainTime);
+	ShowUIAnim(3.0f);
 }

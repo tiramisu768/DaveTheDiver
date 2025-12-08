@@ -25,7 +25,8 @@ public:
 	void SetHPPercent(float value);
 	void SetMeters(float value);
 	void SetWeights(float Current, float Max);
-	void ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo, float SustainTime);
+	UFUNCTION()
+	void ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo);
 	void ShowHPWarningWidget();
 	URoboWeaponUI* GetRoboWeaponUI() const { return WeaponWidget; }
 	void PlaySwitchAnimation(int32 SelectedIndex);

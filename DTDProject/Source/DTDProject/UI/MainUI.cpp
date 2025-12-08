@@ -20,6 +20,11 @@ void UMainUI::NativeConstruct()
 		AimWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 
+	if(RankWidget)
+	{
+		RankWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	if (WarningHPWidget)
 	{
 		WarningHPWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -55,11 +60,12 @@ void UMainUI::SetWeights(float Current, float Max)
 	}
 }
 
-void UMainUI::ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo, float SustainTime)
+void UMainUI::ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo)
 {
 	if (RankWidget)
 	{
-		RankWidget->ShowFishCollected(FishInfo, SustainTime);
+		RankWidget->SetVisibility(ESlateVisibility::Visible);
+		RankWidget->ShowFishCollected(FishInfo);
 	}
 }
 

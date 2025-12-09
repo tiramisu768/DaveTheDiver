@@ -82,7 +82,7 @@ void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& FireDirection)
 						ProjMove->MaxSpeed = WeaponStats->ProjectileSpeed;
 					}
 
-					const FVector NewScale(0.003f);
+					const FVector NewScale(0.03f);
 					SpawnedBullet->SetActorScale3D(NewScale);
 				}
 			}

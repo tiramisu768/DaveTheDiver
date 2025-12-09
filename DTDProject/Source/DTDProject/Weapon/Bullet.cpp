@@ -3,6 +3,7 @@
 
 #include "Weapon/Bullet.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "SeaCreature/SeaCreature.h"
 
@@ -10,10 +11,15 @@ ABullet::ABullet()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+	RootComponent = CollisionComp;
+	CollisionComp->SetCollisionProfileName(TEXT("Projectile"));
+	CollisionComp->SetNotifyRigidBodyCollision(false);
+	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ABullet::OnOverlapBegin);
+
 	BulletMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Bullet Mesh"));
-	RootComponent = BulletMesh;
-	BulletMesh->SetCollisionProfileName(TEXT("Projectile"));
-	BulletMesh->SetNotifyRigidBodyCollision(true);
+	BulletMesh->SetupAttachment(RootComponent);
+	BulletMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement"));
 	ProjectileMovement->SetUpdatedComponent(BulletMesh);
@@ -23,10 +29,10 @@ ABullet::ABullet()
 	ProjectileMovement->bShouldBounce = false;
 	ProjectileMovement->ProjectileGravityScale = 0.0f;
 
-	InitialLifeSpan = 5.0f;
+	InitialLifeSpan = 500.0f;
 }
 
-void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normallmpulse, const FHitResult& Hit)
+void ABullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor != this && OtherActor != GetOwner())
 	{
@@ -34,18 +40,20 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 		ASeaCreature* SeaCreature = Cast<ASeaCreature>(OtherActor);
 		if (SeaCreature)
 		{
-			SeaCreature->HitBy(Damage, Hit);
+			SeaCreature->HitBy(Damage, SweepResult);
+			Destroy();
 		}
-		//총알파괴
-		Destroy();
+		// (선택) 물고기가 아닌 다른 벽 같은 것에 부딪혔을 때도 파괴하고 싶다면 아래 코드를 활성화
+		// else 
+		// {
+		//     Destroy();
+		// }
 	}
 }
 
 void ABullet::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	BulletMesh->OnComponentHit.AddDynamic(this, &ABullet::OnHit);
 }
 
 // Called every frame

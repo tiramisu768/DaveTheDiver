@@ -14,6 +14,7 @@
 
 class UAIPerceptionStimuliSourceComponent;
 class AMyCharacterController;
+class ASeaCreature;
 class UMainUI;
 class ARandomBox;
 
@@ -85,6 +86,8 @@ public:
 	void BroadcastCurrentWeaponStates();
 
 	void AttackTrace() override;
+
+	void CollectSeaCreature(ASeaCreature* FishToCollect);
 
 protected:
 	virtual void BeginPlay() override;

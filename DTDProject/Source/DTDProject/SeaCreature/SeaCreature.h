@@ -87,6 +87,67 @@ UCLASS()
 class DTDPROJECT_API ASeaCreature : public APawn
 {
 	GENERATED_BODY()
+
+public:
+	ASeaCreature();
+
+	FOnAttackMontageEndedDelegate OnAttackMontageEndedDelegate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UCapsuleComponent> CapsuleComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> Mesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UFloatingPawnMovement> MovementComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UFishStateComponent> FishStateComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	class USeaCreatureSteeringComponent* SteeringComp;
+
+	USkeletalMeshComponent* GetMesh() const { return Mesh.Get(); }
+
+	UCapsuleComponent* GetCapsuleComponent() const { return CapsuleComponent.Get(); }
+
+	const FSeaCreatureData* GetData() const { return Data; }
+
+	float GetHomeReturnDist() const { return HomeReturnDist; }
+
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION()
+	void SpawnSeaCreature();
+
+	void HitBy(float DamageAmount, const FHitResult& HitResult);
+
+	void Die();
+
+	bool isDead();
+
+	void RotateToDeadPose(float DeltaTime);
+
+	void EnableCollectTrigger(bool isEnable);
+
+	UFUNCTION()
+	void OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	virtual void Attack(class AMyRobo* Target);
+
+	void PostInitializeComponents() override;
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	void SpawnDamagePopup(float DamageAmount);
+
+protected:
+	virtual void BeginPlay() override;
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Data", meta = (AllowPriaveAccess="true"))
 	FName RowName;
@@ -121,70 +182,4 @@ private:
 	class USphereComponent* CollectSphere;
 
 	FTimerHandle CollectHintTimer;
-
-
-public:
-
-	ASeaCreature();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UCapsuleComponent> CapsuleComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<USkeletalMeshComponent> Mesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UFloatingPawnMovement> MovementComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<class UFishStateComponent> FishStateComponent;
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	class USeaCreatureSteeringComponent* SteeringComp;
-
-	USkeletalMeshComponent* GetMesh() const { return Mesh.Get(); }
-
-	UCapsuleComponent* GetCapsuleComponent() const { return CapsuleComponent.Get(); }
-
-	const FSeaCreatureData* GetData() const { return Data; }
-
-	float GetHomeReturnDist() const { return HomeReturnDist; }
-
-	virtual void Tick(float DeltaTime) override;
-
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-protected:
-	virtual void BeginPlay() override;
-
-public:
-	UFUNCTION()
-	void SpawnSeaCreature();
-
-	void HitBy(float DamageAmount, const FHitResult& HitResult);
-
-	void Die();
-
-	bool isDead();
-
-	void RotateToDeadPose(float DeltaTime);
-
-	void EnableCollectTrigger(bool isEnable);
-
-	UFUNCTION()
-	void OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	
-	void CollectSeaCreature(AActor* OtherActor);
-
-	virtual void Attack(class AMyRobo* Target);
-
-	void PostInitializeComponents() override;
-
-	UFUNCTION()
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-	FOnAttackMontageEndedDelegate OnAttackMontageEndedDelegate;
-
-	void SpawnDamagePopup(float DamageAmount);
-
 };

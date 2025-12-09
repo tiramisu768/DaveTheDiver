@@ -280,33 +280,19 @@ void ASeaCreature::EnableCollectTrigger(bool isEnable)
 void ASeaCreature::OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!FishStateComponent->IsDead()) return;
+
 	if (AMyRobo* robo = Cast<AMyRobo>(OtherActor))
 	{
-		CollectSeaCreature(OtherActor);
-	}
-}
-
-void ASeaCreature::CollectSeaCreature(AActor* OtherActor)
-{
-	EnableCollectTrigger(false);
-
-	GetWorld()->GetTimerManager().ClearTimer(DeathRotateTimerHandle);
-	DeathRotateTimerHandle.Invalidate();
-
-	// 루팅 로직(아이템 지급)
-	if(AMyRobo* robo = Cast<AMyRobo>(OtherActor))
-	{
-		if (robo->GetInventoryComponent())
+		EnableCollectTrigger(false);
+		
+		if (DeathRotateTimerHandle.IsValid())
 		{
-			FCaughtFishInfo Info;
-			Info.FishName = Data->Name;
-			Info.Weight = Data->Weight;
-			Info.Grade = Data->Grade;
-			robo->GetInventoryComponent()->AddCaughtFish(Info);
+			GetWorld()->GetTimerManager().ClearTimer(DeathRotateTimerHandle);
+			DeathRotateTimerHandle.Invalidate();
 		}
+
+		robo->CollectSeaCreature(this);
 	}
-	// 사라지기(이펙트+사운드 후)
-	SetLifeSpan(0.1f); // 또는 페이드/ Dissolve 후 Destroy
 }
 
 void ASeaCreature::Attack(AMyRobo* Target)

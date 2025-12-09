@@ -238,10 +238,10 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 		if (InventoryComponent)
 		{
 			InventoryComponent->OnFishCollected.AddUObject(InMainUI, &UMainUI::ShowCollectedFishNotification);
+			InventoryComponent->OnWeightChanged.AddLambda([InMainUI](float current, float max) {
+				InMainUI->SetWeights(current, max);
+				});
 		}
-		/*InventoryComponent->OnFishCollected.BindLambda([InMainUI](const FCaughtFishInfo& FishInfo) {
-			InMainUI->ShowCollectedFishNotification(FishInfo, 3.0f);
-			});*/
 		//최종 결과 보여줄 때
 		/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
 			InMainUI->ShowCollectedFishNotification(FishList,3.0f);
@@ -529,6 +529,23 @@ void AMyRobo::AttackTrace()
 			}
 		}
 	}
+}
+
+void AMyRobo::CollectSeaCreature(ASeaCreature* FishToCollect)
+{
+	if (!FishToCollect || !FishToCollect->GetData()) return;
+
+	if(InventoryComponent)
+	{
+		FCaughtFishInfo Info;
+		const FSeaCreatureData* FishData = FishToCollect->GetData();
+
+		Info.FishName = FishData->Name;
+		Info.Weight = FishData->Weight;
+		Info.Grade = FishData->Grade;
+		InventoryComponent->AddCaughtFish(Info);
+	}
+	FishToCollect->SetLifeSpan(0.1f);
 }
 
 void AMyRobo::BeginPlay()

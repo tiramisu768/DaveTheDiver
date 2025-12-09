@@ -28,8 +28,9 @@ struct FCaughtFishInfo
 	//FName DataTableRowName;
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnFishCollectedSignature, const FCaughtFishInfo&);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryChangedSignature, const TArray<FCaughtFishInfo>&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFishCollected, const FCaughtFishInfo&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWeightChanged, float, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryChanged, const TArray<FCaughtFishInfo>&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DTDPROJECT_API UInventoryComponent : public UActorComponent
@@ -37,11 +38,11 @@ class DTDPROJECT_API UInventoryComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UInventoryComponent();
 
-	FOnFishCollectedSignature OnFishCollected;
-	FOnInventoryChangedSignature OnInventoryChanged;
+	FOnFishCollected OnFishCollected;
+	FOnWeightChanged OnWeightChanged;
+	FOnInventoryChanged OnInventoryChanged;
 
 	void AddCaughtFish(const FCaughtFishInfo& Info);
 
@@ -49,6 +50,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY()
+	float CurrentTotalWeight;
+
 	UPROPERTY()
 	TArray<FCaughtFishInfo> CaughtFishList;
 };

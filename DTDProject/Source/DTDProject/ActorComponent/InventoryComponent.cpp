@@ -18,6 +18,12 @@ void UInventoryComponent::BeginPlay()
 void UInventoryComponent::AddCaughtFish(const FCaughtFishInfo& Info)
 {
 	CaughtFishList.Add(Info);
+
+	CurrentTotalWeight += Info.Weight;
+
 	OnFishCollected.Broadcast(Info);
+
+	float MaxWeight = 100.f;
+	OnWeightChanged.Broadcast(CurrentTotalWeight, MaxWeight);
 }
 

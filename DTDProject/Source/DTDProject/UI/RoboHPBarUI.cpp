@@ -7,36 +7,32 @@
 
 void URoboHPBarUI::SetHPBarPercent(float Percent)
 {
-	if (RoboHPBar)
+	if (HPBar)
 	{
-		RoboHPBar->SetPercent(Percent);
+		HPBar->SetPercent(Percent);
 	}
-	if (RoboHPText)
+	if (HPText)
 	{
-		RoboHPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%%"), Percent * 100.0f)));
+		HPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%%"), Percent * 100.0f)));
 	}
 }
 
 void URoboHPBarUI::SetCurrentDepthMeters(float Meter)
 {
-	//if (RoboDepthTitleText)
-	//{
-	//	RoboDepthTitleText->SetText(FText::FromString(FString::Printf(TEXT("Normal Depth")))); 
-	//}
-	if (RoboDepthText)
+	if (SeaDepthText)
 	{
-		RoboDepthText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Meter)));
+		SeaDepthText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Meter)));
 	}
 }
 
 void URoboHPBarUI::SetCurrentAndMaxWeight(float Current, float Max)
 {
-	if (RoboCurrentWeightText)
+	if (InventoryCurrentTotalWeightText)
 	{
-		RoboCurrentWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Current)));
+		InventoryCurrentTotalWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Current)));
 	}
-	if (RoboMaxWeightText)
+	if (InventoryMaxWeightText)
 	{
-		RoboMaxWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Max)));
+		InventoryMaxWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Max)));
 	}
 }

@@ -15,17 +15,19 @@ class DTDPROJECT_API URoboHPBarUI : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UProgressBar> RoboHPBar;
+	TObjectPtr<class UProgressBar> HPBar;
+
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> RoboHPText;
+	TObjectPtr<class UTextBlock> HPText;
+
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> RoboDepthText;
-	/*UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> RoboDepthTitleText;*/
+	TObjectPtr<class UTextBlock> SeaDepthText;
+
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> RoboCurrentWeightText;
+	TObjectPtr<class UTextBlock> InventoryCurrentTotalWeightText;
+
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> RoboMaxWeightText;
+	TObjectPtr<class UTextBlock> InventoryMaxWeightText;
 public:
 	void SetHPBarPercent(float Percent);
 	void SetCurrentDepthMeters(float Meter);

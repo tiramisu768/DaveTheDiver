@@ -343,9 +343,9 @@ void ASeaCreature::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted
 
 void ASeaCreature::SpawnDamagePopup(float DamageAmount)
 {
-	/*float HeightOffset = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 0.3f;
-	FVector SpawnLoc = GetActorLocation() + FVector(0.f, 0.f, HeightOffset);*/
-	ADamagePopup* damagePopup = GetWorld()->SpawnActor<ADamagePopup>(SpawnDamagePopupClass, GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
+	float HeightOffset = SphereComponent->GetScaledSphereRadius() + 0.3f;
+	FVector SpawnLoc = GetActorLocation() + FVector(0.f, 0.f, HeightOffset);
+	ADamagePopup* damagePopup = GetWorld()->SpawnActor<ADamagePopup>(SpawnDamagePopupClass, SpawnLoc, GetActorRotation(), FActorSpawnParameters());
 
 	if(damagePopup)
 	{

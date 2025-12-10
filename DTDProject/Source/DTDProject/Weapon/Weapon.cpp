@@ -74,16 +74,12 @@ void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& FireDirection)
 
 				if (SpawnedBullet)
 				{
-					SpawnedBullet->Damage = WeaponStats->Damage;
-
 					if (UProjectileMovementComponent* ProjMove = SpawnedBullet->FindComponentByClass<UProjectileMovementComponent>())
 					{
 						ProjMove->InitialSpeed = WeaponStats->ProjectileSpeed;
 						ProjMove->MaxSpeed = WeaponStats->ProjectileSpeed;
+						SpawnedBullet->Damage = WeaponStats->Damage;
 					}
-
-					const FVector NewScale(0.03f);
-					SpawnedBullet->SetActorScale3D(NewScale);
 				}
 			}
 			break;

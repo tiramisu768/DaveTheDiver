@@ -29,10 +29,10 @@ void URoboHPBarUI::SetCurrentAndMaxWeight(float Current, float Max)
 {
 	if (InventoryCurrentTotalWeightText)
 	{
-		InventoryCurrentTotalWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Current)));
+		InventoryCurrentTotalWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), Current)));
 	}
 	if (InventoryMaxWeightText)
 	{
-		InventoryMaxWeightText->SetText(FText::FromString(FString::Printf(TEXT("%.1fm"), Max)));
+		InventoryMaxWeightText->SetText(FText::FromString(FString::Printf(TEXT("/%.1fkg"), Max)));
 	}
 }

@@ -8,7 +8,6 @@
 #include "Components/WidgetComponent.h"
 #include "UI/SimpleDamageUI.h"
 #include "Object/ObjectUI/DamagePopup.h"
-#include "Components/CapsuleComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Components/skeletalMeshComponent.h"
@@ -29,8 +28,8 @@ ASeaCreature::ASeaCreature()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
-	RootComponent = CapsuleComponent;
+	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+	RootComponent = SphereComponent;
 
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	Mesh->SetupAttachment(RootComponent);
@@ -231,7 +230,7 @@ void ASeaCreature::Die()
 	M->SetComponentTickEnabled(false);
 
 	//Ä¸½¶²ô°í, ¸Þ½¬ÀÇ ÄÝ¸®ÀüÀ» Ragdoll·Î ¼³Á¤
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	M->SetCollisionProfileName(TEXT("Ragdoll"));
 	M->SetAllBodiesSimulatePhysics(false);
 	M->SetSimulatePhysics(false);

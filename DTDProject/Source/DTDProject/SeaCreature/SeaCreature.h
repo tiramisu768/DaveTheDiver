@@ -73,7 +73,6 @@ public:
 };
 
 
-class UCapsuleComponent;
 class USkeletalMeshComponent;
 class UFloatingPawnMovement;
 class UFishStateComponent;
@@ -94,7 +93,7 @@ public:
 	FOnAttackMontageEndedDelegate OnAttackMontageEndedDelegate;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UCapsuleComponent> CapsuleComponent;
+	TObjectPtr<USphereComponent> SphereComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> Mesh;
@@ -109,8 +108,6 @@ public:
 	class USeaCreatureSteeringComponent* SteeringComp;
 
 	USkeletalMeshComponent* GetMesh() const { return Mesh.Get(); }
-
-	UCapsuleComponent* GetCapsuleComponent() const { return CapsuleComponent.Get(); }
 
 	const FSeaCreatureData* GetData() const { return Data; }
 

@@ -314,8 +314,8 @@ void AMyRobo::FireProjectile()
 	QueryParams.AddIgnoredActor(ActiveRangedWeapon);
 
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
-	DrawDebugSphere(GetWorld(), TraceStart, 25.f, 12, FColor::Emerald, false, 2.0f);
-	DrawDebugDirectionalArrow(GetWorld(), TraceStart, TraceEnd, 50.f, FColor::Red, false, 10.f);
+	/*DrawDebugSphere(GetWorld(), TraceStart, 25.f, 12, FColor::Emerald, false, 2.0f);
+	DrawDebugDirectionalArrow(GetWorld(), TraceStart, TraceEnd, 50.f, FColor::Red, false, 10.f);*/
 
 	FVector FinalTargetLocation;
 	if (HitResult.bBlockingHit)
@@ -328,13 +328,13 @@ void AMyRobo::FireProjectile()
 	}
 
 	DrawDebugSphere(GetWorld(), FinalTargetLocation, 25.f, 12, FColor::Red, false, 2.0f);
-	DrawDebugLine(GetWorld(), TraceStart, FinalTargetLocation, FColor::Blue, false, 2.0f, 0, 1.f);
+	//DrawDebugLine(GetWorld(), TraceStart, FinalTargetLocation, FColor::Blue, false, 2.0f, 0, 1.f);
 
 	const FVector MuzzleLocation = ActiveRangedWeapon->GetMuzzleLocation();
 	// 최종 발사 방향은 '총구 위치'에서 '최종 목표 지점'을 향하는 방향입니다.
 	FVector FireDirection = (FinalTargetLocation - MuzzleLocation).GetSafeNormal();
 
-	DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + FireDirection * 10000.f, FColor::Green, false, 2.0f, 0, 1.f);
+	//DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + FireDirection * 10000.f, FColor::Green, false, 2.0f, 0, 1.f);
 
 	ActiveRangedWeapon->Attack(this, FireDirection);
 }
@@ -504,6 +504,10 @@ void AMyRobo::BroadcastCurrentWeaponStates()
 
 void AMyRobo::AttackTrace()
 {
+	if (!MeleeWeapon || !MeleeWeapon->GetWeaponStats()) return;
+
+	const float WeaponDamage = MeleeWeapon->GetWeaponStats()->Damage;
+
 	TArray<FHitResult> HitResult;
 	bool isHit = UKismetSystemLibrary::BoxTraceMulti(
 		this,
@@ -525,7 +529,7 @@ void AMyRobo::AttackTrace()
 			ASeaCreature* SeaCreature = Cast<ASeaCreature>(result.GetActor());
 			if (SeaCreature != nullptr)
 			{
-				SeaCreature->HitBy(RoboComponent->GetDamage(), result);
+				SeaCreature->HitBy(WeaponDamage, result);
 			}
 		}
 	}

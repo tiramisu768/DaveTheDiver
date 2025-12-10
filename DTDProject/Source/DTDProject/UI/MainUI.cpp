@@ -5,7 +5,6 @@
 #include "UI/RoboHPBarUI.h"
 #include "UI/RoboAimUI.h"
 #include "UI/RoboWeaponUI.h"
-#include "UI/ResultTableUI.h"
 #include "UI/WarningOxygenUI.h"
 #include "UI/FishRankUI.h"
 #include "Weapon/Weapon.h"
@@ -28,11 +27,6 @@ void UMainUI::NativeConstruct()
 	if (WarningHPWidget)
 	{
 		WarningHPWidget->SetVisibility(ESlateVisibility::Hidden);
-	}
-
-	if (ResultTableWidget)
-	{
-		ResultTableWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -98,25 +92,12 @@ void UMainUI::OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon)
 {
 	if (!NewWeapon || !WeaponWidget) return;
 
-	// --- 로그 추가: MainUI가 이벤트를 수신했음을 기록합니다. ---
-	UE_LOG(LogTemp, Log, TEXT("[MainUI] OnUpdateWeaponSlot received for slot %s."), *UEnum::GetValueAsString(WeaponSlot));
-
 	if (const FWeaponData* WeaponData = NewWeapon->GetWeaponStats())
 	{
 		if (UTexture2D* IconTexture = WeaponData->Icon.LoadSynchronous())
 		{
-			// --- 로그 추가: WeaponWidget에 아이콘 업데이트를 요청함을 기록합니다. ---
-			UE_LOG(LogTemp, Log, TEXT("[MainUI] Forwarding icon update to WeaponWidget."));
 			WeaponWidget->UpdateWeaponIcon(WeaponSlot, IconTexture);
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("[MainUI] IconTexture is null for weapon %s."), *NewWeapon->GetName());
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[MainUI] WeaponData is null for weapon %s."), *NewWeapon->GetName());
 	}
 }
 
@@ -164,14 +145,5 @@ FVector2D UMainUI::GetCrosshairScreenPosition() const
 		return AimWidget->GetCrosshairScreenPosition();
 	}
 	return FVector2D::ZeroVector;
-}
-
-void UMainUI::ShowGameEndUI()
-{
-	if (ResultTableWidget)
-	{
-		ResultTableWidget->SetVisibility(ESlateVisibility::Visible);
-		ResultTableWidget->SetGameEnd();
-	}
 }
 

@@ -9,12 +9,15 @@
 #include "RoboComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FOnDepthChanged, float);
+DECLARE_MULTICAST_DELEGATE(FOnOxygenDepleted);
+
 UCLASS()
 class DTDPROJECT_API URoboComponent : public UStateComponent
 {
 	GENERATED_BODY()
 public:
 	FOnDepthChanged OnDepthChanged;
+	FOnOxygenDepleted OnOxygenDepleted;
 
 	URoboComponent();
 	void StartDiving();

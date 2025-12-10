@@ -24,6 +24,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float Weight;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	TSoftObjectPtr<UTexture2D> FishIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	TObjectPtr<class USkeletalMesh> Mesh;
 
 	// ¸ùÅ¸Áê

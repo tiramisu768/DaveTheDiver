@@ -7,10 +7,16 @@
 #include "UI/MainUI.h"
 #include "MyCharacterController.generated.h"
 
-/**
- * 
- */
 struct FInputActionValue;
+
+UENUM(BlueprintType)
+enum class EPlayerGameState :uint8
+{
+	Diving,
+	ShowResult,
+	Shop,
+};
+
 UCLASS()
 class DTDPROJECT_API AMyCharacterController : public APlayerController
 {
@@ -44,11 +50,40 @@ public:
 	bool FireStartPostion(FVector& WorldPosition, FVector& WorldDirection);
 	//	bool GetIsMoveInput() const { return isMoveInput; }
 
+protected:
+	virtual void OnPossess(APawn* InPawn) override;
+
+	void OnRoboSurfaced();
+	void ShowResultUI();
+	void OnRoboOxygenDepleted();
+	void ShowBadResultUI();
+	void ShowShopUI();
+	void ReturnToDivingState();
+
+	UPROPERTY(EditDefaultsOnly, Category ="UI")
+	TSubclassOf<class UGoodResultUI> ResultUIClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UBadResultUI> BadResultUIClass;
+
+	UPROPERTY(EditDefaultsOnly, Category ="UI")
+	TSubclassOf<class UShopUI> ShopUIClass;
+
 private:
+	EPlayerGameState CurrentGameState;
 	TSubclassOf<class UMainUI> MainWidgetClass;
 
 	UPROPERTY()
 	class UMainUI* MainWidgetInstance;
+
+	UPROPERTY()
+	TObjectPtr<class UGoodResultUI> ResultUIInstance;
+
+	UPROPERTY()
+	TObjectPtr<class UBadResultUI> BadResultUIInstance;
+
+	UPROPERTY()
+	TObjectPtr<class UShopUI> ShopUIInstance;
 
 #pragma region Input
 	UPROPERTY(VisibleAnywhere)

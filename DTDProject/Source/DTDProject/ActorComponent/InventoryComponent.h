@@ -23,6 +23,9 @@ struct FCaughtFishInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UTexture2D> FishIcon;
+
 	// 필요시 기능적 데이터 참조
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//FName DataTableRowName;
@@ -47,6 +50,10 @@ public:
 	FOnInventoryChanged OnInventoryChanged;
 
 	void AddCaughtFish(const FCaughtFishInfo& Info);
+
+	const TArray<FCaughtFishInfo>& GetCaughtFishList() const { return CaughtFishList; }
+
+	void SellAllFish();
 
 protected:
 	virtual void BeginPlay() override;

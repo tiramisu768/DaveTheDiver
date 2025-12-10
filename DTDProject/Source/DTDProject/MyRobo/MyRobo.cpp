@@ -31,6 +31,8 @@
 AMyRobo::AMyRobo()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	IsMainUISetup = false;
+	//WasOnSurface = false;
 
 #pragma region Component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -119,6 +121,13 @@ void AMyRobo::Tick(float DeltaTime)
 		{
 			RoboComponent->UpdateCurrentDepth(CurrentDepth);
 		}
+
+		/*const bool IsOnSurface = (CurrentDepth <= 0.0f);
+		if (IsOnSurface && !WasOnSurface)
+		{
+			OnSurfaced.Broadcast();
+		}
+		WasOnSurface = IsOnSurface;*/
 	}
 
 
@@ -198,6 +207,15 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 {
 	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
 
+	if (PreviousCustomMode == MOVE_Swimming && GetCharacterMovement()->MovementMode != MOVE_Swimming)
+	{
+		if (!BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty())
+		{
+			GetCharacterMovement()->SetMovementMode(MOVE_Swimming);
+			return;
+		}
+	}
+
 	switch (GetCharacterMovement()->MovementMode)
 	{
 	case EMovementMode::MOVE_Swimming:
@@ -246,6 +264,9 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 			});*/
 
 		OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::OnUpdateWeaponSlot);
+		BroadcastCurrentWeaponStates();
+
+		IsMainUISetup = true;
 		BroadcastCurrentWeaponStates();
 	}
 }
@@ -545,6 +566,7 @@ void AMyRobo::CollectSeaCreature(ASeaCreature* FishToCollect)
 		Info.FishName = FishData->Name;
 		Info.Weight = FishData->Weight;
 		Info.Grade = FishData->Grade;
+		Info.FishIcon = FishData->FishIcon;
 		InventoryComponent->AddCaughtFish(Info);
 	}
 	FishToCollect->SetLifeSpan(0.1f);
@@ -601,6 +623,11 @@ void AMyRobo::BeginPlay()
 
 	ActiveRangedWeapon = HarpoonWeapon;
 	CurrentWeaponState = EWeaponState::Unarmed;
+
+	if (IsMainUISetup)
+	{
+		BroadcastCurrentWeaponStates();
+	}
 }
 
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName, float PlayRate)
@@ -854,9 +881,12 @@ float AMyRobo::GetDepthBelowSurface() const
 		float OutDepth = 0.f;
 		// GetWaterSurfaceInfoAtLocation 함수는 수면 위치(SurfLoc)를 반환합니다.
 		Water->GetWaterSurfaceInfoAtLocation(Loc, SurfLoc, SurfNormal, SurfVelocity, OutDepth, true);
+
+		const float Depth = SurfLoc.Z - Loc.Z;
+
 		// 이 함수는 위치가 수면 위일 경우 음수 값을 반환할 수 있습니다.
 		// 따라서 Max(0.f, ...)를 사용하여 항상 0 이상의 값만 반환하도록 합니다.
-		return FMath::Max(0.f, OutDepth / 100.0f); // cm 단위를 m 단위로 변경
+		return FMath::Max(0.f, Depth / 100.0f); // cm 단위를 m 단위로 변경
 	}
 	return 0.0f; // 물 밖에 있거나 수면 위에 있으면 0을 반환
 }

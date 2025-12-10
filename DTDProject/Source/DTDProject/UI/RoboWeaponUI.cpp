@@ -31,43 +31,37 @@ void URoboWeaponUI::PlaySwitchRangedIconAnimation(int32 SelectedIndex)
 
 void URoboWeaponUI::UpdateWeaponIcon(EWeaponSlot WeaponSlot, UTexture2D* Icon)
 {
-	if (!Icon)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[RoboWeaponUI] Received null icon for slot %s."), *UEnum::GetValueAsString(WeaponSlot));
-		return;
-	}
+	if (!Icon)return;
 
-	// --- 로그 추가: 아이콘 업데이트를 시작함을 기록합니다. ---
-	UE_LOG(LogTemp, Log, TEXT("[RoboWeaponUI] Updating icon for slot: %s"), *UEnum::GetValueAsString(WeaponSlot));
+	UImage* TargetIcon = nullptr;
+	FVector2D DesiredSize(0, 0);
 
 	switch (WeaponSlot)
 	{
 	case EWeaponSlot::Melee:
-		if (MeleeWeaponIcon)
-		{
-			MeleeWeaponIcon->SetBrushFromTexture(Icon);
-			MeleeWeaponIcon->SetVisibility(ESlateVisibility::Visible);
-			// --- 로그 추가: 성공 ---
-			UE_LOG(LogTemp, Log, TEXT("[RoboWeaponUI] MeleeWeaponIcon updated successfully."));
-		}
+		TargetIcon = MeleeWeaponIcon;
+		DesiredSize = FVector2D(57.0f, 48.0f);
 		break;
 	case EWeaponSlot::Harpoon:
-		if (HarpoonWeaponIcon)
-		{
-			HarpoonWeaponIcon->SetBrushFromTexture(Icon);
-			HarpoonWeaponIcon->SetVisibility(ESlateVisibility::Visible);
-			// --- 로그 추가: 성공 ---
-			UE_LOG(LogTemp, Log, TEXT("[RoboWeaponUI] HarpoonWeaponIcon updated successfully."));
-		}
+		TargetIcon = HarpoonWeaponIcon;
+		DesiredSize = FVector2D(100.0f, 43.0f);
 		break;
 	case EWeaponSlot::Gun:
-		if (GunWeaponIcon)
-		{
-			GunWeaponIcon->SetBrushFromTexture(Icon);
-			GunWeaponIcon->SetVisibility(ESlateVisibility::Visible);
-			// --- 로그 추가: 성공 ---
-			UE_LOG(LogTemp, Log, TEXT("[RoboWeaponUI] GunWeaponIcon updated successfully."));
-		}
+		TargetIcon = GunWeaponIcon;
+		DesiredSize = FVector2D(100.0f, 43.0f);
 		break;
+	}
+
+	if (TargetIcon)
+	{
+		TargetIcon->SetBrushFromTexture(Icon);
+
+		if (!DesiredSize.IsZero())
+		{
+			FSlateBrush Brush = TargetIcon->GetBrush();
+			Brush.ImageSize = DesiredSize;
+			TargetIcon->SetBrush(Brush);
+		}
+		TargetIcon->SetVisibility(ESlateVisibility::Visible);
 	}
 }

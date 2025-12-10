@@ -18,6 +18,7 @@ class ASeaCreature;
 class UMainUI;
 class ARandomBox;
 
+DECLARE_MULTICAST_DELEGATE(FOnSurfaced);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponSlotUpdated, EWeaponSlot, Slot, AWeapon*, NewWeapon);
 
 UENUM(BlueprintType)
@@ -36,6 +37,7 @@ class DTDPROJECT_API AMyRobo : public ACharacter, public IAttackTraceNotify, pub
 public:
 	AMyRobo();
 
+	FOnSurfaced OnSurfaced;
 	UPROPERTY(BlueprintAssignable, Category = "Weapon")
 	FOnWeaponSlotUpdated OnWeaponSlotUpdated;
 
@@ -176,7 +178,9 @@ protected:
 #pragma endregion
 
 	private:
-		FGenericTeamId TeamId;
+	FGenericTeamId TeamId;
+	bool IsMainUISetup;
+	bool WasOnSurface;
 
 #pragma region Weapon Instances
 	UPROPERTY()

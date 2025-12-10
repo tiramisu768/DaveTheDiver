@@ -2,11 +2,34 @@
 
 
 #include "ActorComponent/InventoryComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameModeBase/CharacterGameModeBase/MyGameState.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UInventoryComponent::SellAllFish()
+{
+	int32 TotalPrice = 0;
+	for (const FCaughtFishInfo& Fish : CaughtFishList)
+	{
+		TotalPrice += Fish.Grade * 10 + static_cast<int32>(Fish.Weight * 5);
+	}
+
+	if (AMyGameState* MyGameState = GetWorld()->GetGameState<AMyGameState>())
+	{
+		//MyGameState->AddCoins(TotalPrice);
+	}
+
+	CaughtFishList.Empty();
+	CurrentTotalWeight = 0.0f;
+	//IsOverweight = false;
+
+	OnWeightChanged.Broadcast(CurrentTotalWeight, 30.f);
+	OnBecameOverweight.Broadcast(false);
 }
 
 void UInventoryComponent::BeginPlay()

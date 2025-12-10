@@ -21,7 +21,11 @@ void UFishRankUI::ShowFishCollected(const FCaughtFishInfo& FishInfo)
 	}
 	if (FishIcon)
 	{
+		FishIcon->SetBrushFromSoftTexture(FishInfo.FishIcon, false);
 
+		FSlateBrush Brush = FishIcon->GetBrush();
+		Brush.ImageSize = FVector2D(60.0f, 60.0f);
+		FishIcon->SetBrush(Brush);
 	}
 
 	ShowUIAnim(3.0f);

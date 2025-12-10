@@ -81,16 +81,7 @@ void URoboComponent::WarningOxygen()
 
 void URoboComponent::ZeroOxygen()
 {
-	// 게임 플레이 일시 중지 :컨트롤러에? 로보에? 어디에 함수 작성하는가
-	// 산소타이머 일시 중지 :방법 찾기
-	// 획득한 물고기 UI 띄우기 :hud를 호출?
-	if (AMyCharacterController* controller = Cast<AMyCharacterController>(GetWorld()->GetFirstPlayerController()))
-	{
-		if (UMainUI* MainUI = Cast<UMainUI>(controller->GetMainUI()))
-		{
-			MainUI->ShowGameEndUI();
-		}
-	}
+	OnOxygenDepleted.Broadcast();
 }
 
 void URoboComponent::TakeDamage(float DamageAmount)

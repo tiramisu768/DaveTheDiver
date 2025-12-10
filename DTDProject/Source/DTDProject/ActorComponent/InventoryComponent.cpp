@@ -25,5 +25,10 @@ void UInventoryComponent::AddCaughtFish(const FCaughtFishInfo& Info)
 
 	float MaxWeight = 30.f;
 	OnWeightChanged.Broadcast(CurrentTotalWeight, MaxWeight);
+
+	if(CurrentTotalWeight >= MaxWeight)
+	{
+		OnBecameOverweight.Broadcast(true);
+	}
 }
 

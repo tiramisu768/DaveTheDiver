@@ -60,6 +60,14 @@ void UMainUI::SetWeights(float Current, float Max)
 	}
 }
 
+void UMainUI::OverWeightNotification(bool becameOverweight)
+{
+	if (HPBarWidget)
+	{
+		HPBarWidget->ShowOverWeight(becameOverweight);
+	}
+}
+
 void UMainUI::ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo)
 {
 	if (RankWidget)

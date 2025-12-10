@@ -111,28 +111,24 @@ void AMyRobo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//DepthBelowSurface = GetDepthBelowSurface();
-
-	/*if (BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty())
+	if (BuoyancyComponent)
 	{
-		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("Out Sea"));
+		const float CurrentDepth = GetDepthBelowSurface();
 
+		if (RoboComponent)
+		{
+			RoboComponent->UpdateCurrentDepth(CurrentDepth);
+		}
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(10, 1.0f, FColor::Blue, TEXT("In Sea"));
-	}*/
 
 
 	bool bInWater = !BuoyancyComponent->GetCurrentWaterBodyComponents().IsEmpty();
-	//const bool bInWater = DepthBelowSurface > 0.f;
 
 	if (bInWater)
 	{
 		if (GetCharacterMovement()->MovementMode != MOVE_Swimming)
 		{
 			GetCharacterMovement()->SetMovementMode(MOVE_Swimming);
-			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Swimming"));
 		}
 	}
 	else
@@ -140,7 +136,6 @@ void AMyRobo::Tick(float DeltaTime)
 		if (GetCharacterMovement()->MovementMode != MOVE_Walking)
 		{
 			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("Walking"));
 		}
 	}
 
@@ -240,6 +235,9 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 			InventoryComponent->OnFishCollected.AddUObject(InMainUI, &UMainUI::ShowCollectedFishNotification);
 			InventoryComponent->OnWeightChanged.AddLambda([InMainUI](float current, float max) {
 				InMainUI->SetWeights(current, max);
+				});
+			InventoryComponent->OnBecameOverweight.AddLambda([InMainUI](bool becameOverweight) {
+				InMainUI->OverWeightNotification(becameOverweight);
 				});
 		}
 		//최종 결과 보여줄 때
@@ -844,26 +842,23 @@ void AMyRobo::OnStopAimMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 float AMyRobo::GetDepthBelowSurface() const
 {
 	if (!BuoyancyComponent) return 0.0f;
-
-	// 현재 캐릭터의 위치
-	//FVector ActorLocation = BuoyancyComponent->GetOwner()->GetActorLocation();
-
 	// BuoyancyComponent가 인식 중인 WaterBody 목록 가져오기
-	const auto& WaterBodies = BuoyancyComponent->GetCurrentWaterBodyComponents();
-
-	if (UWaterBodyComponent* Water = WaterBodies[0].Get())    // .Get()로 유효 포인터 획득
-	{
+	const TArray<UWaterBodyComponent*>& WaterBodies = BuoyancyComponent->GetCurrentWaterBodyComponents();
+	// 물 속에 있는지, 그리고 WaterBodies 배열이 비어있지 않은지 확인합니다.
+	if (WaterBodies.Num() > 0 && WaterBodies[0] != nullptr)
+	{	// 첫 번째 WaterBody 컴포넌트를 가져옵니다.
+		UWaterBodyComponent* Water = WaterBodies[0];
 		const FVector Loc = GetActorLocation();
-		FVector SurfLoc, SurfNormal, SurfVelocity;
+
+		FVector SurfLoc,SurfNormal, SurfVelocity;
 		float OutDepth = 0.f;
-
-		Water->GetWaterSurfaceInfoAtLocation(
-			Loc, SurfLoc, SurfNormal, SurfVelocity, OutDepth, /*bIncludeDepth=*/true);
-
-		// 수면 기준 잠수 깊이(+면 수면 아래)
-		return SurfLoc.Z - Loc.Z;
+		// GetWaterSurfaceInfoAtLocation 함수는 수면 위치(SurfLoc)를 반환합니다.
+		Water->GetWaterSurfaceInfoAtLocation(Loc, SurfLoc, SurfNormal, SurfVelocity, OutDepth, true);
+		// 이 함수는 위치가 수면 위일 경우 음수 값을 반환할 수 있습니다.
+		// 따라서 Max(0.f, ...)를 사용하여 항상 0 이상의 값만 반환하도록 합니다.
+		return FMath::Max(0.f, OutDepth / 100.0f); // cm 단위를 m 단위로 변경
 	}
-	return 0.0f; // 물에 없음
+	return 0.0f; // 물 밖에 있거나 수면 위에 있으면 0을 반환
 }
 
 #pragma region reference

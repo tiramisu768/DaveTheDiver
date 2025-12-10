@@ -32,4 +32,5 @@ public:
 	void SetHPBarPercent(float Percent);
 	void SetCurrentDepthMeters(float Meter);
 	void SetCurrentAndMaxWeight(float Current, float Max);
+	void ShowOverWeight(bool becameOverweight);
 };

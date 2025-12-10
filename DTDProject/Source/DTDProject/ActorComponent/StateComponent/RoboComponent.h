@@ -27,6 +27,7 @@ public:
 	virtual void TakeDamage(float DamageAmount) override;
 	virtual void Heal(float HealAmount) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void UpdateCurrentDepth(float NewDepth);
 
 protected:
 	void BeginPlay() override;
@@ -37,7 +38,7 @@ private:
 	bool bIsDiving = true; // 수면체크하게 되면 false로 바꾸기
 	UPROPERTY(EditAnywhere, Category = "State | Robo")
 	UWidgetComponent* RoboHPBarWidget;
-
+	float CurrentDepth = 0.0f;
 
 
 

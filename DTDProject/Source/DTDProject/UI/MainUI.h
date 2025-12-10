@@ -25,6 +25,7 @@ public:
 	void SetHPPercent(float value);
 	void SetMeters(float value);
 	void SetWeights(float Current, float Max);
+	void OverWeightNotification(bool becameOverweight);
 	UFUNCTION()
 	void ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo);
 	void ShowHPWarningWidget();

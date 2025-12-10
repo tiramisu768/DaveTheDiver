@@ -36,3 +36,18 @@ void URoboHPBarUI::SetCurrentAndMaxWeight(float Current, float Max)
 		InventoryMaxWeightText->SetText(FText::FromString(FString::Printf(TEXT("/%.1fkg"), Max)));
 	}
 }
+
+void URoboHPBarUI::ShowOverWeight(bool becameOverweight)
+{
+	if (becameOverweight)
+	{
+		if (InventoryCurrentTotalWeightText)
+		{
+			InventoryCurrentTotalWeightText->SetColorAndOpacity(FSlateColor(FLinearColor::Red));
+		}
+		if (InventoryMaxWeightText)
+		{
+			InventoryMaxWeightText->SetColorAndOpacity(FSlateColor(FLinearColor::Red));
+		}
+	}
+}

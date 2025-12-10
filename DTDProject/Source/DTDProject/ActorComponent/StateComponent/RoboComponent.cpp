@@ -109,3 +109,12 @@ void URoboComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 }
+
+void URoboComponent::UpdateCurrentDepth(float NewDepth)
+{
+	if (!FMath::IsNearlyEqual(CurrentDepth, NewDepth, 0.01f))
+	{
+		CurrentDepth = NewDepth;
+		OnDepthChanged.ExecuteIfBound(CurrentDepth);
+	}
+}

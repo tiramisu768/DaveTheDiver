@@ -30,6 +30,7 @@ struct FCaughtFishInfo
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFishCollected, const FCaughtFishInfo&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWeightChanged, float, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnBecameOverweight, bool);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryChanged, const TArray<FCaughtFishInfo>&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -42,6 +43,7 @@ public:
 
 	FOnFishCollected OnFishCollected;
 	FOnWeightChanged OnWeightChanged;
+	FOnBecameOverweight OnBecameOverweight;
 	FOnInventoryChanged OnInventoryChanged;
 
 	void AddCaughtFish(const FCaughtFishInfo& Info);

@@ -263,9 +263,20 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 			InMainUI->ShowCollectedFishNotification(FishList,3.0f);
 			});*/
 
-		OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::OnUpdateWeaponSlot);
-		BroadcastCurrentWeaponStates();
+		OnSurfaced.AddLambda([InMainUI]()
+			{
+				InMainUI->ShowGameResultUI(true);
+			});
 
+		if (RoboComponent)
+		{
+			RoboComponent->OnOxygenDepleted.AddLambda([InMainUI]
+				{
+					InMainUI->ShowGameResultUI(false);
+				});
+		}
+
+		OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::OnUpdateWeaponSlot);
 		IsMainUISetup = true;
 		BroadcastCurrentWeaponStates();
 	}

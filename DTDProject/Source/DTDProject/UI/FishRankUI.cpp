@@ -28,5 +28,5 @@ void UFishRankUI::ShowFishCollected(const FCaughtFishInfo& FishInfo)
 		FishIcon->SetBrush(Brush);
 	}
 
-	ShowUIAnim(3.0f);
+	ShowNotification(3.0f);
 }

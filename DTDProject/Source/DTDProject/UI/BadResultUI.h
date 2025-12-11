@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/ResponsiveUI.h"
 #include "BadResultUI.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DTDPROJECT_API UBadResultUI : public UUserWidget
+class DTDPROJECT_API UBadResultUI : public UResponsiveUI
 {
 	GENERATED_BODY()
 	

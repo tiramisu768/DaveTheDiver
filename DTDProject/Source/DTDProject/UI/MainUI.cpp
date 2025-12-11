@@ -7,6 +7,8 @@
 #include "UI/RoboWeaponUI.h"
 #include "UI/WarningOxygenUI.h"
 #include "UI/FishRankUI.h"
+#include "UI/ResultTableUI.h"
+#include "UI/ShopUI.h"
 #include "Weapon/Weapon.h"
 #include "Components/Image.h"
 
@@ -145,5 +147,22 @@ FVector2D UMainUI::GetCrosshairScreenPosition() const
 		return AimWidget->GetCrosshairScreenPosition();
 	}
 	return FVector2D::ZeroVector;
+}
+
+void UMainUI::ShowGameResultUI(bool bSuccess)
+{
+	if (ResultTableWidget)
+	{
+		ResultTableWidget->SetGameEnd(bSuccess);
+		ResultTableWidget->ShowUI();
+	}
+}
+
+void UMainUI::ShowShopUI()
+{
+	if (ShopWidget)
+	{
+		ShopWidget->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 

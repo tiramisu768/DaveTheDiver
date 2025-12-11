@@ -9,12 +9,13 @@
 
 struct FInputActionValue;
 
+// 게임 상태 enum도 MainUI나 GameMode로 이전하는 것이 좋습니다.
+// 일단 여기서는 유지하되, UI와 직접 관련된 상태는 제거합니다.
 UENUM(BlueprintType)
 enum class EPlayerGameState :uint8
 {
 	Diving,
-	ShowResult,
-	Shop,
+
 };
 
 UCLASS()
@@ -50,40 +51,12 @@ public:
 	bool FireStartPostion(FVector& WorldPosition, FVector& WorldDirection);
 	//	bool GetIsMoveInput() const { return isMoveInput; }
 
-protected:
-	virtual void OnPossess(APawn* InPawn) override;
-
-	void OnRoboSurfaced();
-	void ShowResultUI();
-	void OnRoboOxygenDepleted();
-	void ShowBadResultUI();
-	void ShowShopUI();
-	void ReturnToDivingState();
-
-	UPROPERTY(EditDefaultsOnly, Category ="UI")
-	TSubclassOf<class UGoodResultUI> ResultUIClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class UBadResultUI> BadResultUIClass;
-
-	UPROPERTY(EditDefaultsOnly, Category ="UI")
-	TSubclassOf<class UShopUI> ShopUIClass;
-
 private:
 	EPlayerGameState CurrentGameState;
 	TSubclassOf<class UMainUI> MainWidgetClass;
 
 	UPROPERTY()
 	class UMainUI* MainWidgetInstance;
-
-	UPROPERTY()
-	TObjectPtr<class UGoodResultUI> ResultUIInstance;
-
-	UPROPERTY()
-	TObjectPtr<class UBadResultUI> BadResultUIInstance;
-
-	UPROPERTY()
-	TObjectPtr<class UShopUI> ShopUIInstance;
 
 #pragma region Input
 	UPROPERTY(VisibleAnywhere)

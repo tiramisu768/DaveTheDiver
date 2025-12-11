@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/ResponsiveUI.h"
 #include "ResultTableUI.generated.h"
 
 /**
@@ -18,15 +18,16 @@ Fast-Exit(인양기) 기본(옵션) + 마무리 루프 + 포트폴리오 정리
 획득한 물고기 UI 띄우기 / (물고기 중 하나만 고르기) / 게임 종료 / 첫화면으로 돌아가기  
  */
 UCLASS()
-class DTDPROJECT_API UResultTableUI : public UUserWidget
+class DTDPROJECT_API UResultTableUI : public UResponsiveUI
 {
 	GENERATED_BODY()
 private:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UOverlay> Overlay_O_Table;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UOverlay> Overlay_X_Table;
+	TObjectPtr<class UWidgetSwitcher> ResultSwitcher;
+
+	const int32 GoodResultIndex = 0;
+	const int32 BadResultIndex = 1;
 
 public:
-	void SetGameEnd();
+	void SetGameEnd(bool bWasSuccessful);
 };

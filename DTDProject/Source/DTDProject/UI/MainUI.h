@@ -14,6 +14,8 @@ class UFishRankUI;
 class URoboAimUI;
 class UWarningOxygenUI;
 class AWeapon;
+class UResultTableUI;
+class UShopUI;
 
 UCLASS()
 class DTDPROJECT_API UMainUI : public UUserWidget
@@ -37,6 +39,8 @@ public:
 	void StopAiming();
 	void UpdateAimPos(FVector2D MoveDelta);
 	FVector2D GetCrosshairScreenPosition()const;
+	void ShowGameResultUI(bool bSuccess);
+	void ShowShopUI();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -62,6 +66,14 @@ protected:
 	//Warning HP
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWarningOxygenUI> WarningHPWidget;
+
+	//Result Table
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UResultTableUI> ResultTableWidget;
+
+	//Shop UI
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UShopUI> ShopWidget;
 
 private:
 	void ResetAimPos();

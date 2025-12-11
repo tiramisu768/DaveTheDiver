@@ -72,7 +72,7 @@ void URoboComponent::WarningOxygen()
 	//È­¸é¿¡ ºÓÀº °æ°í À§Á¬ ¶ç¿ì±â
 	if (AMyCharacterController* controller = Cast<AMyCharacterController>(GetWorld()->GetFirstPlayerController()))
 	{
-		if (UMainUI* MainUI = Cast<UMainUI>(controller->GetMainUI()))
+		if (UMainUI* MainUI = controller->GetMainUI())
 		{
 			MainUI->ShowHPWarningWidget();
 		}
@@ -81,7 +81,15 @@ void URoboComponent::WarningOxygen()
 
 void URoboComponent::ZeroOxygen()
 {
-	OnOxygenDepleted.Broadcast();
+	//OnOxygenDepleted.Broadcast();
+
+	if (AMyCharacterController* controller = Cast<AMyCharacterController>(GetWorld()->GetFirstPlayerController()))
+	{
+		if (UMainUI* MainUI = controller->GetMainUI())
+		{
+			MainUI->ShowGameResultUI(false);
+		}
+	}
 }
 
 void URoboComponent::TakeDamage(float DamageAmount)

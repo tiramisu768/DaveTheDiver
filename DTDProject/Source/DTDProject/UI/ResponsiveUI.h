@@ -6,14 +6,31 @@
 #include "Blueprint/UserWidget.h"
 #include "ResponsiveUI.generated.h"
 
-/**
- * 
- */
+
+
 UCLASS()
 class DTDPROJECT_API UResponsiveUI : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Responsive UI")
+	virtual void ShowUI();
+
+	UFUNCTION(BlueprintCallable, Category = "Responsive UI")
+	virtual void ShowNotification(float SustainTime);
+
+	UFUNCTION(BlueprintCallable, Category = "Responsive UI")
+	virtual void HideUI();
+
 protected:
+	UFUNCTION(BlueprintImplementableEvent, Category="Responsive UI")
+	void OnShow();
+	UFUNCTION(BlueprintImplementableEvent, Category = "Responsive UI")
+	void OnHide();
+	UFUNCTION()
+	void OnHideAnimationFinished();
+
 	UPROPERTY(meta =(BindWidgetAnim),Transient)
 	TObjectPtr<UWidgetAnimation> ShowAnim;
 
@@ -22,10 +39,5 @@ protected:
 
 	FTimerHandle SustainTimerHandle;
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "Responsive UI")
-	virtual void ShowUIAnim(float SustainTime = -1.0f);
 
-	UFUNCTION(BlueprintCallable, Category = "Responsive UI")
-	virtual void HideUIAnim();
 };

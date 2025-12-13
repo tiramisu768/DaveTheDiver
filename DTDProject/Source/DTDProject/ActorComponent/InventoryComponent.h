@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Tool/ToolData.h"
 #include "InventoryComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -34,6 +35,8 @@ struct FCaughtFishInfo
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFishCollected, const FCaughtFishInfo&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWeightChanged, float, float);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBecameOverweight, bool);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnToolSlotUpdated, int32, FName);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnActiveToolChanged,int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryChanged, const TArray<FCaughtFishInfo>&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -47,6 +50,8 @@ public:
 	FOnFishCollected OnFishCollected;
 	FOnWeightChanged OnWeightChanged;
 	FOnBecameOverweight OnBecameOverweight;
+	FOnToolSlotUpdated OnToolSlotUpdated;
+	FOnActiveToolChanged OnActiveToolChanged;
 	FOnInventoryChanged OnInventoryChanged;
 
 	void AddCaughtFish(const FCaughtFishInfo& Info);
@@ -54,6 +59,7 @@ public:
 	const TArray<FCaughtFishInfo>& GetCaughtFishList() const { return CaughtFishList; }
 
 	void SellAllFish();
+	void SwitchActiveTool();
 
 protected:
 	virtual void BeginPlay() override;
@@ -64,4 +70,9 @@ private:
 
 	UPROPERTY()
 	TArray<FCaughtFishInfo> CaughtFishList;
+
+	UPROPERTY(EditDefaultsOnly,Category ="Tool")
+	TObjectPtr<UDataTable> ToolDataTable;
+
+	int32 ActiveToolSlotIndex;
 };

@@ -29,6 +29,31 @@ void URoboWeaponUI::PlaySwitchRangedIconAnimation(int32 SelectedIndex)
 	}
 }
 
+void URoboWeaponUI::UpdateToolIcon(int32 SlotIndex, UTexture2D* Icon)
+{
+	UImage* TargetIcon = nullptr;
+	if (SlotIndex == 0)
+	{
+		TargetIcon = FirstToolIcon;
+	}
+	else if (SlotIndex == 1)
+	{
+		TargetIcon = SecondToolIcon;
+	}
+
+	if (!TargetIcon) return;
+
+	if (Icon)
+	{
+		TargetIcon->SetBrushFromTexture(Icon);
+		TargetIcon->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		TargetIcon->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
 void URoboWeaponUI::UpdateWeaponIcon(EWeaponSlot WeaponSlot, UTexture2D* Icon)
 {
 	if (!Icon)return;
@@ -63,5 +88,19 @@ void URoboWeaponUI::UpdateWeaponIcon(EWeaponSlot WeaponSlot, UTexture2D* Icon)
 			TargetIcon->SetBrush(Brush);
 		}
 		TargetIcon->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void URoboWeaponUI::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (FirstToolIcon)
+	{
+		FirstToolIcon->SetVisibility(ESlateVisibility::Hidden);
+	}
+	if (SecondToolIcon)
+	{
+		SecondToolIcon->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

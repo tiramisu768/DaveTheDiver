@@ -11,6 +11,7 @@
 #include "UI/ShopUI.h"
 #include "Weapon/Weapon.h"
 #include "Components/Image.h"
+#include "Tool/ToolData.h"
 
 void UMainUI::NativeConstruct()
 {
@@ -30,7 +31,9 @@ void UMainUI::NativeConstruct()
 	{
 		WarningHPWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
+
 }
+
 
 void UMainUI::SetHPPercent(float value)
 {
@@ -82,24 +85,56 @@ void UMainUI::ShowHPWarningWidget()
 	}
 }
 
-void UMainUI::PlaySwitchAnimation(int32 SelectedIndex)
+void UMainUI::PlayWeaponSwitchAnimation(int32 SelectedIndex)
 {
-	if (WeaponWidget)
+	if (EquipmentWidget)
 	{
-		WeaponWidget->PlaySwitchRangedIconAnimation(SelectedIndex);
+		EquipmentWidget->PlaySwitchRangedIconAnimation(SelectedIndex);
+	}
+}
+
+void UMainUI::PlayToolSwitchAnimation(int32 SelectedIndex)
+{
+	if (EquipmentWidget)
+	{
+		EquipmentWidget->PlaySwitchToolIconAnimation(SelectedIndex);
 	}
 }
 
 void UMainUI::OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon)
 {
-	if (!NewWeapon || !WeaponWidget) return;
+	if (!NewWeapon || !EquipmentWidget) return;
 
 	if (const FWeaponData* WeaponData = NewWeapon->GetWeaponStats())
 	{
 		if (UTexture2D* IconTexture = WeaponData->Icon.LoadSynchronous())
 		{
-			WeaponWidget->UpdateWeaponIcon(WeaponSlot, IconTexture);
+			EquipmentWidget->UpdateWeaponIcon(WeaponSlot, IconTexture);
 		}
+	}
+}
+
+void UMainUI::OnUpdateToolSlot(int32 SlotIndex, FName NewToolRowName)
+{
+	if (!EquipmentWidget || !ToolDataTable) return;
+
+	UTexture2D* Icon = nullptr;
+
+	if (!NewToolRowName.IsNone())
+	{
+		if (const FToolData* ToolData = ToolDataTable->FindRow<FToolData>(NewToolRowName, TEXT("")))
+		{
+			Icon = ToolData->ToolIcon.LoadSynchronous();
+		}
+	}
+	EquipmentWidget->UpdateToolIcon(SlotIndex, Icon);
+}
+
+void UMainUI::OnChangeActiveTool(int32 NewActiveSlotIndex)
+{
+	if (EquipmentWidget)
+	{
+		EquipmentWidget->PlaySwitchToolIconAnimation(NewActiveSlotIndex);
 	}
 }
 

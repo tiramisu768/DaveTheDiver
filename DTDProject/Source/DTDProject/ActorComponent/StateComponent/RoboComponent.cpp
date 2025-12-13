@@ -92,9 +92,9 @@ void URoboComponent::ZeroOxygen()
 	}
 }
 
-void URoboComponent::TakeDamage(float DamageAmount)
+void URoboComponent::TakeDamage(float DamageAmount, const FHitResult& HitResult)
 {
-	Super::TakeDamage(DamageAmount);
+	Super::TakeDamage(DamageAmount,HitResult);
 }
 
 void URoboComponent::Heal(float HealAmount)

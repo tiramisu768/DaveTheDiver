@@ -2,6 +2,7 @@
 
 
 #include "ActorComponent/StateComponent/StateComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values for this component's properties
 UStateComponent::UStateComponent()
@@ -25,41 +26,49 @@ void UStateComponent::BeginPlay()
 
 void UStateComponent::SetHP(float NewHP)
 {
-	CurrentHP = FMath::Clamp(NewHP, 0, MaxHP);
+	CurrentHP = FMath::Clamp(NewHP, 0, MaxHP); //체력이 음수가 되거나 최대치 초과를 차단
 	OnHPChanged.ExecuteIfBound(GetHPPercent());
 }
 
-//피격
-void UStateComponent::TakeDamage(float DamageAmount)
+void UStateComponent::SetMaxHP(float NewMaxHP)
 {
-	if (DamageAmount <= 0.0f || CurrentHP <= 0.0f)
-		return;
-	CurrentHP -= DamageAmount;
-	if (CurrentHP < 0.0f)
-		CurrentHP = 0.0f;
-	if (OnTakeDamage.IsBound())
+	MaxHP = FMath::Max(0.0f, NewMaxHP); //최대 체력이 음수가 되는 상황을 방지
+	SetHP(MaxHP);
+}
+
+void UStateComponent::TakeDamage(float DamageAmount, const FHitResult& HitResult)
+{
+	if (IsDead() || DamageAmount <= 0.f)
 	{
-		OnTakeDamage.Execute(GetHPPercent());
+		return;
 	}
 
-	//if (CurrentHP <= 0.f)
-	//{
-	//	Die();
-	//}
+	SetHP(CurrentHP - DamageAmount);
+	OnTakeDamage.ExecuteIfBound(DamageAmount);
+
+	if (HitEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+			HitEffect,
+			HitResult.ImpactPoint,
+			HitResult.ImpactNormal.Rotation()
+		);
+	}
+
+	if (IsDead())
+	{
+
+	}
 }
 
 //회복
 void UStateComponent::Heal(float HealAmount)
 {
-	if (HealAmount <= 0.0f || CurrentHP <= 0.0f)
+	if (HealAmount <= 0.0f || IsDead())
 		return;
-	CurrentHP += HealAmount;
-	if (CurrentHP > MaxHP)
-		CurrentHP = MaxHP;
-	if (OnTakeDamage.IsBound())
-	{
-		OnTakeDamage.Execute(GetHPPercent());
-	}
+
+	SetHP(CurrentHP + HealAmount);
 }
 
 // Called every frame

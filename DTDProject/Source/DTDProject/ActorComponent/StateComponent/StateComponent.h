@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "StateComponent.generated.h"
 
+class UNiagaraSystem;
+
 DECLARE_DELEGATE_OneParam(FOnHPChanged, float);
 DECLARE_DELEGATE_OneParam(FOnTakeDamage, float);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -13,32 +15,28 @@ class DTDPROJECT_API UStateComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-protected:
-	UPROPERTY(EditAnywhere, Category = "State")
-	float CurrentHP{ 100.0f };
-	UPROPERTY(EditAnywhere, Category = "State")
-	float MaxHP{ 100.0f };
-	UPROPERTY(EditAnywhere, Category = "State")
-	float Damage{ 10.0f };
-
-public:
-	// Sets default values for this component's properties
-	UStateComponent();
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 public:
 	FOnHPChanged OnHPChanged;
 	FOnTakeDamage OnTakeDamage;
 
-public:
-	float GetDamage() const { return Damage; }
+	UStateComponent();
+
 	//void SetDamage(float NewDamage) { Damage = NewDamage; }
 	float GetHPPercent() const { return CurrentHP / MaxHP; }
 	virtual void SetHP(float NewHP);
-	virtual void TakeDamage(float DamageAmount);
+	virtual void SetMaxHP(float NewMaxHP);
+	virtual void TakeDamage(float DamageAmount, const FHitResult& HitResult);
 	virtual void Heal(float HealAmount);
 	bool IsDead() const { return CurrentHP <= 0.0f; }
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;		
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+protected:
+	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, Category = "State")
+	float CurrentHP{ 100.0f };
+	UPROPERTY(EditAnywhere, Category = "State")
+	float MaxHP{ 100.0f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TObjectPtr<UNiagaraSystem> HitEffect;
 };

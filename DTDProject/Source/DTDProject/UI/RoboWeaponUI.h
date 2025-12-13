@@ -14,6 +14,15 @@ UCLASS()
 class DTDPROJECT_API URoboWeaponUI : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+	void PlaySwitchToolIconAnimation(int32 SelectedIndex);
+	void PlaySwitchRangedIconAnimation(int32 SelectedIndex);
+	void UpdateToolIcon(int32 SlotIndex, UTexture2D* Icon);
+	void UpdateWeaponIcon(EWeaponSlot WeaponSlot, UTexture2D* Icon);
+
+protected:
+	virtual void NativeConstruct() override;
+
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> MeleeWeaponIcon;	
@@ -35,9 +44,4 @@ private:
 	UWidgetAnimation* RangedAnim;
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
 	UWidgetAnimation* RangedAnim_Reverse;
-
-public:
-	void PlaySwitchToolIconAnimation(int32 SelectedIndex);
-	void PlaySwitchRangedIconAnimation(int32 SelectedIndex);
-	void UpdateWeaponIcon(EWeaponSlot WeaponSlot, UTexture2D* Icon);
 };

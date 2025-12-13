@@ -12,9 +12,9 @@ void UFishStateComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UFishStateComponent::TakeDamage(float Amount)
+void UFishStateComponent::TakeDamage(float Amount,const FHitResult& HitResult)
 {
-	Super::TakeDamage(Amount);
+	Super::TakeDamage(Amount,HitResult);
 }
 
 void UFishStateComponent::Heal(float HealAmount)

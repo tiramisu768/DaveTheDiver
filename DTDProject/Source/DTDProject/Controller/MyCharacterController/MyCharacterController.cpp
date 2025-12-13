@@ -129,7 +129,8 @@ void AMyCharacterController::BeginPlay()
 
 			if (AMyRobo* MyRobo = Cast<AMyRobo>(GetPawn()))
 			{
-				MyRobo->setupMainUIReference(MainWidgetInstance);
+				MyRobo->SetupMainUIReference(MainWidgetInstance);
+				MyRobo->BroadcastCurrentWeaponStates();
 			}
 		}
 	}
@@ -303,7 +304,7 @@ void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
 	if (MainWidgetInstance)
 	{
-		MainWidgetInstance->PlaySwitchAnimation(CurrentWeaponIndex);
+		MainWidgetInstance->PlayWeaponSwitchAnimation(CurrentWeaponIndex);
 	}
 
 	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponCount;
@@ -324,12 +325,11 @@ void AMyCharacterController::UseToolInput(const FInputActionValue& value)
 
 void AMyCharacterController::SwitchToolInput(const FInputActionValue& value)
 {
+	if (ControlledRobo && ControlledRobo->GetInventoryComponent())
+	{
+		ControlledRobo->GetInventoryComponent()->SwitchActiveTool();
+	}
 }
- 
-//void AMyCharacterController::EquipInput(const FInputActionValue& value)
-//{
-//	//ControlledCharacter->PlayEquipWeaponMontage();
-//}
 
 void AMyCharacterController::InteractionStarted(const FInputActionValue& value)
 {

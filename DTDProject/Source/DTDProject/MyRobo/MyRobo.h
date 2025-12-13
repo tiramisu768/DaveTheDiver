@@ -51,7 +51,7 @@ public:
 
 	void PossessedBy(AController* NewController) override;
 
-	void setupMainUIReference(UMainUI* InMainUI);
+	void SetupMainUIReference(UMainUI* InMainUI);
 
 	void StartRangedAim();
 
@@ -90,6 +90,8 @@ public:
 	void AttackTrace() override;
 
 	void CollectSeaCreature(ASeaCreature* FishToCollect);
+
+	void HitBy(AActor* DamageCauser, const FHitResult& HitResult);
 
 protected:
 	virtual void BeginPlay() override;
@@ -135,6 +137,11 @@ protected:
 	TSubclassOf<AWeapon> DefaultGunWeaponClass;
 #pragma endregion
 
+#pragma region Effects
+	UPROPERTY(EditDefaultsOnly, Category ="Effects")
+	TObjectPtr<UAnimMontage> HitReactionMontage;
+#pragma endregion
+
 #pragma region Internal State
 	UPROPERTY()
 	TObjectPtr<AMyCharacterController> MainController;
@@ -177,9 +184,8 @@ protected:
 	float GetDepthBelowSurface() const;
 #pragma endregion
 
-	private:
+private:
 	FGenericTeamId TeamId;
-	bool IsMainUISetup;
 	bool WasOnSurface;
 
 #pragma region Weapon Instances

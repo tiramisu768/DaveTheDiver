@@ -32,6 +32,12 @@ void UInventoryComponent::SellAllFish()
 	OnBecameOverweight.Broadcast(false);
 }
 
+void UInventoryComponent::SwitchActiveTool()
+{
+	ActiveToolSlotIndex = (ActiveToolSlotIndex + 1) % 2;
+	OnActiveToolChanged.Broadcast(ActiveToolSlotIndex);
+}
+
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();

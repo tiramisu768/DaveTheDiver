@@ -27,7 +27,7 @@ public:
 	void DecreaseOxygen();
 	void WarningOxygen();
 	void ZeroOxygen();
-	virtual void TakeDamage(float DamageAmount) override;
+	virtual void TakeDamage(float DamageAmount, const FHitResult& HitResult) override;
 	virtual void Heal(float HealAmount) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void UpdateCurrentDepth(float NewDepth);

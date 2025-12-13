@@ -31,7 +31,6 @@
 AMyRobo::AMyRobo()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	IsMainUISetup = false;
 	//WasOnSurface = false;
 
 #pragma region Component
@@ -238,16 +237,23 @@ void AMyRobo::PossessedBy(AController* NewController)
 }
 
 //델리게이트 등록
-void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
+void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 {
 	if (InMainUI)
 	{
-		RoboComponent->OnHPChanged.BindLambda([this, InMainUI](float value) {
-			InMainUI->SetHPPercent(value);
-			});
-		RoboComponent->OnDepthChanged.BindLambda([this, InMainUI](float value) {
-			InMainUI->SetMeters(value);
-			});
+		if(RoboComponent)
+		{
+			RoboComponent->OnHPChanged.BindLambda([this, InMainUI](float value) {
+				InMainUI->SetHPPercent(value);
+				});
+			RoboComponent->OnDepthChanged.BindLambda([this, InMainUI](float value) {
+				InMainUI->SetMeters(value);
+				});
+			RoboComponent->OnOxygenDepleted.AddLambda([InMainUI]
+				{
+					InMainUI->ShowGameResultUI(false);
+				});
+		}
 		if (InventoryComponent)
 		{
 			InventoryComponent->OnFishCollected.AddUObject(InMainUI, &UMainUI::ShowCollectedFishNotification);
@@ -257,28 +263,21 @@ void AMyRobo::setupMainUIReference(UMainUI* InMainUI)
 			InventoryComponent->OnBecameOverweight.AddLambda([InMainUI](bool becameOverweight) {
 				InMainUI->OverWeightNotification(becameOverweight);
 				});
+			InventoryComponent->OnToolSlotUpdated.AddUObject(InMainUI, &UMainUI::OnUpdateToolSlot);
+			InventoryComponent->OnActiveToolChanged.AddUObject(InMainUI, &UMainUI::OnChangeActiveTool);
+
+				//최종 결과 보여줄 때
+			/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
+				InMainUI->ShowCollectedFishNotification(FishList,3.0f);
+				});*/
 		}
-		//최종 결과 보여줄 때
-		/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
-			InMainUI->ShowCollectedFishNotification(FishList,3.0f);
-			});*/
 
 		OnSurfaced.AddLambda([InMainUI]()
 			{
 				InMainUI->ShowGameResultUI(true);
 			});
 
-		if (RoboComponent)
-		{
-			RoboComponent->OnOxygenDepleted.AddLambda([InMainUI]
-				{
-					InMainUI->ShowGameResultUI(false);
-				});
-		}
-
 		OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::OnUpdateWeaponSlot);
-		IsMainUISetup = true;
-		BroadcastCurrentWeaponStates();
 	}
 }
 
@@ -583,6 +582,22 @@ void AMyRobo::CollectSeaCreature(ASeaCreature* FishToCollect)
 	FishToCollect->SetLifeSpan(0.1f);
 }
 
+void AMyRobo::HitBy(AActor* DamageCauser, const FHitResult& HitResult)
+{
+	if (!RoboComponent || !DamageCauser) return;
+
+	ASeaCreature* Fish = Cast<ASeaCreature>(DamageCauser);
+	if (Fish && Fish->GetData())
+	{
+		const float DamageAmount = Fish->GetData()->Damage;
+
+		if (DamageAmount > 0)
+		{
+			RoboComponent->TakeDamage(DamageAmount,HitResult);
+		}
+	}
+}
+
 void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
@@ -634,11 +649,6 @@ void AMyRobo::BeginPlay()
 
 	ActiveRangedWeapon = HarpoonWeapon;
 	CurrentWeaponState = EWeaponState::Unarmed;
-
-	if (IsMainUISetup)
-	{
-		BroadcastCurrentWeaponStates();
-	}
 }
 
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName, float PlayRate)
@@ -901,12 +911,3 @@ float AMyRobo::GetDepthBelowSurface() const
 	}
 	return 0.0f; // 물 밖에 있거나 수면 위에 있으면 0을 반환
 }
-
-#pragma region reference
-
-//void AMyCharacter::HitBy(float DamageAmount)
-//{
-//	StateComponent->TakeDamage(DamageAmount);
-//}
-//
-#pragma endregion

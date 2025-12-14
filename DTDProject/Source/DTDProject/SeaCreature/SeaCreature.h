@@ -13,65 +13,72 @@ struct FSeaCreatureData : public FTableRowBase
 	GENERATED_BODY()
 public:
 	FSeaCreatureData();
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	//float Damage;
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	//float HP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
 	FString Name;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
 	int32 Grade;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
 	float Weight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
+	float MaxHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 시각적 요소")
 	TSoftObjectPtr<UTexture2D> FishIcon;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 시각적 요소")
 	TObjectPtr<class USkeletalMesh> Mesh;
 
-	// 몽타쥬
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 시각적 요소")
 	TSubclassOf<UAnimInstance> AnimClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 시각적 요소")
 	TObjectPtr<UAnimMontage> HitbyMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	TObjectPtr<UAnimMontage> AttackMontage;
-
-	// 성향
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "3. 행동 성향")
 	bool IsAggressive;
 
-	// 반경
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
 	float WanderRadius = { 900.0f }; //물고기 배회범위
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
 	float SlowRadius = { 300.0f }; //물고기 배회범위
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
 	float SightRadius = 1500.0f; // 로보 인지 범위
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Stat")
-	float SafeDistance = 1000.f; //물고기 추격/도망 중단 범위
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category ="Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
 	float ActionTriggerDistance = 400.0f; //물고기 추격/도망 시작 범위
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float AttackRange = 50.0f; //물고기 공격 시작 범위
 
-	// 속도
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Acceleration = { 1500.f };
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	float SafeDistance = 1000.f; //물고기 추격/도망 중단 범위
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
 	float WanderSpeed = { 5.0f };
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float FleeSpeed = { 20.0f };
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float AttackSpeed{ 10.0f };
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float ChaseSpeed = { 10.0f };
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
 	float ReturnSpeed = { 5.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	float Acceleration = { 1500.f }; //가속도
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "5. 비공격형 행동", meta = (EditCondition = "!IsAggressive"))
+	float FleeSpeed = { 20.0f };
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "IsAggressive"))
+	float Damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. 공격형 행동", meta = (EditCondition = "IsAggressive"))
+	TObjectPtr<UAnimMontage> AttackMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. 공격형 행동", meta = (EditCondition = "IsAggressive"))
+	float AttackRange = 50.0f; //물고기 공격 시작 범위
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. 공격형 행동", meta = (EditCondition = "IsAggressive"))
+	float ChaseSpeed = { 10.0f };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. 공격형 행동", meta = (EditCondition = "IsAggressive"))
+	float AttackSpeed{ 10.0f };
+
+
 };
 
 

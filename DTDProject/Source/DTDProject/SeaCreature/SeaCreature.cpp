@@ -90,6 +90,11 @@ void ASeaCreature::BeginPlay()
 
 	if (Data)
 	{
+		if (FishStateComponent)
+		{
+			FishStateComponent->SetMaxHP(Data->MaxHP);
+		}
+
 		if (Data->AnimClass)
 		{
 			GetMesh()->SetAnimInstanceClass(Data->AnimClass);
@@ -158,7 +163,7 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 	if (FishStateComponent->IsDead() || Data->HitbyMontage == nullptr)
 		return;
 
-	FishStateComponent->TakeDamage(DamageAmount);
+	FishStateComponent->TakeDamage(DamageAmount,HitResult);
 	SpawnDamagePopup(DamageAmount);
 	/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
 		HitResult.Normal.Rotation(), true);*/

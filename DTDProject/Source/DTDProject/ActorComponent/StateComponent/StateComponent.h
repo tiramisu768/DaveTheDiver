@@ -7,6 +7,7 @@
 #include "StateComponent.generated.h"
 
 class UNiagaraSystem;
+class UNiagaraComponent;
 
 DECLARE_DELEGATE_OneParam(FOnHPChanged, float);
 DECLARE_DELEGATE_OneParam(FOnTakeDamage, float);
@@ -39,4 +40,13 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	TObjectPtr<UNiagaraSystem> HitEffect;
+
+private:
+	void UpdateHitEffect();
+	void HideHitEffect();
+
+	UPROPERTY()
+	TObjectPtr<UNiagaraComponent> HitEffectComponent;
+
+	FTimerHandle HitEffectTimerHandle;
 };

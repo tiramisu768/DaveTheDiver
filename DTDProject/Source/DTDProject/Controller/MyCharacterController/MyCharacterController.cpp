@@ -73,11 +73,6 @@ AMyCharacterController::AMyCharacterController()
 	{
 		InteractionAction = InteractionActionFinder.Object;
 	}
-	/*static ConstructorHelpers::FObjectFinder<UInputAction> EquipActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/Blueprints/MyRobo/Input/IA_Equip_Ch.IA_Equip_Ch'"));
-	if (EquipActionFinder.Succeeded())
-	{
-		EquipAction = EquipActionFinder.Object;
-	}*/
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> NavigateUpActionFinder(TEXT("/Script/EnhancedInput.InputAction'/Game/BluePrint/MyRobo/Input/IA_NavigateUp.IA_NavigateUp'"));
 	if (NavigateUpActionFinder.Succeeded())
@@ -129,8 +124,7 @@ void AMyCharacterController::BeginPlay()
 
 			if (AMyRobo* MyRobo = Cast<AMyRobo>(GetPawn()))
 			{
-				MyRobo->SetupMainUIReference(MainWidgetInstance);
-				MyRobo->BroadcastCurrentWeaponStates();
+				MainWidgetInstance->InitializeUI(MyRobo);
 			}
 		}
 	}

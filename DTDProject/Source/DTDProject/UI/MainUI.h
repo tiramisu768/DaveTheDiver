@@ -24,6 +24,7 @@ class DTDPROJECT_API UMainUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	void InitializeUI(class AMyRobo* Robo);
 	void SetHPPercent(float value);
 	void SetMeters(float value);
 	void SetWeights(float Current, float Max);

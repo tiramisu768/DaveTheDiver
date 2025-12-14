@@ -19,7 +19,7 @@ class UMainUI;
 class ARandomBox;
 
 DECLARE_MULTICAST_DELEGATE(FOnSurfaced);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponSlotUpdated, EWeaponSlot, Slot, AWeapon*, NewWeapon);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWeaponSlotUpdated, EWeaponSlot, AWeapon*);
 
 UENUM(BlueprintType)
 enum class EWeaponState :uint8
@@ -38,7 +38,6 @@ public:
 	AMyRobo();
 
 	FOnSurfaced OnSurfaced;
-	UPROPERTY(BlueprintAssignable, Category = "Weapon")
 	FOnWeaponSlotUpdated OnWeaponSlotUpdated;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
@@ -50,8 +49,6 @@ public:
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
 	void PossessedBy(AController* NewController) override;
-
-	void SetupMainUIReference(UMainUI* InMainUI);
 
 	void StartRangedAim();
 

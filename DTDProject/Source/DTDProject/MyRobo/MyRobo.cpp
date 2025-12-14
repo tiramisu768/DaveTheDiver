@@ -236,51 +236,6 @@ void AMyRobo::PossessedBy(AController* NewController)
 	RoboComponent->InitOxygen();
 }
 
-//델리게이트 등록
-void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
-{
-	if (InMainUI)
-	{
-		if(RoboComponent)
-		{
-			RoboComponent->OnHPChanged.BindLambda([this, InMainUI](float value) {
-				InMainUI->SetHPPercent(value);
-				});
-			RoboComponent->OnDepthChanged.BindLambda([this, InMainUI](float value) {
-				InMainUI->SetMeters(value);
-				});
-			RoboComponent->OnOxygenDepleted.AddLambda([InMainUI]
-				{
-					InMainUI->ShowGameResultUI(false);
-				});
-		}
-		if (InventoryComponent)
-		{
-			InventoryComponent->OnFishCollected.AddUObject(InMainUI, &UMainUI::ShowCollectedFishNotification);
-			InventoryComponent->OnWeightChanged.AddLambda([InMainUI](float current, float max) {
-				InMainUI->SetWeights(current, max);
-				});
-			InventoryComponent->OnBecameOverweight.AddLambda([InMainUI](bool becameOverweight) {
-				InMainUI->OverWeightNotification(becameOverweight);
-				});
-			InventoryComponent->OnToolSlotUpdated.AddUObject(InMainUI, &UMainUI::OnUpdateToolSlot);
-			InventoryComponent->OnActiveToolChanged.AddUObject(InMainUI, &UMainUI::OnChangeActiveTool);
-
-				//최종 결과 보여줄 때
-			/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
-				InMainUI->ShowCollectedFishNotification(FishList,3.0f);
-				});*/
-		}
-
-		OnSurfaced.AddLambda([InMainUI]()
-			{
-				InMainUI->ShowGameResultUI(true);
-			});
-
-		OnWeaponSlotUpdated.AddDynamic(InMainUI, &UMainUI::OnUpdateWeaponSlot);
-	}
-}
-
 void AMyRobo::StartRangedAim()
 {
 	CurrentWeaponState = EWeaponState::RangedAttaching;

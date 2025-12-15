@@ -50,6 +50,8 @@ public:
 
 	void PossessedBy(AController* NewController) override;
 
+	void SetupMainUIReference(UMainUI* InMainUI);
+
 	void StartRangedAim();
 
 	void StopRangedAim();
@@ -89,6 +91,8 @@ public:
 	void CollectSeaCreature(ASeaCreature* FishToCollect);
 
 	void HitBy(AActor* DamageCauser, const FHitResult& HitResult);
+
+	virtual void PostInitializeComponents() override;
 
 protected:
 	virtual void BeginPlay() override;

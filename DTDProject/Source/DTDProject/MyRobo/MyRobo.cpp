@@ -230,10 +230,59 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 void AMyRobo::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("PossessedBy Call!!"));
 
-	MainController = Cast<AMyCharacterController>(NewController);
+	if(RoboComponent)
+	{
+		RoboComponent->InitOxygen();
+	}
+}
 
-	RoboComponent->InitOxygen();
+void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
+{
+	if (InMainUI)
+	{
+		if (RoboComponent)
+		{
+			RoboComponent->OnHPChanged.BindLambda([this, InMainUI](float value) {
+				InMainUI->SetHPPercent(value);
+				});
+			RoboComponent->OnDepthChanged.BindLambda([this, InMainUI](float value) {
+				InMainUI->SetMeters(value);
+				});
+			RoboComponent->OnOxygenDepleted.AddLambda([InMainUI]
+				{
+					InMainUI->ShowGameResultUI(false);
+				});
+		}
+		if (InventoryComponent)
+		{
+			InventoryComponent->OnFishCollected.AddUObject(InMainUI, &UMainUI::ShowCollectedFishNotification);
+			InventoryComponent->OnWeightChanged.AddLambda([InMainUI](float current, float max) {
+				InMainUI->SetWeights(current, max);
+				});
+			InventoryComponent->OnBecameOverweight.AddLambda([InMainUI](bool becameOverweight) {
+				InMainUI->OverWeightNotification(becameOverweight);
+				});
+			InventoryComponent->OnToolSlotUpdated.AddUObject(InMainUI, &UMainUI::OnUpdateToolSlot);
+			InventoryComponent->OnActiveToolChanged.AddUObject(InMainUI, &UMainUI::OnChangeActiveTool);
+
+			//최종 결과 보여줄 때
+		/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
+			InMainUI->ShowCollectedFishNotification(FishList,3.0f);
+			});*/
+		}
+
+		OnSurfaced.AddLambda([InMainUI]()
+			{
+				InMainUI->ShowGameResultUI(true);
+			});
+
+
+		OnWeaponSlotUpdated.AddUObject(InMainUI, &UMainUI::OnUpdateWeaponSlot);
+
+		BroadcastCurrentWeaponStates();
+	}
 }
 
 void AMyRobo::StartRangedAim()
@@ -553,9 +602,24 @@ void AMyRobo::HitBy(AActor* DamageCauser, const FHitResult& HitResult)
 	}
 }
 
+void AMyRobo::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	//MainController = Cast<AMyCharacterController>(GetController());
+	//if (!MainController) return;
+
+	//if (UMainUI* MainUI = MainController->GetMainUI())
+	//{
+	//	SetupMainUIReference(MainUI);
+	//}
+}
+
 void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("BeginPlay Call!!"));
 
 	LongPressWidget->SetHiddenInGame(true);
 	PickupWidget->SetHiddenInGame(true);
@@ -604,6 +668,15 @@ void AMyRobo::BeginPlay()
 
 	ActiveRangedWeapon = HarpoonWeapon;
 	CurrentWeaponState = EWeaponState::Unarmed;
+
+
+	MainController = Cast<AMyCharacterController>(GetController());
+	if (!MainController) return;
+
+	if (UMainUI* MainUI = MainController->GetMainUI())
+	{
+		SetupMainUIReference(MainUI);
+	}
 }
 
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName, float PlayRate)

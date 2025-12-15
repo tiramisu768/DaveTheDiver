@@ -121,11 +121,6 @@ void AMyCharacterController::BeginPlay()
 		if (MainWidgetInstance)
 		{
 			MainWidgetInstance->AddToViewport();
-
-			if (AMyRobo* MyRobo = Cast<AMyRobo>(GetPawn()))
-			{
-				MainWidgetInstance->InitializeUI(MyRobo);
-			}
 		}
 	}
 }
@@ -397,5 +392,11 @@ bool AMyCharacterController::FireStartPostion(FVector& WorldPosition, FVector& W
 		}
 	}
 	return false;
+}
+
+void AMyCharacterController::OnPossess(APawn* aPawn)
+{
+	Super::OnPossess(aPawn);
+
 }
 

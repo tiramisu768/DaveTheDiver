@@ -109,5 +109,6 @@ private:
 	const int32 WeaponCount = 2;
 
 	FVector2D PrevMousePosition{-1,-1};
+	virtual void OnPossess(APawn* aPawn) override;
 //	//bool isHit{ true };
 };

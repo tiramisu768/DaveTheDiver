@@ -47,52 +47,6 @@ void UMainUI::NativeConstruct()
 
 }
 
-
-void UMainUI::InitializeUI(AMyRobo* Robo)
-{
-	if (!Robo) return;
-
-	if (URoboComponent* RoboComponent = Robo->FindComponentByClass<URoboComponent>())
-	{
-		RoboComponent->OnHPChanged.BindLambda([this](float value) {
-			SetHPPercent(value);
-			});
-		RoboComponent->OnDepthChanged.BindLambda([this](float value) {
-			SetMeters(value);
-			});
-		RoboComponent->OnOxygenDepleted.AddLambda([this]
-			{
-				ShowGameResultUI(false);
-			});
-	}
-	if (UInventoryComponent* InventoryComponent = Robo->GetInventoryComponent())
-	{
-		InventoryComponent->OnFishCollected.AddUObject(this, &UMainUI::ShowCollectedFishNotification);
-		InventoryComponent->OnWeightChanged.AddLambda([this](float current, float max) {
-			SetWeights(current, max);
-			});
-		InventoryComponent->OnBecameOverweight.AddLambda([this](bool becameOverweight) {
-			OverWeightNotification(becameOverweight);
-			});
-		InventoryComponent->OnToolSlotUpdated.AddUObject(this, &UMainUI::OnUpdateToolSlot);
-		InventoryComponent->OnActiveToolChanged.AddUObject(this, &UMainUI::OnChangeActiveTool);
-
-		//최종 결과 보여줄 때
-	/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
-		InMainUI->ShowCollectedFishNotification(FishList,3.0f);
-		});*/
-	}
-
-	Robo->OnSurfaced.AddLambda([this]()
-		{
-			ShowGameResultUI(true);
-		});
-
-	Robo->OnWeaponSlotUpdated.AddUObject(this, &UMainUI::OnUpdateWeaponSlot);
-
-	Robo->BroadcastCurrentWeaponStates();
-}
-
 void UMainUI::SetHPPercent(float value)
 {
 	if(HPBarWidget)

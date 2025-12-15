@@ -31,7 +31,7 @@
 AMyRobo::AMyRobo()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	//WasOnSurface = false;
+	WasOnSurface = false;
 
 #pragma region Component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -121,12 +121,12 @@ void AMyRobo::Tick(float DeltaTime)
 			RoboComponent->UpdateCurrentDepth(CurrentDepth);
 		}
 
-		/*const bool IsOnSurface = (CurrentDepth <= 0.0f);
+		const bool IsOnSurface = (CurrentDepth <= 0.0f);
 		if (IsOnSurface && !WasOnSurface)
 		{
 			OnSurfaced.Broadcast();
 		}
-		WasOnSurface = IsOnSurface;*/
+		WasOnSurface = IsOnSurface;
 	}
 
 
@@ -223,18 +223,6 @@ void AMyRobo::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 Previo
 	case EMovementMode::MOVE_Walking:
 		GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = false;
 		break;
-	}
-}
-
-//controller 생성이후 호출되는 함수
-void AMyRobo::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("PossessedBy Call!!"));
-
-	if(RoboComponent)
-	{
-		RoboComponent->InitOxygen();
 	}
 }
 
@@ -602,6 +590,7 @@ void AMyRobo::HitBy(AActor* DamageCauser, const FHitResult& HitResult)
 	}
 }
 
+//컴포넌트 초기화 이후 호출, 컨트롤러가 널일 확률 높음
 void AMyRobo::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -613,6 +602,18 @@ void AMyRobo::PostInitializeComponents()
 	//{
 	//	SetupMainUIReference(MainUI);
 	//}
+}
+
+//빙의할 떄 호출, 컨트롤러가 유효하다는 것이 보장되는 첫 번째 시점
+void AMyRobo::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("PossessedBy Call!!"));
+
+	if (RoboComponent)
+	{
+		RoboComponent->InitOxygen();
+	}
 }
 
 void AMyRobo::BeginPlay()

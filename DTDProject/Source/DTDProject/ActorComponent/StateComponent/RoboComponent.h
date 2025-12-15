@@ -24,16 +24,20 @@ public:
 	void StopDriving();
 	virtual void SetHP(float NewHP) override;
 	void InitOxygen();
+	void ConsumeOxygen(float DeltaTime);
 	void DecreaseOxygen();
 	void WarningOxygen();
 	void ZeroOxygen();
 	virtual void TakeDamage(float DamageAmount, const FHitResult& HitResult) override;
 	virtual void Heal(float HealAmount) override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void UpdateCurrentDepth(float NewDepth);
 
 protected:
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, Category = "Robo State | Oxygen")
+	float OxygenConsumptionRate = 1.0f; // 초당 산소 소모량
 
 private:
 	FTimerHandle O2TimerHandle;

@@ -48,8 +48,6 @@ public:
 
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
-	void PossessedBy(AController* NewController) override;
-
 	void SetupMainUIReference(UMainUI* InMainUI);
 
 	void StartRangedAim();
@@ -92,9 +90,11 @@ public:
 
 	void HitBy(AActor* DamageCauser, const FHitResult& HitResult);
 
+protected:
 	virtual void PostInitializeComponents() override;
 
-protected:
+	void PossessedBy(AController* NewController) override;
+
 	virtual void BeginPlay() override;
 
 #pragma region Components

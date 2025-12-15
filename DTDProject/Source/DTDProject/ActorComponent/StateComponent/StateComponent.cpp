@@ -96,11 +96,10 @@ void UStateComponent::HideHitEffect()
 void UStateComponent::SetHP(float NewHP)
 {
 	float OldHP = CurrentHP;
-	CurrentHP = FMath::Clamp(NewHP, 0, MaxHP); //체력이 음수가 되거나 최대치 초과를 차단
+	CurrentHP = FMath::Clamp(NewHP, 0.f, MaxHP); //체력이 음수가 되거나 최대치 초과를 차단
 	if(FMath::IsNearlyEqual(OldHP,CurrentHP)==false)
 	{
 		OnHPChanged.ExecuteIfBound(GetHPPercent());
-		UpdateHitEffect();
 	}
 }
 
@@ -130,7 +129,7 @@ void UStateComponent::TakeDamage(float DamageAmount, const FHitResult& HitResult
 	SetHP(CurrentHP - DamageAmount);
 	OnTakeDamage.ExecuteIfBound(DamageAmount);
 
-
+	UpdateHitEffect();
 }
 
 //회복

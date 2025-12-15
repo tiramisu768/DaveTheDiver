@@ -7,6 +7,7 @@
 
 URoboComponent::URoboComponent()
 {
+
 }
 
 void URoboComponent::BeginPlay()
@@ -51,12 +52,11 @@ void URoboComponent::SetHP(float NewHP)
 void URoboComponent::InitOxygen()
 {
 	SetHP(MaxHP);
+}
 
-	//근접무기 초기화 - 로봇에서 관리
-
-	//원거리무기 초기화 - 로봇에서 관리
-
-	//포획가방 초기화 - 포획가방 컴포넌트 따로 제작해서 관리
+void URoboComponent::ConsumeOxygen(float DeltaTime)
+{
+	SetHP(CurrentHP - (OxygenConsumptionRate * DeltaTime));
 }
 
 void URoboComponent::DecreaseOxygen()
@@ -107,6 +107,10 @@ void URoboComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (CurrentDepth > 0.0f) 
+	{
+		ConsumeOxygen(DeltaTime); 
+	}
 }
 
 void URoboComponent::UpdateCurrentDepth(float NewDepth)

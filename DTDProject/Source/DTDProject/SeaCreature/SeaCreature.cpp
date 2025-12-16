@@ -14,6 +14,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/PrimitiveComponent.h"
 //#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureSteeringComponent.h"
@@ -23,6 +24,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
+#include "GameInstance/MyGameInstance.h"
 
 ASeaCreature::ASeaCreature()
 {
@@ -85,6 +87,11 @@ ASeaCreature::ASeaCreature()
 void ASeaCreature::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		GameInstance->OnGameEnded.AddUObject(this, &ASeaCreature::StopAIBehavior);
+	}
 	
 	Data = SeaCreatureDataTable->FindRow<FSeaCreatureData>(RowName, TEXT(""));
 
@@ -131,6 +138,15 @@ void ASeaCreature::BeginPlay()
 
 	CollectSphere->OnComponentBeginOverlap.AddDynamic(this, &ASeaCreature::OnCollectOverlap);
 	EnableCollectTrigger(false);
+}
+
+void ASeaCreature::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		GameInstance->OnGameEnded.RemoveAll(this);
+	}
 }
 
 // Called every frame
@@ -315,6 +331,38 @@ void ASeaCreature::Attack(AMyRobo* Target)
 	}
 }
 
+void ASeaCreature::AttackTrace()
+{
+	TArray<AActor*> HitActors;
+	TArray<FHitResult> HitResults;
+	bool isHit = UKismetSystemLibrary::BoxTraceMulti(
+		this,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * 100.0f,
+		FVector(50.0f, 50.0f, 50.0f),
+		FRotator::ZeroRotator,
+		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel5),
+		false,
+		{},
+		EDrawDebugTrace::ForDuration,
+		HitResults,
+		true
+	);
+
+	if (isHit)
+	{
+		for (const FHitResult& result : HitResults)
+		{
+			AMyRobo* Robo = Cast<AMyRobo>(result.GetActor());
+			if (Robo != nullptr && !HitActors.Contains(Robo))
+			{
+				HitActors.Add(Robo); //중복피격방지
+				Robo->HitBy(this, result);
+			}
+		}
+	}
+}
+
 void ASeaCreature::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -362,6 +410,25 @@ void ASeaCreature::SpawnDamagePopup(float DamageAmount)
 				SimpleDamageUI->SetDamageText(DamageAmount);
 			}
 		}
+	}
+}
+
+void ASeaCreature::StopAIBehavior()
+{
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController)
+	{
+		if (UBrainComponent* BrainComponent = AIController->GetBrainComponent())
+		{
+			BrainComponent->StopLogic(TEXT("Player is dead"));
+		}
+
+		AIController->StopMovement();
+	}
+
+	if (MovementComponent)
+	{
+		MovementComponent->Velocity = FVector::ZeroVector;
 	}
 }
 

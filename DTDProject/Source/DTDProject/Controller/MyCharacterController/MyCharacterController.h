@@ -47,9 +47,9 @@ public:
 	void OnNavigateUp();
 	void OnNavigateDown();
 	void OnSelectUIButton();
-
 	bool FireStartPostion(FVector& WorldPosition, FVector& WorldDirection);
 	//	bool GetIsMoveInput() const { return isMoveInput; }
+	void EndMyGame(bool IsSuccess);
 
 private:
 	EPlayerGameState CurrentGameState;

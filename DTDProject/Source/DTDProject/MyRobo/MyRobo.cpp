@@ -14,6 +14,7 @@
 #include "UI/LongPressUI.h"
 #include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "BuoyancyComponent.h"
 #include "WaterBodyComponent.h"
@@ -69,6 +70,11 @@ AMyRobo::AMyRobo()
 	if (Melee3AttackMontageFinder.Succeeded())
 	{
 		Melee3AttackMontage = Melee3AttackMontageFinder.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> HitReactionMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/MyRobo/Animation/AM_HitBy.AM_HitBy'"));
+	if (HitReactionMontageFinder.Succeeded())
+	{
+		HitReactionMontage = HitReactionMontageFinder.Object;
 	}
 
 #pragma endregion
@@ -261,9 +267,12 @@ void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 			});*/
 		}
 
-		OnSurfaced.AddLambda([InMainUI]()
+		OnSurfaced.AddLambda([this]()
 			{
-				InMainUI->ShowGameResultUI(true);
+				if (MainController)
+				{
+					MainController->EndMyGame(true);
+				}
 			});
 
 
@@ -579,15 +588,45 @@ void AMyRobo::HitBy(AActor* DamageCauser, const FHitResult& HitResult)
 	if (!RoboComponent || !DamageCauser) return;
 
 	ASeaCreature* Fish = Cast<ASeaCreature>(DamageCauser);
+
 	if (Fish && Fish->GetData())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("Robo HitBy Call : %s"), *Fish->GetName()));
+
 		const float DamageAmount = Fish->GetData()->Damage;
 
-		if (DamageAmount > 0)
+		RoboComponent->TakeDamage(DamageAmount, HitResult);
+
+		if (!RoboComponent->IsDead())
 		{
-			RoboComponent->TakeDamage(DamageAmount,HitResult);
+			GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("Robo is in danger.")));
+			if (HitReactionMontage && BodyComponent && BodyComponent->GetAnimInstance())
+			{
+				BodyComponent->GetAnimInstance()->Montage_Play(HitReactionMontage);
+			}
 		}
 	}
+}
+
+void AMyRobo::DieRobo()
+{
+	if (InputEnabled() == false) return;
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BodyComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (MainController)
+	{
+		DisableInput(MainController);
+
+		MainController->EndMyGame(false);
+	}
+
+	// UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	// if (AnimInstance && DeathMontage)
+	// {
+	//	 AnimInstance->Montage_Play(DeathMontage);
+	// }
 }
 
 //컴포넌트 초기화 이후 호출, 컨트롤러가 널일 확률 높음

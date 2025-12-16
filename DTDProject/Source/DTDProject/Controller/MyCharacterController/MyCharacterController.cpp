@@ -19,6 +19,7 @@
 #include "Components/Image.h"
 #include "ActorComponent/InventoryComponent.h"
 #include "ActorComponent/StateComponent/RoboComponent.h"
+#include "GameInstance/MyGameInstance.h"
 
 AMyCharacterController::AMyCharacterController()
 {
@@ -392,6 +393,24 @@ bool AMyCharacterController::FireStartPostion(FVector& WorldPosition, FVector& W
 		}
 	}
 	return false;
+}
+
+void AMyCharacterController::EndMyGame(bool IsSuccess)
+{
+	if (IsPaused()) return;
+
+	SetPause(true);
+	SetShowMouseCursor(true);
+
+	if (MainWidgetInstance)
+	{
+		MainWidgetInstance->ShowGameResultUI(IsSuccess);
+	}
+
+	if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		GameInstance->OnGameEnded.Broadcast();
+	}
 }
 
 void AMyCharacterController::OnPossess(APawn* aPawn)

@@ -198,6 +198,11 @@ FVector2D UMainUI::GetCrosshairScreenPosition() const
 
 void UMainUI::ShowGameResultUI(bool bSuccess)
 {
+	 if (WarningHPWidget)
+	 {
+		 WarningHPWidget->SetVisibility(ESlateVisibility::Hidden);
+	 }
+
 	if (ResultTableWidget)
 	{
 		ResultTableWidget->SetGameEnd(bSuccess);

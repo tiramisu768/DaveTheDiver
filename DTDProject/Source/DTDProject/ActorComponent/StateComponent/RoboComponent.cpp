@@ -4,6 +4,7 @@
 #include "Controller/MyCharacterController/MyCharacterController.h"
 #include "UI/MainUI.h"
 #include "Engine/World.h"
+#include "MyRobo/MyRobo.h" 
 
 URoboComponent::URoboComponent()
 {
@@ -42,7 +43,7 @@ void URoboComponent::SetHP(float NewHP)
 		ZeroOxygen();
 	}
 
-	else if (CurrentHP == 50 && OldHP > 50)
+	else if (CurrentHP <= 50 && OldHP > 50)
 	{
 		//산소 경고
 		WarningOxygen();
@@ -83,12 +84,11 @@ void URoboComponent::ZeroOxygen()
 {
 	//OnOxygenDepleted.Broadcast();
 
-	if (AMyCharacterController* controller = Cast<AMyCharacterController>(GetWorld()->GetFirstPlayerController()))
+	AMyRobo* Robo = Cast<AMyRobo>(GetOwner());
+	if (Robo)
 	{
-		if (UMainUI* MainUI = controller->GetMainUI())
-		{
-			MainUI->ShowGameResultUI(false);
-		}
+		// Robo의 Die 함수를 호출하여 사망 처리를 위임합니다.
+		Robo->DieRobo();
 	}
 }
 

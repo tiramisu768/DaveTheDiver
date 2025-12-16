@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Engine/DataTable.h"
+#include "Interface/AttackTraceNotify/AttackTraceNotify.h"
 #include "SeaCreature.generated.h"
 
 USTRUCT(BlueprintType)
@@ -92,7 +93,7 @@ class UAnimMontage;
 
 DECLARE_DELEGATE(FOnAttackMontageEndedDelegate);
 UCLASS()
-class DTDPROJECT_API ASeaCreature : public APawn
+class DTDPROJECT_API ASeaCreature : public APawn,public IAttackTraceNotify
 {
 	GENERATED_BODY()
 
@@ -144,6 +145,8 @@ public:
 
 	virtual void Attack(class AMyRobo* Target);
 
+	virtual void AttackTrace() override;
+
 	void PostInitializeComponents() override;
 
 	UFUNCTION()
@@ -151,8 +154,12 @@ public:
 
 	void SpawnDamagePopup(float DamageAmount);
 
+	void StopAIBehavior();
+
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Data", meta = (AllowPriaveAccess="true"))

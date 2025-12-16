@@ -90,6 +90,8 @@ public:
 
 	void HitBy(AActor* DamageCauser, const FHitResult& HitResult);
 
+	void DieRobo();
+
 protected:
 	virtual void PostInitializeComponents() override;
 
@@ -136,11 +138,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<AWeapon> DefaultGunWeaponClass;
-#pragma endregion
-
-#pragma region Effects
-	UPROPERTY(EditDefaultsOnly, Category ="Effects")
-	TObjectPtr<UAnimMontage> HitReactionMontage;
 #pragma endregion
 
 #pragma region Internal State
@@ -228,6 +225,8 @@ private:
 	TObjectPtr<UAnimMontage> Melee2AttackMontage;
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> Melee3AttackMontage;
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> HitReactionMontage;
 #pragma endregion
 
 #pragma region Water

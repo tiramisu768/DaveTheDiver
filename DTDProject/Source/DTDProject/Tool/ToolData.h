@@ -21,17 +21,17 @@ struct FToolData :public FTableRowBase
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category ="1. 기본 정보")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category ="1. Default Info")
 	FString ToolName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. Default Info")
 	TSoftObjectPtr<UTexture2D> ToolIcon;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 타입 및 효과")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Type and Effect")
 	EToolType ToolType;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 타입 및 효과", meta = (EditCondition="일회성아이템"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Type and Effect", meta = (EditCondition="Consumable"))
 	float HealAmount;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 타입 및 효과", meta=(EditCondition="지속아이템"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Type and Effect", meta=(EditCondition="Active"))
 	float Duration; //지속 시간
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 타입 및 효과", meta = (EditCondition = "지속아이템"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Type and Effect", meta = (EditCondition = "Active"))
 	float SpeedMultiplier; //속도 증가 배율
 
 

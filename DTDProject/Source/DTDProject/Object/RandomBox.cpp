@@ -23,24 +23,6 @@ ARandomBox::ARandomBox()
 	BoxFrameMesh->SetupAttachment(RootComponent);
 }
 
-void ARandomBox::ClearSpawnedWeapon()
-{
-	SpawnedWeapon = nullptr;
-	if (CurrentInteractingRobo)
-	{
-		CurrentInteractingRobo->ShowPickupWidget(false, nullptr);
-	}
-}
-
-void ARandomBox::SetSpawnedWeapon(AWeapon* NewWeapon)
-{
-	SpawnedWeapon = NewWeapon;
-	if (SpawnedWeapon)
-	{
-		SpawnedWeapon->SetOwner(this);
-	}
-}
-
 // Called when the game starts or when spawned
 void ARandomBox::BeginPlay()
 {
@@ -48,7 +30,7 @@ void ARandomBox::BeginPlay()
 	BoxCollision->OnComponentBeginOverlap.AddDynamic(this, &ARandomBox::RandomBoxOnBeginOverlap);
 	BoxCollision->OnComponentEndOverlap.AddDynamic(this, &ARandomBox::RandomBoxOnEndOverlap);
 
-	if(BoxFrameMesh)
+	if (BoxFrameMesh)
 	{
 		DynMat = BoxFrameMesh->CreateAndSetMaterialInstanceDynamic(0);
 	}
@@ -69,12 +51,32 @@ void ARandomBox::Tick(float DeltaTime)
 	{
 		UpdateOpenAnimation(DeltaTime);
 	}
-	else if(IsRoboOverlap && IsOpen)
+	else if (IsRoboOverlap && IsOpen)
 	{
 		//이미 열린 상자 상태에서의 표시
 		GEngine->AddOnScreenDebugMessage(-8, 3.0f, FColor::Purple, TEXT("No Weapon"));
 	}
 }
+
+void ARandomBox::ClearSpawnedWeapon()
+{
+	SpawnedWeapon = nullptr;
+	if (CurrentInteractingRobo)
+	{
+		CurrentInteractingRobo->ShowPickupWidget(false, nullptr);
+	}
+}
+
+void ARandomBox::SetSpawnedWeapon(AWeapon* NewWeapon)
+{
+	SpawnedWeapon = NewWeapon;
+	if (SpawnedWeapon)
+	{
+		SpawnedWeapon->SetOwner(this);
+	}
+}
+
+
 
 void ARandomBox::Interact(AMyRobo* InteractingRobo)
 {
@@ -113,6 +115,11 @@ void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponen
 				Robo->SetAcquirableWeapon(SpawnedWeapon);
 				Robo->ShowPickupWidget(true, SpawnedWeapon);
 			}
+			else if (IsValid(SpawnedItemActor))
+			{
+				Robo->SetAcquirableWeapon(nullptr);
+				Robo->ShowPickupWidget(true, SpawnedItemActor);
+			}
 		}
 		else
 		{
@@ -139,7 +146,7 @@ void ARandomBox::UpdateOpenAnimation(float DeltaTime)
 {
 	if (!DynMat) return;
 
-	Brightness = FMath::Max(0.03f, Brightness - DeltaTime * 2.0f);
+	Brightness = FMath::Max(0.03f, Brightness - DeltaTime * 2.0f); //OpenSpeed = 2.0
 	DynMat->SetScalarParameterValue(TEXT("Brightness"), Brightness);
 
 	// 밝기가 최소치에 도달하면 Open 상태로 전환
@@ -148,38 +155,56 @@ void ARandomBox::UpdateOpenAnimation(float DeltaTime)
 		IsOpen = true;
 		IsOpening = false;
 
-		SpawnWeapon();
+		SpawnLoot();
 	}
 }
 
-void ARandomBox::SpawnWeapon()
+void ARandomBox::SpawnLoot()
+{
+	if (!IsValid(CurrentInteractingRobo)) return;
+	
+	switch (BoxType)
+	{
+	case EBoxType::Weapon:
+		HandleSpawnWeapon();
+		break;
+
+	case EBoxType::Ammo:
+		HandleSpawnAmmo();
+		break;
+
+	case EBoxType::Oxygen:
+		HandleSpawnOxygen();
+		break;
+		
+	case EBoxType::Tool:
+		HandleSpawnTool();
+		break;
+	}
+}
+
+void ARandomBox::HandleSpawnWeapon()
 {
 	if (!WeaponDataTable || WeaponDataTable->GetRowMap().Num() == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("No WeaponData"));
 		return;
 	}
-// 이미 무기가 스폰되었다면 함수를 종료합니다.
+	// 이미 무기가 스폰되었다면 함수를 종료합니다.
 	if (IsValid(SpawnedWeapon)) return;
-// 2. 데이터 테이블의 모든 행 이름(Row Name)을 가져옵니다.
+	// 2. 데이터 테이블의 모든 행 이름(Row Name)을 가져옵니다.
 	TArray<FName> RowNames = WeaponDataTable->GetRowNames();
-// 3. 행 이름 중 하나를 무작위로 선택합니다.
+	// 3. 행 이름 중 하나를 무작위로 선택합니다.
 	const FName RandomRowName = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
-// 4. 선택된 행 이름으로 데이터 테이블에서 실제 데이터(FWeaponData)를 찾아옵니다.
+	// 4. 선택된 행 이름으로 데이터 테이블에서 실제 데이터(FWeaponData)를 찾아옵니다.
 	static const FString ContextString(TEXT("WeaponDataTable Context"));
 	FWeaponData* FoundWeaponData = WeaponDataTable->FindRow<FWeaponData>(RandomRowName, ContextString);
-// 5. 데이터와 데이터 안의 WeaponClass가 유효한지 확인하고 무기를 스폰합니다.
+	// 5. 데이터와 데이터 안의 WeaponClass가 유효한지 확인하고 무기를 스폰합니다.
 	if (FoundWeaponData && FoundWeaponData->WeaponClass)
 	{
 		TSubclassOf<AWeapon> WeaponToSpawn = FoundWeaponData->WeaponClass;
 
-		FVector SpawnLocation = GetActorLocation();
-
-		FVector DirectionToRobo = CurrentInteractingRobo->GetActorLocation() - GetActorLocation();
-		DirectionToRobo.Z = 0;
-		DirectionToRobo.Normalize();
-		SpawnLocation += DirectionToRobo * 60.0f + FVector(0, 0, 100.f);
-
+		FVector SpawnLocation = GetSpawnInFrontOfBox();
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
 
@@ -190,9 +215,9 @@ void ARandomBox::SpawnWeapon()
 			SpawnedWeapon->RowName = RandomRowName;
 			SpawnedWeapon->PostInitializeComponents();
 
-			UE_LOG(LogTemp, Log, TEXT("[RandomBox] Weapon Spawning: %s with RowName: %s"), * SpawnedWeapon->GetName(), * RandomRowName.ToString());
+			UE_LOG(LogTemp, Log, TEXT("[RandomBox] Weapon Spawning: %s with RowName: %s"), *SpawnedWeapon->GetName(), *RandomRowName.ToString());
 
-			if(IsValid(CurrentInteractingRobo))
+			if (IsValid(CurrentInteractingRobo))
 			{
 				CurrentInteractingRobo->SetAcquirableWeapon(SpawnedWeapon);
 				CurrentInteractingRobo->ShowPickupWidget(true, SpawnedWeapon);
@@ -203,5 +228,56 @@ void ARandomBox::SpawnWeapon()
 	{
 		UE_LOG(LogTemp, Error, TEXT("[RandomBox] Spawn failed! Row '%s' in DataTable has a null WeaponClass!"), *RandomRowName.ToString());
 	}
+}
+
+void ARandomBox::HandleSpawnAmmo()
+{
+	if (!AmmoPickupClass) return;
+
+	FVector SpawnLocation = GetSpawnInFrontOfBox();
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+
+	SpawnedItemActor = GetWorld()->SpawnActor<AActor>(AmmoPickupClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+	if (IsValid(SpawnedItemActor) && IsValid(CurrentInteractingRobo))
+	{
+		CurrentInteractingRobo->ShowPickupWidget(true, SpawnedItemActor);
+	}
+}
+
+void ARandomBox::HandleSpawnOxygen()
+{
+	if (!IsValid(CurrentInteractingRobo)) return;
+
+	//CurrentInteractingRobo->ReceiveOxygenFromBox(OxygenRefillAmount);
+}
+
+void ARandomBox::HandleSpawnTool()
+{
+	if (!ToolPickupClass) return;
+
+	FVector SpawnLocation = GetSpawnInFrontOfBox();
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+
+	SpawnedItemActor = GetWorld()->SpawnActor<AActor>(ToolPickupClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+	if (IsValid(SpawnedItemActor) && IsValid(CurrentInteractingRobo))
+	{
+		CurrentInteractingRobo->ShowPickupWidget(true, SpawnedItemActor);
+	}
+}
+
+FVector ARandomBox::GetSpawnInFrontOfBox(float ZOffset, float ForwardDist) const
+{
+	FVector SpawnLocation = GetActorLocation();
+	if (IsValid(CurrentInteractingRobo))
+	{
+		FVector DirectionToRobo = CurrentInteractingRobo->GetActorLocation() - GetActorLocation();
+		DirectionToRobo.Z = 0;
+		DirectionToRobo.Normalize();
+		SpawnLocation += DirectionToRobo * ForwardDist;
+	}
+	SpawnLocation.Z += ZOffset;
+	return SpawnLocation;
 }
 

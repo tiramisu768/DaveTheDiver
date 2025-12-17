@@ -11,6 +11,15 @@ class UBoxComponent;
 class AWeapon;
 class UDataTable;
 
+UENUM(BlueprintType)
+enum class EBoxType :uint8
+{
+	Weapon UMETA(DisplayName = "Weapon"),
+	Ammo UMETA(DisplayName = "Ammo"),
+	Oxygen UMETA(DisplayName = "Oxygen"),
+	Tool UMETA(DisplayName = "Tool"),
+};
+
 UCLASS()
 class DTDPROJECT_API ARandomBox : public AActor,public IInteractionObject
 {
@@ -21,46 +30,76 @@ public:
 	void ClearSpawnedWeapon();
 	void SetSpawnedWeapon(AWeapon* NewWeapon);
 
-protected:
-
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 	virtual void Interact(AMyRobo* InteractingRobo) override;
 	virtual void ShowInteractionWidget(bool bShow) override;
 	virtual void StartFocus() override;
 	virtual void EndFocus() override;
 
+protected:
+
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
+
 	UFUNCTION()
 	void RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	void RandomBoxOnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
+	void UpdateOpenAnimation(float DeltaTime); //밝기 애니메이션 실행
 
-private:
-	bool IsOpen{ false };
-	bool IsRoboOverlap{ false };
-	bool IsOpening{ false }; //오픈 애님 진행 여부
+	void SpawnLoot();
+	void HandleSpawnWeapon();
+	void HandleSpawnAmmo();
+	void HandleSpawnOxygen();
+	void HandleSpawnTool();
 
-	UPROPERTY(VisibleAnywhere)
+	FVector GetSpawnInFrontOfBox(float ZOffset = 100.f, float ForwardDist = 60.f) const;
+
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> BoxFrameMesh;
 
-	UPROPERTY(EditAnywhere, Category ="Box Properties")
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<class UBoxComponent> BoxCollision;
 
-	UPROPERTY(EditAnywhere,Category = "Box Properties")
+	UPROPERTY()
 	UMaterialInstanceDynamic* DynMat;
 
-	float Brightness = 1.0f;
+	UPROPERTY()
+	bool IsOpen{ false };
+	UPROPERTY()
+	bool IsRoboOverlap{ false };
+	UPROPERTY()
+	bool IsOpening{ false }; //오픈 애님 진행 여부
 
-	UPROPERTY(EditAnywhere, Category = "Box Properties", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UDataTable> WeaponDataTable;
+	UPROPERTY()
+	TObjectPtr<AMyRobo> CurrentInteractingRobo;
 
 	UPROPERTY()
 	TObjectPtr<AWeapon> SpawnedWeapon;
 
 	UPROPERTY()
-	TObjectPtr<AMyRobo> CurrentInteractingRobo;
+	TObjectPtr<AActor> SpawnedItemActor; //Ammo, Tool 픽업을 위해
 
-	void UpdateOpenAnimation(float DeltaTime); //밝기 애니메이션 실행
-	void SpawnWeapon();
+	UPROPERTY(EditAnywhere, Category = "RandomBox")
+	EBoxType BoxType = EBoxType::Weapon;
 
+	UPROPERTY(EditAnywhere, Category = "RandomBox|Weapon")
+	TObjectPtr<UDataTable> WeaponDataTable;
+
+	UPROPERTY(EditAnywhere, Category = "RandomBox|Ammo")
+	TSubclassOf<AActor> AmmoPickupClass;
+
+	UPROPERTY(EditAnywhere, Category = "RandomBox|Tool")
+	TSubclassOf<AActor> ToolPickupClass;
+
+	UPROPERTY(EditAnywhere, Category = "RandomBox|Oxygen")
+	float OxygenRefillAmount = 0.f;
+
+	UPROPERTY(EditAnywhere, Category = "RandomBox|Visual")
+	float Brightness = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "RandomBox|Visual")
+	float OpenSpeed = 2.0f;
 };

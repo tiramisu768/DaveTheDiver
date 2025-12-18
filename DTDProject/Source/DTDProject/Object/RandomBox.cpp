@@ -115,11 +115,6 @@ void ARandomBox::RandomBoxOnBeginOverlap(UPrimitiveComponent* OverlappedComponen
 				Robo->SetAcquirableWeapon(SpawnedWeapon);
 				Robo->ShowPickupWidget(true, SpawnedWeapon);
 			}
-			else if (IsValid(SpawnedItemActor))
-			{
-				Robo->SetAcquirableWeapon(nullptr);
-				Robo->ShowPickupWidget(true, SpawnedItemActor);
-			}
 		}
 		else
 		{
@@ -239,10 +234,6 @@ void ARandomBox::HandleSpawnAmmo()
 	SpawnParams.Owner = this;
 
 	SpawnedItemActor = GetWorld()->SpawnActor<AActor>(AmmoPickupClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
-	if (IsValid(SpawnedItemActor) && IsValid(CurrentInteractingRobo))
-	{
-		CurrentInteractingRobo->ShowPickupWidget(true, SpawnedItemActor);
-	}
 }
 
 void ARandomBox::HandleSpawnOxygen()
@@ -261,10 +252,6 @@ void ARandomBox::HandleSpawnTool()
 	SpawnParams.Owner = this;
 
 	SpawnedItemActor = GetWorld()->SpawnActor<AActor>(ToolPickupClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
-	if (IsValid(SpawnedItemActor) && IsValid(CurrentInteractingRobo))
-	{
-		CurrentInteractingRobo->ShowPickupWidget(true, SpawnedItemActor);
-	}
 }
 
 FVector ARandomBox::GetSpawnInFrontOfBox(float ZOffset, float ForwardDist) const

@@ -57,6 +57,7 @@ void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
     const float Elapsed = OwnerComp.GetWorld()->GetTimeSeconds() - StartTime;
     if (Elapsed >= WaitTime)
     {
+        BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey,true);
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
     }
 }

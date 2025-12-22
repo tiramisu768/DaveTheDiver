@@ -13,6 +13,7 @@ const FName ASeaCreatureAIController::TargetActorKey = TEXT("TargetActor");
 const FName ASeaCreatureAIController::HomeLocationKey = TEXT("HomeLocation");
 const FName ASeaCreatureAIController::IsFarFromHomeKey = TEXT("IsFarFromHome");
 const FName ASeaCreatureAIController::IsThreatImminentKey = TEXT("IsThreatImminent");
+const FName ASeaCreatureAIController::IsChargingKey = TEXT("IsCharging");
 
 ASeaCreatureAIController::ASeaCreatureAIController()
 {

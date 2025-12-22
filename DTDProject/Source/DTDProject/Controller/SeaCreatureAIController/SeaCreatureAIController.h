@@ -21,6 +21,7 @@ public:
 	static const FName HomeLocationKey;
 	static const FName IsFarFromHomeKey;
 	static const FName IsThreatImminentKey; // 도망쳐야 할 만큼 가까운가?
+	static const FName IsChargingKey; //
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
@@ -35,6 +36,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<class UBehaviorTree> AggressiveBT;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	TObjectPtr<class UBehaviorTree> MonsterBT;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<class UBlackboardData> BlackboardAsset;

@@ -22,6 +22,9 @@ public:
 	static const FName IsFarFromHomeKey;
 	static const FName IsThreatImminentKey; // 도망쳐야 할 만큼 가까운가?
 	static const FName IsChargingKey; //
+	static const FName AttackReadyAtKey;
+	static const FName LastAttackEndTimeKey;
+	static const FName FaceStartTimeKey;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 

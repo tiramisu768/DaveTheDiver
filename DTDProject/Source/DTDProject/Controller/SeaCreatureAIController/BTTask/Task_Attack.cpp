@@ -20,6 +20,9 @@ EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+	if (!BlackboardComp) return EBTNodeResult::Failed;
+
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	if (SeaCreature == nullptr)
 	{
@@ -32,14 +35,30 @@ EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 		return EBTNodeResult::Failed;
 	}
 
-	SeaCreature->OnAttackMontageEndedDelegate.BindLambda([&]()
+	UBehaviorTreeComponent* OwnerCompPtr = &OwnerComp;
+	UBlackboardComponent* BBPtr = BlackboardComp;
+	UWorld* WorldPtr = OwnerComp.GetWorld();
+
+	SeaCreature->OnAttackMontageEndedDelegate.BindLambda([this,OwnerCompPtr,BBPtr,WorldPtr]()
 		{
-			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		}
-	);
+			if (BBPtr)
+			{
+				BBPtr->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, false);
+				BBPtr->ClearValue(ASeaCreatureAIController::FaceStartTimeKey);
+
+				if (WorldPtr)
+				{
+					BBPtr->SetValueAsFloat(ASeaCreatureAIController::LastAttackEndTimeKey, WorldPtr->GetTimeSeconds());
+				}
+			}
+
+			if (OwnerCompPtr)
+			{
+				this->FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Succeeded);
+			}
+		});
 
 	SeaCreature->Attack(Target);
-	OwnerComp.GetBlackboardComponent()->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, false);
 
 	return EBTNodeResult::InProgress;
 }

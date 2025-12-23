@@ -4,27 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "Task_FaceAndWait.generated.h"
+#include "Task_ChargeStraight.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DTDPROJECT_API UTask_FaceAndWait : public UBTTaskNode
+class DTDPROJECT_API UTask_ChargeStraight : public UBTTaskNode
 {
 	GENERATED_BODY()
-
+	
 public:
-	UTask_FaceAndWait();
-
-	UPROPERTY(EditAnywhere, Category="Settings")
-	float WaitTime = 3.0f;
+	UTask_ChargeStraight();
 
 	UPROPERTY(EditAnywhere, Category ="Settings")
-	float RotationSpeed = 5.0f;
+	float AcceptanceRadius = 100.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Settings")
+	float MaxChargeDistance = 2000.0f;
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
-	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type Result) override;
 };

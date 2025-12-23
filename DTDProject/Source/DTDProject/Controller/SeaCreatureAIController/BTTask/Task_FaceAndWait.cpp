@@ -21,10 +21,19 @@ EBTNodeResult::Type UTask_FaceAndWait::ExecuteTask(UBehaviorTreeComponent& Owner
     UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
     if (!BlackboardComp) return EBTNodeResult::Failed;
 
+    const float CooldownAfterAttack = 1.0f;
+    float LastAttack = BlackboardComp->GetValueAsFloat(ASeaCreatureAIController::LastAttackEndTimeKey);
+    float Now = OwnerComp.GetWorld()->GetTimeSeconds();
+    if (LastAttack > 0.f && (Now - LastAttack) < CooldownAfterAttack)
+    {
+        BlackboardComp->SetValueAsFloat(ASeaCreatureAIController::FaceStartTimeKey, Now);
+        return EBTNodeResult::InProgress;
+    }
+
     AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
     if (!Target) return EBTNodeResult::Failed;
 
-    BlackboardComp->SetValueAsFloat(TEXT("FaceStartTime"), OwnerComp.GetWorld()->GetTimeSeconds());
+    BlackboardComp->SetValueAsFloat(ASeaCreatureAIController::FaceStartTimeKey, Now);
     return EBTNodeResult::InProgress;
 }
 
@@ -83,11 +92,22 @@ void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
         SeaCreature->SetActorRotation(NewRot);
     }
 
-    const float StartTime = BlackboardComp->GetValueAsFloat(TEXT("FaceStartTime"));
+    const float StartTime = BlackboardComp->GetValueAsFloat(ASeaCreatureAIController::FaceStartTimeKey);
     const float Elapsed = OwnerComp.GetWorld()->GetTimeSeconds() - StartTime;
     if (Elapsed >= WaitTime)
     {
         BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey,true);
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
     }
+}
+
+void UTask_FaceAndWait::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type Result)
+{
+    UBlackboardComponent* BlackboarComp = OwnerComp.GetBlackboardComponent();
+    if (BlackboarComp)
+    {
+        BlackboarComp->ClearValue(ASeaCreatureAIController::FaceStartTimeKey);
+    }
+
+    Super::OnTaskFinished(OwnerComp, NodeMemory, Result);
 }

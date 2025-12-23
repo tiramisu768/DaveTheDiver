@@ -18,7 +18,7 @@ public:
 	UTask_FaceAndWait();
 
 	UPROPERTY(EditAnywhere, Category="Settings")
-	float WaitTime = 3.0f;
+	float WaitTime = 10.0f;
 
 	UPROPERTY(EditAnywhere, Category ="Settings")
 	float RotationSpeed = 5.0f;
@@ -26,6 +26,4 @@ public:
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
-	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type Result) override;
-	
 };

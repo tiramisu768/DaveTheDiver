@@ -33,18 +33,48 @@ void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
     UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-    AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
     ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
-    if (!BlackboardComp||!SeaCreature || !Target)
+
+    if (BlackboardComp == nullptr || SeaCreature == nullptr || SeaCreature->SteeringComp == nullptr)
     {
         FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-        return; 
+        return;
+    }
+
+    AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
+
+    //타겟이 사라졌거나 너무 멀어지면 추적 포기 (Succeeded)
+    const float DistToTarget = FVector::Dist(SeaCreature->GetActorLocation(), Target->GetActorLocation());
+    bool bFaceFinished = false;
+    if (Target == nullptr)
+    {
+        bFaceFinished = true;
+    }
+    else
+    {
+        if (DistToTarget > SeaCreature->GetData()->SafeDistance)
+        {
+            bFaceFinished = true;
+        }
+        else
+        {
+            bFaceFinished = false;
+        }
+    }
+
+    if (bFaceFinished)
+    {
+        BlackboardComp->ClearValue(ASeaCreatureAIController::TargetActorKey);
+        BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsThreatImminentKey, false);
+        FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+        return;
     }
 
     const FVector SeaCreatureLoc = SeaCreature->GetActorLocation();
     FVector TargetLoc = Target->GetActorLocation();
     TargetLoc.Z = SeaCreatureLoc.Z;
     FVector Dir = TargetLoc - SeaCreatureLoc;
+
     if (!Dir.IsNearlyZero())
     {
         FRotator Desired = Dir.Rotation();
@@ -60,8 +90,4 @@ void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
         BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey,true);
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
     }
-}
-
-void UTask_FaceAndWait::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type Result)
-{
 }

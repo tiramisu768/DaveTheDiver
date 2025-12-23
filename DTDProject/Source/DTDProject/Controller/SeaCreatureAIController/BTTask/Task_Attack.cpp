@@ -39,6 +39,7 @@ EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	);
 
 	SeaCreature->Attack(Target);
+	OwnerComp.GetBlackboardComponent()->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, false);
 
 	return EBTNodeResult::InProgress;
 }

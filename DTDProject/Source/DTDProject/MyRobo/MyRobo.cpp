@@ -905,7 +905,7 @@ void AMyRobo::UpdateWeaponAttachments()
 	case EWeaponState::MeleeAttaching:
 		if (MeleeWeapon)
 		{
-			MeleeWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MeleeWeaponSocketName);
+			MeleeWeapon->AttachToComponent(GetMesh(),	FAttachmentTransformRules::SnapToTargetNotIncludingScale, MeleeWeaponSocketName);
 			MeleeWeapon->SetActorHiddenInGame(false);
 		}
 		break;

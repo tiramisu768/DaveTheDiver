@@ -54,6 +54,10 @@ public:
 
 	void StopRangedAim();
 
+	void StartFire(const FVector& FireDirection);
+
+	void StopFire();
+
 	void PerformAttack();
 
 	void PerformAttack(const FVector2D& ScreenPosition);
@@ -219,12 +223,6 @@ private:
 #pragma endregion
 
 #pragma region Animation
-	UPROPERTY()
-	TObjectPtr<UAnimMontage> MeleeAttackMontage;
-	UPROPERTY()
-	TObjectPtr<UAnimMontage> Melee2AttackMontage;
-	UPROPERTY()
-	TObjectPtr<UAnimMontage> Melee3AttackMontage;
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> HitReactionMontage;
 #pragma endregion

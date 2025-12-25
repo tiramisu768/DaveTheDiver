@@ -55,22 +55,6 @@ AMyRobo::AMyRobo()
 #pragma endregion
 
 #pragma region	Animation
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> MeleeAttackMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/MyRobo/Animation/AM_MeleeAttack.AM_MeleeAttack'"));
-	if (MeleeAttackMontageFinder.Succeeded())
-	{
-		MeleeAttackMontage = MeleeAttackMontageFinder.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Melee2AttackMontageFinder(TEXT(""));
-	if (Melee2AttackMontageFinder.Succeeded())
-	{
-		Melee2AttackMontage = Melee2AttackMontageFinder.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Melee3AttackMontageFinder(TEXT(""));
-	if (Melee3AttackMontageFinder.Succeeded())
-	{
-		Melee3AttackMontage = Melee3AttackMontageFinder.Object;
-	}
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> HitReactionMontageFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/MyRobo/Animation/AM_HitBy.AM_HitBy'"));
 	if (HitReactionMontageFinder.Succeeded())
 	{
@@ -294,6 +278,22 @@ void AMyRobo::StopRangedAim()
 	PlayRangedStopAimMontage();
 }
 
+void AMyRobo::StartFire(const FVector& FireDirection)
+{
+	if (ActiveRangedWeapon)
+	{
+		ActiveRangedWeapon->StartFire(this, FireDirection);
+	}
+}
+
+void AMyRobo::StopFire()
+{
+	if (ActiveRangedWeapon)
+	{
+		ActiveRangedWeapon->StopFire(this);
+	}
+}
+
 void AMyRobo::PerformAttack()
 {
 	if (!MainController) return;
@@ -333,7 +333,7 @@ void AMyRobo::FireProjectile()
 
 	// 2. 광선의 시작점은 '카메라 위치'로 설정하여, 플레이어의 시야에서 장애물에 가려지는지를 확인합니다.
 	FVector TraceStart, ForwardVector;
-	MainController->FireStartPostion(TraceStart, ForwardVector);
+	MainController->FireStartPosition(TraceStart, ForwardVector);
 
 	// 3. 광선의 끝점은 카메라 위치에서 '컨트롤러의 조준 방향'으로 길게 뻗어나갑니다.
 	const FVector TraceEnd = TraceStart + (ForwardVector * 10000.f);
@@ -749,23 +749,9 @@ void AMyRobo::PlayMeleeAttackMontage()
 {
 	if (MeleeWeapon && MeleeWeapon->GetWeaponStats() && MeleeWeapon->GetWeaponStats()->AttackMontage)
 	{
-		UAnimMontage* MeleeMontage;
-		if (MeleeWeapon->GetWeaponStats()->AttackMontage == MeleeAttackMontage)
-		{
-			MeleeMontage = MeleeAttackMontage;
-		}
-		else if (MeleeWeapon->GetWeaponStats()->AttackMontage == Melee2AttackMontage)
-		{
-			MeleeMontage = Melee2AttackMontage;
-		}
-		else if (MeleeWeapon->GetWeaponStats()->AttackMontage == Melee3AttackMontage)
-		{
-			MeleeMontage = Melee3AttackMontage;
-		}
-
 		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
-		PlayMontageFullBody(MeleeMontage, EndDelegate);
+		PlayMontageFullBody(MeleeWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
 	}
 }
 

@@ -8,6 +8,7 @@
 #include "Weapon/WeaponData.h"
 #include "Weapon.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponStateChanged, int32, CurrentAmmo, float, CooldownRatio);
 
 UCLASS()
 class DTDPROJECT_API AWeapon : public AActor
@@ -23,6 +24,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category ="Weapon")
 	UDataTable* WeaponDataTable;
 
+	UPROPERTY(BlueprintAssignable, Category="Weapon")
+	FOnWeaponStateChanged OnWeaponStateChanged;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Weapon")
+	int32 CurrentAmmo = 0;
+
+	FTimerHandle CooldownTimerHandle;
+
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	EWeaponSlot GetSlotType() const;
 
@@ -33,11 +42,19 @@ public:
 
 	FVector GetMuzzleLocation() const;
 
-	virtual void Tick(float DeltaTime) override;
-
+	void StartFire(ACharacter* OwnerCharacter, const FVector& FireDirection);
+	void StopFire(ACharacter* OwnerCharacter);
 	virtual void Attack(ACharacter* OwnerCharacter, const FVector& FireDirection = FVector::ZeroVector);
 
+	bool ConsumeAmmo(int32 Amount = 1);
+	bool CanFire() const;
+	void StartCooldown();
+	void OnCooldownExpired();
+
 protected:
+	virtual void Tick(float DeltaTime) override;
+	virtual void BeginPlay() override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USceneComponent* ParentMesh;
 
@@ -47,8 +64,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	TSubclassOf<class ABullet> BulletClass;
 
-	virtual void BeginPlay() override;
-
-private:
 	FWeaponData* WeaponStats;
+
+	bool bIsFiring = false;
+	FVector CurrentFireDirection;
 };

@@ -16,8 +16,6 @@ UTask_ChargeStraight::UTask_ChargeStraight()
 
 EBTNodeResult::Type UTask_ChargeStraight::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	return EBTNodeResult::Type();
-
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComp) return EBTNodeResult::Failed;
 

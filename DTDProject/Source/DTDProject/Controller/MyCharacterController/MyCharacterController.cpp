@@ -164,7 +164,8 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(MoveAction, ETriggerEvent::Completed, this, &AMyCharacterController::MoveEndInput);
 		input->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCharacterController::LookInput);
 		input->BindAction(DashAction, ETriggerEvent::Started, this, &AMyCharacterController::DashInput);
-		input->BindAction(MeleeAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::MeleeAttackInput);
+		input->BindAction(MeleeAttackAction, ETriggerEvent::Triggered, this, &AMyCharacterController::OnFireTriggered);
+		input->BindAction(MeleeAttackAction, ETriggerEvent::Completed, this, &AMyCharacterController::OnFireStopped);
 		input->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::StartAiming); //우클릭 시작 시
 		input->BindAction(RangedAttackAction, ETriggerEvent::Completed, this, &AMyCharacterController::StopAiming); //우클릭 끝 시
 		input->BindAction(SwitchWeaponAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchWeaponInput);
@@ -225,7 +226,7 @@ void AMyCharacterController::DashInput(const FInputActionValue& value)
 	}
 }
 
-void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
+void AMyCharacterController::OnFireTriggered(const FInputActionValue& value)
 {
 	if (IsAttacking) return;
 
@@ -235,18 +236,39 @@ void AMyCharacterController::MeleeAttackInput(const FInputActionValue& value)
 		{
 			if(MainWidgetInstance)
 			{
-				FVector2D ScreenPosition = MainWidgetInstance->GetCrosshairScreenPosition();
+				FVector TraceStart, TraceDir;
+				if (FireStartPosition(TraceStart, TraceDir))
+				{
+					ControlledRobo->StartFire(TraceDir);
+				}
+
+				/*FVector2D ScreenPosition = MainWidgetInstance->GetCrosshairScreenPosition();
 
 				IsAttacking = true;
-				ControlledRobo->PerformAttack(ScreenPosition);
+				ControlledRobo->PerformAttack(ScreenPosition);*/
 			}
 			
 		}
 		else
 		{   //근접 공격
+			if (IsAttacking) return;
 			IsAttacking = true;
 			ControlledRobo->PerformAttack();
 		}
+	}
+}
+
+void AMyCharacterController::OnFireStopped(const FInputActionValue& value)
+{
+	if (!ControlledRobo) return;
+
+	if (IsAiming)
+	{
+		ControlledRobo->StopFire();
+	}
+	else
+	{
+		IsAttacking = false;
 	}
 }
 
@@ -292,6 +314,9 @@ void AMyCharacterController::StopAiming(const FInputActionValue& value)
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
+	if (IsAiming) return;
+	//툴전환막는것도 추가해야함
+
 	if (MainWidgetInstance)
 	{
 		MainWidgetInstance->PlayWeaponSwitchAnimation(CurrentWeaponIndex);
@@ -375,7 +400,7 @@ void AMyCharacterController::OnSelectUIButton()
 	}*/
 }
 
-bool AMyCharacterController::FireStartPostion(FVector& WorldPosition, FVector& WorldDirection)
+bool AMyCharacterController::FireStartPosition(FVector& WorldPosition, FVector& WorldDirection)
 {
 	UImage* AimUI = MainWidgetInstance->GetRoboAimUI()->GetImageArrow();
 	FVector2D ScreenPosition = AimUI->GetCachedGeometry().GetAbsolutePosition();

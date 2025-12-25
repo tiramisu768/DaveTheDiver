@@ -34,6 +34,8 @@ private:
 	TObjectPtr<UImage> HarpoonWeaponIcon;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> GunWeaponIcon;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> BulletCountText;
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
 	UWidgetAnimation* ToolAnim;

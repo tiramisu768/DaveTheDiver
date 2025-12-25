@@ -33,6 +33,11 @@ void AWeapon::BeginPlay()
 	{
 		WeaponStats = WeaponDataTable->FindRow<FWeaponData>(RowName, TEXT(""));
 	}
+
+	if (WeaponStats)
+	{
+		CurrentAmmo = WeaponStats->MaxAmmo;
+	}
 }
 
 EWeaponSlot AWeapon::GetSlotType() const
@@ -48,6 +53,28 @@ EWeaponSlot AWeapon::GetSlotType() const
 void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& FireDirection)
 {
 	if (!WeaponStats || !OwnerCharacter) return;
+
+	if (!WeaponStats->bAllowFireDuringMontage)
+	{
+		if (USkeletalMeshComponent* Mesh = OwnerCharacter->GetMesh())
+		{
+			if (UAnimInstance* Anim = Mesh->GetAnimInstance())
+			{
+				if ((WeaponStats->AttackMontage && Anim->Montage_Play(WeaponStats->AttackMontage)) || (WeaponStats->AimMontage && Anim->Montage_Play(WeaponStats->AimMontage)))
+				{
+					return;
+				}
+			}
+		}
+	}
+
+	if (!CanFire()) return;
+
+	if (!ConsumeAmmo(WeaponStats->AmmoPerShot))
+	{
+		//탄약 부족 처리(사운드 등)
+		return;
+	}
 
 	switch (WeaponStats->Slot)
 	{
@@ -85,6 +112,54 @@ void AWeapon::Attack(ACharacter* OwnerCharacter, const FVector& FireDirection)
 			break;
 		}
 	}
+	StartCooldown();
+}
+
+bool AWeapon::ConsumeAmmo(int32 Amount)
+{
+	if (!WeaponStats) return false;
+	if (WeaponStats->MaxAmmo <= 0) return true;
+	if (CurrentAmmo >= Amount)
+	{
+		CurrentAmmo -= Amount;
+		OnWeaponStateChanged.Broadcast(CurrentAmmo, 0.0f);
+		return true;
+	}
+	return false;
+}
+
+bool AWeapon::CanFire() const
+{
+	if (!WeaponStats) return false;
+
+	if (!WeaponStats->bAutomatic && WeaponStats->MaxAmmo > 0 && CurrentAmmo <= 0) return false;
+	if (GetWorld() && GetWorld()->GetTimerManager().IsTimerActive(CooldownTimerHandle)) return false;
+	return true;
+}
+
+void AWeapon::StartCooldown()
+{
+	if (!WeaponStats) return;
+
+	float Cool = WeaponStats->CooldownSeconds;
+
+	if (WeaponStats->bAutomatic && WeaponStats->FireRate > 0.f)
+	{
+		Cool = 1.f / WeaponStats->FireRate;
+	}
+
+	if (Cool <= 0.f) return;
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &AWeapon::OnCooldownExpired, Cool, false);
+		OnWeaponStateChanged.Broadcast(CurrentAmmo, 1.0f);
+	}
+}
+
+void AWeapon::OnCooldownExpired()
+{
+	OnWeaponStateChanged.Broadcast(CurrentAmmo, 0.0f);
 }
 
 FWeaponData AWeapon::GetWeaponStatsCopy() const
@@ -105,6 +180,50 @@ FVector AWeapon::GetMuzzleLocation() const
 
 	UE_LOG(LogTemp, Warning, TEXT("Weapon '%s' is No Muzzle socket."), *GetName());
 	return GetActorLocation();
+}
+
+void AWeapon::StartFire(ACharacter* OwnerCharacter, const FVector& FireDirection)
+{
+	if (!OwnerCharacter || !WeaponStats) return;
+
+	bIsFiring = true;
+	CurrentFireDirection = FireDirection;
+
+	if (WeaponStats->AttackMontage)
+	{
+		if (USkeletalMeshComponent* Mesh = OwnerCharacter->GetMesh())
+		{
+			if (UAnimInstance* Anim = Mesh->GetAnimInstance())
+			{
+				if (!Anim->Montage_IsPlaying(WeaponStats->AttackMontage))
+				{
+					Anim->Montage_Play(WeaponStats->AttackMontage);
+				}
+			}
+		}
+	}
+}
+
+void AWeapon::StopFire(ACharacter* OwnerCharacter)
+{
+	bIsFiring = false;
+
+	if (WeaponStats && WeaponStats->AttackMontage)
+	{
+		if (OwnerCharacter)
+		{
+			if (USkeletalMeshComponent* Mesh = OwnerCharacter->GetMesh())
+			{
+				if (UAnimInstance* Anim = Mesh->GetAnimInstance())
+				{
+					if (Anim->Montage_IsPlaying(WeaponStats->AttackMontage))
+					{
+						Anim->Montage_Stop(0.2f, WeaponStats->AttackMontage);
+					}
+				}
+			}
+		}
+	}
 }
 
 // Called every frame

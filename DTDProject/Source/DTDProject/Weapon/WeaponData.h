@@ -39,14 +39,38 @@ struct FWeaponData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<UTexture2D> Icon;
 
+	//사거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Range;
+	float Range =300.f;
+
+	//초당 발사 수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float FireRate=1.f; 
+
+	//무기별 추가 쿨다운
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CooldownSeconds = 0.0f;
+
+	//연사 가능 여부
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bAutomatic = false;
+
+	//몽타주가 끝나기 전에 발사 허용 여부
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bAllowFireDuringMontage = true;
+
+	//탄약관련
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaxAmmo = 6;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float FireRate; //초당 발사 수
+	int32 AmmoPerShot = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ProjectileSpeed;
+	float ReloadTime = 1.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ProjectileSpeed =2000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* AimMontage;

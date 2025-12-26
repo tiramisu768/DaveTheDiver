@@ -50,15 +50,15 @@ public:
 
 	void SetupMainUIReference(UMainUI* InMainUI);
 
-	void StartRangedAim();
+	void BeginRangedAim();
 
-	void StopRangedAim();
+	void EndRangedAim();
 
-	void StartFire(const FVector& FireDirection);
+	void StartFiring(const FVector& FireDirection);
 
-	void StopFire();
+	void StopFiring();
 
-	void PerformAttack();
+	void PerformMeleeAttack();
 
 	void PerformAttack(const FVector2D& ScreenPosition);
 
@@ -220,6 +220,7 @@ private:
 	bool IsHolding = false;
 	float HoldElapsed = 0.0f;
 	bool bIsCameraFixed = false;
+	bool bIsFiring = false;
 #pragma endregion
 
 #pragma region Animation

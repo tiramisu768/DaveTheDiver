@@ -27,45 +27,44 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Weapon")
 	FOnWeaponStateChanged OnWeaponStateChanged;
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Weapon")
-	int32 CurrentAmmo = 0;
-
-	FTimerHandle CooldownTimerHandle;
-
-	UFUNCTION(BlueprintPure, Category = "Weapon")
-	EWeaponSlot GetSlotType() const;
-
-	const FWeaponData* GetWeaponStats() const { return WeaponStats; }
-
-	UFUNCTION(BlueprintPure, Category = "Weapon", meta = (DisplayName = "GetWeaponStats (Copy)"))
-	FWeaponData GetWeaponStatsCopy() const;
-
-	FVector GetMuzzleLocation() const;
-
 	void StartFire(ACharacter* OwnerCharacter, const FVector& FireDirection);
 	void StopFire(ACharacter* OwnerCharacter);
-	virtual void Attack(ACharacter* OwnerCharacter, const FVector& FireDirection = FVector::ZeroVector);
+	void PlayFireMontage(ACharacter* OwnerCharacter);
+	void StopFireMontage(ACharacter* OwnerCharacter);
+	void SpawnProjectileAtMuzzle(const FVector& Direction);
+	virtual void TryFire(ACharacter* OwnerCharacter, const FVector& FireDirection = FVector::ZeroVector);
+
+	EWeaponSlot GetSlotType() const;
+	const FWeaponData* GetWeaponStats() const { return WeaponStats; }
+	FVector GetMuzzleLocation() const;
+
+	virtual void Tick(float DeltaTime) override;
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	FWeaponData* WeaponStats;
+	FTimerHandle CooldownTimerHandle;
+	FTimerHandle FireTimerHandle;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Weapon", meta=(AllowPrivateAccess="true"))
+	int32 CurrentAmmo = 0;
+
+	bool bIsFiring = false;
+	FVector CurrentFireDirection;
 
 	bool ConsumeAmmo(int32 Amount = 1);
 	bool CanFire() const;
 	void StartCooldown();
 	void OnCooldownExpired();
 
-protected:
-	virtual void Tick(float DeltaTime) override;
-	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* ParentMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* WeaponMesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	TSubclassOf<class ABullet> BulletClass;
-
-	FWeaponData* WeaponStats;
-
-	bool bIsFiring = false;
-	FVector CurrentFireDirection;
 };

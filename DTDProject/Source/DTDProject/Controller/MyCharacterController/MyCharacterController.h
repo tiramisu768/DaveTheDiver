@@ -37,8 +37,8 @@ public:
 	void DashInput(const FInputActionValue& value);
 	void OnFireTriggered(const FInputActionValue& value);
 	void OnFireStopped(const FInputActionValue& value);
-	void StartAiming(const FInputActionValue& value);
-	void StopAiming(const FInputActionValue& value);
+	void BeginAim(const FInputActionValue& value);
+	void EndAim(const FInputActionValue& value);
 	void SwitchWeaponInput(const FInputActionValue& value);
 	void UseToolInput(const FInputActionValue& value);
 	void SwitchToolInput(const FInputActionValue& value);
@@ -48,7 +48,7 @@ public:
 	void OnNavigateUp();
 	void OnNavigateDown();
 	void OnSelectUIButton();
-	bool FireStartPosition(FVector& WorldPosition, FVector& WorldDirection);
+	bool DeprojectAimToWorld(FVector& WorldPosition, FVector& WorldDirection);
 	//	bool GetIsMoveInput() const { return isMoveInput; }
 	void EndMyGame(bool IsSuccess);
 

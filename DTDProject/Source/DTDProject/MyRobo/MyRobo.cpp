@@ -266,35 +266,48 @@ void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 	}
 }
 
-void AMyRobo::StartRangedAim()
+void AMyRobo::BeginRangedAim()
 {
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(HolsterTimerHandle);
+	}
 	CurrentWeaponState = EWeaponState::RangedAttaching;
 	UpdateWeaponAttachments();
 	PlayRangedAimMontage();
 }
 
-void AMyRobo::StopRangedAim()
+void AMyRobo::EndRangedAim()
 {
 	PlayRangedStopAimMontage();
 }
 
-void AMyRobo::StartFire(const FVector& FireDirection)
+void AMyRobo::StartFiring(const FVector& FireDirection)
 {
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(HolsterTimerHandle);
+	}
+
+	bIsFiring = true;
+
 	if (ActiveRangedWeapon)
 	{
 		ActiveRangedWeapon->StartFire(this, FireDirection);
 	}
 }
 
-void AMyRobo::StopFire()
+void AMyRobo::StopFiring()
 {
+	bIsFiring = false;
+
 	if (ActiveRangedWeapon)
 	{
 		ActiveRangedWeapon->StopFire(this);
 	}
 }
 
-void AMyRobo::PerformAttack()
+void AMyRobo::PerformMeleeAttack()
 {
 	if (!MainController) return;
 
@@ -333,7 +346,7 @@ void AMyRobo::FireProjectile()
 
 	// 2. 광선의 시작점은 '카메라 위치'로 설정하여, 플레이어의 시야에서 장애물에 가려지는지를 확인합니다.
 	FVector TraceStart, ForwardVector;
-	MainController->FireStartPosition(TraceStart, ForwardVector);
+	MainController->DeprojectAimToWorld(TraceStart, ForwardVector);
 
 	// 3. 광선의 끝점은 카메라 위치에서 '컨트롤러의 조준 방향'으로 길게 뻗어나갑니다.
 	const FVector TraceEnd = TraceStart + (ForwardVector * 10000.f);
@@ -366,7 +379,7 @@ void AMyRobo::FireProjectile()
 
 	//DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + FireDirection * 10000.f, FColor::Green, false, 2.0f, 0, 1.f);
 
-	ActiveRangedWeapon->Attack(this, FireDirection);
+	ActiveRangedWeapon->SpawnProjectileAtMuzzle(FireDirection);
 }
 
 void AMyRobo::SwitchActiveRangedWeapon()
@@ -772,9 +785,6 @@ void AMyRobo::PlayRangedStopAimMontage()
 		//EndDelegate.BindUObject(this, &AMyRobo::OnStopAimMontageEnded);
 		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AimMontage, EndDelegate, NAME_None, -1.0f); //NAME_None : 특정 세션으로 점프하지말고, 그냥 처음부터 재생해라.
 	}
-
-	// 만약 '무기 내리기' 몽타주가 없다면, 바로 무기를 집어넣는 타이머를 시작
-	StartHolsterTimer();
 }
 
 void AMyRobo::PlayRangedAttackMontage()
@@ -927,7 +937,7 @@ void AMyRobo::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 		MainController->SetIsAttacking(false);
 	}
 
-	if (bInterrupted)
+	if (!bIsFiring)
 	{
 		StartHolsterTimer();
 	}
@@ -935,7 +945,7 @@ void AMyRobo::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 
 void AMyRobo::OnStopAimMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (bInterrupted)
+	if (!bIsFiring)
 	{
 		StartHolsterTimer();
 	}

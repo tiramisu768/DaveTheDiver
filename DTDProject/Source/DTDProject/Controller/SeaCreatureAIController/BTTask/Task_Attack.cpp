@@ -29,6 +29,18 @@ EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 		return EBTNodeResult::Failed;
 	}
 
+	const FSeaCreatureData* Data = SeaCreature->GetData();
+	if (Data == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UTask_Attack::ExecuteTask - SeaCreature Data is null"));
+		return EBTNodeResult::Failed;
+	}
+	if (Data->Disposition == ESeaDisposition::Passive)
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("UTask_Attack aborted: Creature is Passive (no attack)."));
+		return EBTNodeResult::Failed;
+	}
+
 	AMyRobo* Target = Cast<AMyRobo>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
 	if (Target == nullptr)
 	{

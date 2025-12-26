@@ -8,6 +8,14 @@
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
 #include "SeaCreature.generated.h"
 
+UENUM(BlueprintType)
+enum class ESeaDisposition :uint8
+{
+	Passive UMETA(DisplayName = "Passive"),
+	Aggressive UMETA(DisplayName = "Aggressive"),
+	Monster UMETA(DisplayName = "Monster")
+};
+
 USTRUCT(BlueprintType)
 struct FSeaCreatureData : public FTableRowBase
 {
@@ -15,71 +23,68 @@ struct FSeaCreatureData : public FTableRowBase
 public:
 	FSeaCreatureData();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. Default Info")
 	FString Name;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. Default Info")
 	int32 Grade;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. Default Info")
 	float Weight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. 기본 정보")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. Default Info")
 	float MaxHP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. Default Info")
+	ESeaDisposition Disposition = ESeaDisposition::Passive;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 시각적 요소")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Visual")
 	TSoftObjectPtr<UTexture2D> FishIcon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 시각적 요소")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Visual")
 	TObjectPtr<class USkeletalMesh> Mesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 시각적 요소")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Visual")
 	TSubclassOf<UAnimInstance> AnimClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. 시각적 요소")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Visual")
 	TObjectPtr<UAnimMontage> HitbyMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "3. 행동 성향")
-	bool IsAggressive;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float WanderRadius = { 900.0f }; //물고기 배회범위
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float SlowRadius = { 300.0f }; //물고기 배회범위
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float SightRadius = 1500.0f; // 로보 인지 범위
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float ActionTriggerDistance = 400.0f; //물고기 추격/도망 시작 범위
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float SafeDistance = 1000.f; //물고기 추격/도망 중단 범위
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float WanderSpeed = { 5.0f };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float ReturnSpeed = { 5.0f };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. 공통 행동")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float Acceleration = { 1500.f }; //가속도
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "5. 비공격형 행동", meta = (EditCondition = "!IsAggressive"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "5. Passive")
 	float FleeSpeed = { 20.0f };
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "IsAggressive"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. 공격형 행동", meta = (EditCondition = "IsAggressive"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
 	TObjectPtr<UAnimMontage> AttackMontage;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. 공격형 행동", meta = (EditCondition = "IsAggressive"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
 	float AttackRange = 50.0f; //물고기 공격 시작 범위
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. 공격형 행동", meta = (EditCondition = "IsAggressive"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
 	float ChaseSpeed = { 10.0f };
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. 공격형 행동", meta = (EditCondition = "IsAggressive"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
 	float AttackSpeed{ 10.0f };
-
-
 };
 
 

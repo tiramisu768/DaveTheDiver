@@ -39,7 +39,20 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	if (FishData == nullptr) return;
 
-	UBehaviorTree* BTToRun = FishData->IsAggressive ? AggressiveBT : PassiveBT;
+	UBehaviorTree* BTToRun = nullptr;
+	if (FishData->Disposition == ESeaDisposition::Monster)
+	{
+		BTToRun = MonsterBT;
+	}
+	else if (FishData->Disposition == ESeaDisposition::Aggressive)
+	{
+		BTToRun = AggressiveBT;
+	}
+	else
+	{
+		BTToRun = PassiveBT;
+	}
+
 	if (BTToRun == nullptr) return;
 
 	if (SightConfig)

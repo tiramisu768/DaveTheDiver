@@ -166,8 +166,8 @@ void AMyCharacterController::SetupInputComponent()
 		input->BindAction(DashAction, ETriggerEvent::Started, this, &AMyCharacterController::DashInput);
 		input->BindAction(MeleeAttackAction, ETriggerEvent::Triggered, this, &AMyCharacterController::OnFireTriggered);
 		input->BindAction(MeleeAttackAction, ETriggerEvent::Completed, this, &AMyCharacterController::OnFireStopped);
-		input->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::StartAiming); //우클릭 시작 시
-		input->BindAction(RangedAttackAction, ETriggerEvent::Completed, this, &AMyCharacterController::StopAiming); //우클릭 끝 시
+		input->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMyCharacterController::BeginAim); //우클릭 시작 시
+		input->BindAction(RangedAttackAction, ETriggerEvent::Completed, this, &AMyCharacterController::EndAim); //우클릭 끝 시
 		input->BindAction(SwitchWeaponAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchWeaponInput);
 		input->BindAction(UseToolAction, ETriggerEvent::Started, this, &AMyCharacterController::UseToolInput);
 		input->BindAction(SwitchToolAction, ETriggerEvent::Started, this, &AMyCharacterController::SwitchToolInput);
@@ -237,9 +237,9 @@ void AMyCharacterController::OnFireTriggered(const FInputActionValue& value)
 			if(MainWidgetInstance)
 			{
 				FVector TraceStart, TraceDir;
-				if (FireStartPosition(TraceStart, TraceDir))
+				if (DeprojectAimToWorld(TraceStart, TraceDir))
 				{
-					ControlledRobo->StartFire(TraceDir);
+					ControlledRobo->StartFiring(TraceDir);
 				}
 
 				/*FVector2D ScreenPosition = MainWidgetInstance->GetCrosshairScreenPosition();
@@ -251,9 +251,9 @@ void AMyCharacterController::OnFireTriggered(const FInputActionValue& value)
 		}
 		else
 		{   //근접 공격
-			if (IsAttacking) return;
+			//if (IsAttacking) return;
 			IsAttacking = true;
-			ControlledRobo->PerformAttack();
+			ControlledRobo->PerformMeleeAttack();
 		}
 	}
 }
@@ -264,7 +264,7 @@ void AMyCharacterController::OnFireStopped(const FInputActionValue& value)
 
 	if (IsAiming)
 	{
-		ControlledRobo->StopFire();
+		ControlledRobo->StopFiring();
 	}
 	else
 	{
@@ -272,7 +272,7 @@ void AMyCharacterController::OnFireStopped(const FInputActionValue& value)
 	}
 }
 
-void AMyCharacterController::StartAiming(const FInputActionValue& value)
+void AMyCharacterController::BeginAim(const FInputActionValue& value)
 {
 	IsAiming = true;
 	IsAttacking = false;
@@ -284,13 +284,13 @@ void AMyCharacterController::StartAiming(const FInputActionValue& value)
 
 	if (ControlledRobo)
 	{
-		ControlledRobo->StartRangedAim();
+		ControlledRobo->BeginRangedAim();
 	}
 
 	// 마우스 커서 숨기거나 포커스 고정할 필요가 있으면 여기서 처리
 }
 
-void AMyCharacterController::StopAiming(const FInputActionValue& value)
+void AMyCharacterController::EndAim(const FInputActionValue& value)
 {
 	IsAiming = false;
 
@@ -307,7 +307,7 @@ void AMyCharacterController::StopAiming(const FInputActionValue& value)
 	{
 		if (ControlledRobo)
 		{
-			ControlledRobo->StopRangedAim();
+			ControlledRobo->EndRangedAim();
 		}
 	}
 }
@@ -400,7 +400,7 @@ void AMyCharacterController::OnSelectUIButton()
 	}*/
 }
 
-bool AMyCharacterController::FireStartPosition(FVector& WorldPosition, FVector& WorldDirection)
+bool AMyCharacterController::DeprojectAimToWorld(FVector& WorldPosition, FVector& WorldDirection)
 {
 	UImage* AimUI = MainWidgetInstance->GetRoboAimUI()->GetImageArrow();
 	FVector2D ScreenPosition = AimUI->GetCachedGeometry().GetAbsolutePosition();

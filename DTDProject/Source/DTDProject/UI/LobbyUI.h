@@ -4,26 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Interface/UINavigateInterface.h" // 인터페이스 헤더 추가
+#include "Interface/UINavigateInterface.h"
 #include "LobbyUI.generated.h"
 
-/**
- * 
- */
+class UShopUI;
+
 UCLASS()
-class DTDPROJECT_API ULobbyUI : public UUserWidget, public IUINavigateInterface // 인터페이스 상속
+class DTDPROJECT_API ULobbyUI : public UUserWidget, public IUINavigateInterface
 {
 	GENERATED_BODY()
 
 protected:
 	virtual void NativeConstruct() override;
-	// virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override; // 더 이상 필요 없음
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UButton> Button_NewGame;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UButton> Button_ExitGame;
+
+	UPROPERTY(meta = (BindWidget, Optional))
+	TObjectPtr<UShopUI> ShopWidget;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UButton>> NavigatableButtons;
@@ -37,9 +38,12 @@ protected:
 	virtual void NavigateDown_Implementation() override;
 	virtual void Select_Implementation() override;
 
-
 public:
 	void OnNewGameClicked();
 	void OnExitClicked();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category ="Lobby")
+	void ShowShop();
+	virtual void ShowShop_Implementation();
 	
 };

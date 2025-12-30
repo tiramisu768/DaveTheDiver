@@ -28,6 +28,13 @@ public:
 	bool HasSelectedFish() const { return bHasSelectedFish; }
 	const FCaughtFishInfo& GetSelectedFish() const { return SelectedFish; }
 
+	void RequestShowShopOnLobby() { bShowShopOnLobby = true; }
+	bool ShouldShowShopOnLobby() const { return bShowShopOnLobby; }
+	void ClearShowShopOnLobby() { bShowShopOnLobby = false; }
+
+	UFUNCTION(BlueprintCallable)
+	void StartNewGameRandom();
+
 private:
 	UPROPERTY()
 	int32 Coins = 0;
@@ -40,5 +47,8 @@ private:
 
 	UPROPERTY()
 	bool bHasSelectedFish = false;
+
+	UPROPERTY()
+	bool bShowShopOnLobby = false;
 	
 };

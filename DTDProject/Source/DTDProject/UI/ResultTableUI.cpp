@@ -45,6 +45,12 @@ void UResultTableUI::OnConfirmClicked()
 	if (ActiveIndex == GoodResultIndex)
 	{
 		UE_LOG(LogTemp, Log, TEXT("OnConfirmClicked:Good"));
+
+		if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance()))
+		{
+			GI->RequestShowShopOnLobby();
+		}
+
 		if (APlayerController* PlayerController = GetOwningPlayer())
 		{
 			APawn* Pawn = PlayerController->GetPawn();
@@ -73,8 +79,8 @@ void UResultTableUI::OnConfirmClicked()
 	}
 	else if (ActiveIndex == BadResultIndex)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Bad"));
-		UE_LOG(LogTemp, Log, TEXT("OnConfirmClicked:Good"));
+		UE_LOG(LogTemp, Log, TEXT("OnConfirmClicked:Bad"));
+
 		APlayerController* PlayerController = GetOwningPlayer();
 		if (PlayerController)
 		{

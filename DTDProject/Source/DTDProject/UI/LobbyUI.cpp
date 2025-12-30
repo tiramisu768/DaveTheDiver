@@ -2,6 +2,7 @@
 
 
 #include "UI/LobbyUI.h"
+#include "UI/ShopUI.h"
 #include <Kismet/GameplayStatics.h>
 #include "Components/Button.h"
 #include "Styling/SlateColor.h"
@@ -10,7 +11,7 @@ void ULobbyUI::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    // 버튼들을 네비게이션 배열에 추가합니다.
+    // 버튼들을 배열에 추가합니다.
     if (Button_NewGame)
     {
         NavigatableButtons.Add(Button_NewGame);
@@ -22,13 +23,17 @@ void ULobbyUI::NativeConstruct()
         Button_ExitGame->OnClicked.AddDynamic(this, &ULobbyUI::OnExitClicked);
     }
 
-    // 초기 버튼 포커스 설정
+    // 초기 버튼 인덱스 설정
     SelectedButtonIndex = 0;
     UpdateButtonFocus();
 
-    // 이 위젯이 키보드 포커스를 받을 수 있도록 설정합니다.
+    if (ShopWidget)
+    {
+        ShopWidget->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    // 키 입력을 받도록 설정
     bIsFocusable = true;
-    // SetFocus(); // 컨트롤러가 포커스를 관리하므로 주석 처리
 }
 
 void ULobbyUI::NavigateUp_Implementation()
@@ -70,15 +75,23 @@ void ULobbyUI::UpdateButtonFocus()
     }
 }
 
-
 void ULobbyUI::OnNewGameClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("New Game Button Clicked!"));
-	UGameplayStatics::OpenLevel(this, "MainLevel");
+	UGameplayStatics::OpenLevel(this, "Map1Level");
 }
 
 void ULobbyUI::OnExitClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("Exit Game Button Clicked!"));
 	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
+}
+
+void ULobbyUI::ShowShop_Implementation()
+{
+    if (ShopWidget)
+    {
+        ShopWidget->SetVisibility(ESlateVisibility::Visible);
+        UE_LOG(LogTemp, Warning, TEXT("Shop shown from Lobby UI"));
+    }
 }

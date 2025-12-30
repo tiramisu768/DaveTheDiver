@@ -3,6 +3,8 @@
 
 #include "Controller/MyCharacterController/LobbyPlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "GameInstance/MyGameInstance.h"
+#include "UI/LobbyUI.h"
 
 ALobbyPlayerController::ALobbyPlayerController()
 {
@@ -19,7 +21,7 @@ void ALobbyPlayerController::BeginPlay()
 
 	if (LobbyWidgetClass)
 	{
-		LobbyWidgetInstance = CreateWidget<UUserWidget>(this, LobbyWidgetClass);
+		LobbyWidgetInstance = CreateWidget<ULobbyUI>(this, LobbyWidgetClass);
 		if (LobbyWidgetInstance)
 		{
 			LobbyWidgetInstance->AddToViewport();
@@ -27,7 +29,19 @@ void ALobbyPlayerController::BeginPlay()
 	}
 
 	bShowMouseCursor = true;
-
 	FInputModeUIOnly InputMode;
 	SetInputMode(InputMode);
+
+	if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		if (GI->ShouldShowShopOnLobby())
+		{
+			GI->ClearShowShopOnLobby();
+
+			if (ULobbyUI* Lobby = Cast<ULobbyUI>(LobbyWidgetInstance))
+			{
+				Lobby->ShowShop();
+			}
+		}
+	}
 }

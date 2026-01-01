@@ -46,6 +46,18 @@ public:
 	void UpdateAimPos(FVector2D MoveDelta);
 	FVector2D GetCrosshairScreenPosition()const;
 
+	UFUNCTION()
+	void HandleResultConfirmRequested(bool bSuccess, int32 SelectedIndex);
+
+	UFUNCTION()
+	void HandleResultConfirmed(bool bSuccess);
+
+	UFUNCTION()
+	void HandleShopConfirmRequested();
+
+	UFUNCTION()
+	void HandleShopClosed();
+
 	void ShowGameResultUI(bool bSuccess);
 	void ShowShopUI();
 
@@ -85,6 +97,11 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UShopUI> ShopWidget;
 
+	//¸Ê ÈÄº¸
+	UPROPERTY(EditDefaultsOnly, Category="Flow")
+	TArray<FName> MapCandidates;
+
 private:
 	void ResetAimPos();
+	void StartRandomMap();
 };

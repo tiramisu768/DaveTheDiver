@@ -6,6 +6,9 @@
 #include "UI/ResponsiveUI.h"
 #include "ResultTableUI.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FResultConfirmed, bool, bSuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FResultConfirmRequested, bool, bSuccess, int32, SelectedIndex);
+
 UCLASS()
 class DTDPROJECT_API UResultTableUI : public UResponsiveUI
 {
@@ -13,6 +16,18 @@ class DTDPROJECT_API UResultTableUI : public UResponsiveUI
 
 public:
 	void SetGameEnd(bool bWasSuccessful);
+
+	UPROPERTY(BlueprintAssignable, Category = "Result")
+	FResultConfirmed OnResultConfirmed;
+
+	UPROPERTY(BlueprintAssignable, Category = "Result")
+	FResultConfirmRequested OnConfirmRequested;
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Result")
+	void PopulateFishList(const TArray<struct FCaughtFishInfo>& FishList);
+
+	UFUNCTION(BlueprintCallable, Category="Result")
+	void SelectFishAtIndex(int32 Index);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -29,4 +44,13 @@ private:
 
 	UFUNCTION()
 	void OnConfirmClicked();
+
+	int32 SelectedFishIndex = -1; //실패화면에서 선택된 물고기 인덱스
+
+	void UpdateConfirmButtonState();
+
+	void BroadcastResultConfirmed();
+
+	bool bPendingSuccess = false;
+	FTimerHandle HideAnimFinishTimerHandle;
 };

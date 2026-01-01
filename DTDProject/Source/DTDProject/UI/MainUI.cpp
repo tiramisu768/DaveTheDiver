@@ -15,6 +15,9 @@
 #include "Tool/ToolData.h"
 #include "ActorComponent/InventoryComponent.h"
 #include "ActorComponent/StateComponent/RoboComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "GameInstance/MyGameInstance.h"
 
 void UMainUI::NativeConstruct()
 {
@@ -38,11 +41,21 @@ void UMainUI::NativeConstruct()
 	if (ResultTableWidget)
 	{
 		ResultTableWidget->SetVisibility(ESlateVisibility::Hidden);
+		ResultTableWidget->OnConfirmRequested.AddDynamic(this, &UMainUI::HandleResultConfirmRequested); //Confirm 요청을 메인이 받는다
+		ResultTableWidget->OnResultConfirmed.AddDynamic(this, &UMainUI::HandleResultConfirmed); //Hide 애니 종료 후 흐름 수신
 	}
 
 	if (ShopWidget)
 	{
 		ShopWidget->SetVisibility(ESlateVisibility::Hidden);
+		ShopWidget->OnConfirmRequested.AddDynamic(this, &UMainUI::HandleShopConfirmRequested);
+		ShopWidget->OnShopClosed.AddDynamic(this, &UMainUI::HandleShopClosed);
+	}
+
+	if (MapCandidates.Num() == 0)
+	{
+		MapCandidates.Add(FName("Map1Level"));
+		MapCandidates.Add(FName("Map2Level"));
 	}
 
 }
@@ -187,6 +200,23 @@ void UMainUI::ResetAimPos()
 	}
 }
 
+void UMainUI::StartRandomMap()
+{
+	if (MapCandidates.Num() == 0)
+	{
+		return;
+	}
+
+	const int32 Index = FMath::RandRange(0, MapCandidates.Num() - 1);
+	const FName MapToLoad = MapCandidates[Index];
+	UE_LOG(LogTemp, Log, TEXT("random map : %s"), *MapToLoad.ToString());
+
+	if (UWorld* World = GetWorld())
+	{
+		UGameplayStatics::OpenLevel(World, MapToLoad);
+	}
+}
+
 FVector2D UMainUI::GetCrosshairScreenPosition() const
 {
 	if (AimWidget)
@@ -194,6 +224,82 @@ FVector2D UMainUI::GetCrosshairScreenPosition() const
 		return AimWidget->GetCrosshairScreenPosition();
 	}
 	return FVector2D::ZeroVector;
+}
+
+void UMainUI::HandleResultConfirmRequested(bool bSuccess, int32 SelectedIndex)
+{
+	UE_LOG(LogTemp, Log, TEXT("success=%d selectedIdx=%d"),bSuccess?1:0,SelectedIndex);
+
+	if (APlayerController* PlayerController = GetOwningPlayer())
+	{
+		APawn* Pawn = PlayerController->GetPawn();
+		if (Pawn)
+		{
+			if (UInventoryComponent* Inventory = Pawn->FindComponentByClass<UInventoryComponent>())
+			{
+				if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance()))
+				{
+					if (bSuccess)
+					{
+						int32 TotalPrice = 0;
+						for (const FCaughtFishInfo& Fish : Inventory->GetCaughtFishList())
+						{
+							TotalPrice += Fish.Grade * 10 + static_cast<int32>(Fish.Weight * 5);
+						}
+						GI->AddCoins(TotalPrice);
+						GI->SetTempCaughtFishList(Inventory->GetCaughtFishList());
+						GI->RequestShowShopOnLobby();
+					}
+					else
+					{
+						const TArray<FCaughtFishInfo>& FishList = Inventory->GetCaughtFishList();
+						if (FishList.IsValidIndex(SelectedIndex))
+						{
+							const FCaughtFishInfo& SelectedFish = FishList[SelectedIndex];
+							const int32 Reward = SelectedFish.Grade * 10 + static_cast<int32>(SelectedFish.Weight * 5);
+							GI->AddCoins(Reward);
+							GI->SetSelectedFish(SelectedFish);
+						}
+					}
+					Inventory->SellAllFish();
+				}
+			}
+		}
+		PlayerController->SetPause(false);
+		PlayerController->SetShowMouseCursor(false);
+	}
+
+	if (ResultTableWidget)
+	{
+		ResultTableWidget->HideUI();
+	}
+}
+
+void UMainUI::HandleResultConfirmed(bool bSuccess)
+{
+	UE_LOG(LogTemp, Log, TEXT("success=%d"),bSuccess?1:0);
+
+	if (bSuccess && ShopWidget)
+	{
+		ShopWidget->ShowUI();
+	}
+	else
+	{
+		StartRandomMap();
+	}
+}
+
+void UMainUI::HandleShopConfirmRequested()
+{
+	if (ShopWidget)
+	{
+		ShopWidget->HideUI();
+	}
+}
+
+void UMainUI::HandleShopClosed()
+{
+	StartRandomMap();
 }
 
 void UMainUI::ShowGameResultUI(bool bSuccess)

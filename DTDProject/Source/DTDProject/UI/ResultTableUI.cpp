@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ActorComponent/InventoryComponent.h"
 #include "GameInstance/MyGameInstance.h"
+#include "ShopUI.h"
 
 void UResultTableUI::SetGameEnd(bool bWasSuccessful)
 {
@@ -21,7 +22,37 @@ void UResultTableUI::SetGameEnd(bool bWasSuccessful)
 			ResultSwitcher->SetActiveWidgetIndex(BadResultIndex);
 		}
 	}
-//잡은 물고기 목록을 채우는 등의 공통 로직을 추가할 수 있음
+
+	//실패창이면 인벤토리에서 물고기목록을 가져와서 BP에게 전달해 목록을 채운다.
+	if (!bWasSuccessful)
+	{
+		SelectedFishIndex = -1;
+		UpdateConfirmButtonState();
+
+		if (APlayerController* Controller = GetOwningPlayer())
+		{
+			if (APawn* Pawn = Controller->GetPawn())
+			{
+				if (UInventoryComponent* InventoryComponent = Pawn->FindComponentByClass<UInventoryComponent>())
+				{
+					const TArray<FCaughtFishInfo>& FishList = InventoryComponent->GetCaughtFishList();
+					PopulateFishList(FishList);
+				}
+				else
+				{
+					TArray<FCaughtFishInfo> Empty;
+					PopulateFishList(Empty);
+				}
+			}
+		}
+	}
+}
+
+void UResultTableUI::SelectFishAtIndex(int32 Index)
+{
+	SelectedFishIndex = Index;
+	UpdateConfirmButtonState();
+	UE_LOG(LogTemp, Log, TEXT("SelectedFishIndex : %d"),SelectedFishIndex);
 }
 
 void UResultTableUI::NativeConstruct()
@@ -37,60 +68,39 @@ void UResultTableUI::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ConfirmButton is null - move the button to BP_ResultTable and set 'Is Variable'"));
 	}
+
+	SelectedFishIndex = -1;
+	UpdateConfirmButtonState();
 }
 
 void UResultTableUI::OnConfirmClicked()
 {
 	int32 ActiveIndex = ResultSwitcher ? ResultSwitcher->GetActiveWidgetIndex() : -1;
-	if (ActiveIndex == GoodResultIndex)
+	bPendingSuccess = (ActiveIndex == GoodResultIndex);
+
+	if (OnConfirmRequested.IsBound())
 	{
-		UE_LOG(LogTemp, Log, TEXT("OnConfirmClicked:Good"));
-
-		if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance()))
-		{
-			GI->RequestShowShopOnLobby();
-		}
-
-		if (APlayerController* PlayerController = GetOwningPlayer())
-		{
-			APawn* Pawn = PlayerController->GetPawn();
-			if (Pawn)
-			{
-				if (UInventoryComponent* InventoryComponent = Pawn->FindComponentByClass<UInventoryComponent>())
-				{
-					int32 TotalPrice = 0;
-					for (const FCaughtFishInfo& Fish : InventoryComponent->GetCaughtFishList())
-					{
-						TotalPrice += Fish.Grade * 10 + static_cast<int32>(Fish.Weight * 5);
-					}
-
-					if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
-					{
-						GameInstance ->AddCoins(TotalPrice);
-						GameInstance->SetTempCaughtFishList(InventoryComponent->GetCaughtFishList());
-					}
-					InventoryComponent->SellAllFish();
-				}
-			}
-			PlayerController->SetPause(false);
-			PlayerController->SetShowMouseCursor(false);
-		}
-		UGameplayStatics::OpenLevel(GetWorld(), FName("LobbyLevel"));
+		OnConfirmRequested.Broadcast(bPendingSuccess, SelectedFishIndex);
 	}
-	else if (ActiveIndex == BadResultIndex)
-	{
-		UE_LOG(LogTemp, Log, TEXT("OnConfirmClicked:Bad"));
+}
 
-		APlayerController* PlayerController = GetOwningPlayer();
-		if (PlayerController)
-		{
-			PlayerController->SetPause(false);
-			PlayerController->SetShowMouseCursor(false);
-		}
-		UGameplayStatics::OpenLevel(GetWorld(), FName("LobbyLevel"));
+void UResultTableUI::UpdateConfirmButtonState()
+{
+	if (!ConfirmButton) return;
+
+	const bool bOnBadPage = (ResultSwitcher && ResultSwitcher->GetActiveWidgetIndex() == BadResultIndex);
+	
+	if (bOnBadPage)
+	{
+		ConfirmButton->SetIsEnabled(SelectedFishIndex != -1);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnConfirmClicked: Unknown active index %d"), ActiveIndex);
+		ConfirmButton->SetIsEnabled(true);
 	}
+}
+
+void UResultTableUI::BroadcastResultConfirmed()
+{
+	OnResultConfirmed.Broadcast(bPendingSuccess);
 }

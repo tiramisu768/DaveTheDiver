@@ -40,9 +40,19 @@ void UMainUI::NativeConstruct()
 
 	if (ResultTableWidget)
 	{
+		UE_LOG(LogTemp, Log, TEXT("MainUI::NativeConstruct - ResultTableWidget valid: %s"), * ResultTableWidget->GetName());
 		ResultTableWidget->SetVisibility(ESlateVisibility::Hidden);
 		ResultTableWidget->OnConfirmRequested.AddDynamic(this, &UMainUI::HandleResultConfirmRequested); //Confirm 요청을 메인이 받는다
 		ResultTableWidget->OnResultConfirmed.AddDynamic(this, &UMainUI::HandleResultConfirmed); //Hide 애니 종료 후 흐름 수신
+		
+		UE_LOG(LogTemp, Log, TEXT("MainUI::NativeConstruct - After binding: OnResultConfirmed.IsBound=%d, OnHidden.IsBound=%d"),
+			ResultTableWidget->OnResultConfirmed.IsBound() ? 1 : 0,
+			ResultTableWidget->OnHidden.IsBound() ? 1 : 0);
+	
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MainUI::NativeConstruct - ResultTableWidget is null"));
 	}
 
 	if (ShopWidget)
@@ -291,10 +301,19 @@ void UMainUI::HandleResultConfirmed(bool bSuccess)
 
 void UMainUI::HandleShopConfirmRequested()
 {
-	if (ShopWidget)
+	UE_LOG(LogTemp, Log, TEXT("MainUI::HandleShopConfirmRequested called"));
+
+	if (!ShopWidget)
 	{
-		ShopWidget->HideUI();
+		UE_LOG(LogTemp, Warning, TEXT("MainUI::HandleShopConfirmRequested - ShopWidget is null"));
+		return;
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("MainUI::HandleShopConfirmRequested - ShopWidget name: %s, OnConfirmRequested bound?: %d"),
+		*ShopWidget->GetName(), ShopWidget->OnConfirmRequested.IsBound() ? 1 : 0);
+
+	// 기존 동작: MainUI가 Shop 닫음
+	ShopWidget->HideUI();
 }
 
 void UMainUI::HandleShopClosed()

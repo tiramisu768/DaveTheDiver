@@ -49,6 +49,7 @@ private:
 
 	void UpdateConfirmButtonState();
 
+	UFUNCTION()
 	void BroadcastResultConfirmed();
 
 	bool bPendingSuccess = false;

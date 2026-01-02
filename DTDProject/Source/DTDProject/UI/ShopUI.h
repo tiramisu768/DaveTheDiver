@@ -33,5 +33,6 @@ private:
 
 	FTimerHandle HideAnimFinishTimerHandle;
 
+	UFUNCTION()
 	void BroadcastShopClosed();
 };

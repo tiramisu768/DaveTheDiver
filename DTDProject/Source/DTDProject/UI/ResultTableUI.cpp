@@ -46,6 +46,7 @@ void UResultTableUI::SetGameEnd(bool bWasSuccessful)
 			}
 		}
 	}
+	UpdateConfirmButtonState();
 }
 
 void UResultTableUI::SelectFishAtIndex(int32 Index)
@@ -64,11 +65,8 @@ void UResultTableUI::NativeConstruct()
 		ConfirmButton->OnClicked.RemoveDynamic(this, &UResultTableUI::OnConfirmClicked);
 		ConfirmButton->OnClicked.AddDynamic(this, &UResultTableUI::OnConfirmClicked);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ConfirmButton is null - move the button to BP_ResultTable and set 'Is Variable'"));
-	}
 
+	OnHidden.AddDynamic(this, &UResultTableUI::BroadcastResultConfirmed);
 	SelectedFishIndex = -1;
 	UpdateConfirmButtonState();
 }
@@ -102,5 +100,8 @@ void UResultTableUI::UpdateConfirmButtonState()
 
 void UResultTableUI::BroadcastResultConfirmed()
 {
-	OnResultConfirmed.Broadcast(bPendingSuccess);
+	if (OnResultConfirmed.IsBound())
+	{
+		OnResultConfirmed.Broadcast(bPendingSuccess);
+	}
 }

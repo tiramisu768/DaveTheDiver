@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ResponsiveUI.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUIHidden);
 
 UCLASS()
 class DTDPROJECT_API UResponsiveUI : public UUserWidget
@@ -22,6 +22,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Responsive UI")
 	virtual void HideUI();
+
+	UPROPERTY(BlueprintAssignable, Category = "Responsive UI")
+	FOnUIHidden OnHidden;
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="Responsive UI")

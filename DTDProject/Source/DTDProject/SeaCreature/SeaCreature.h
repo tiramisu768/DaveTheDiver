@@ -162,20 +162,15 @@ public:
 	void StopAIBehavior();
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	FDataTableRowHandle SeaCreatureDataHandle;
+
 	virtual void BeginPlay() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Data", meta = (AllowPriaveAccess="true"))
-	FName RowName;
-
 	float HomeReturnDist=0.f;
-
-	//TArray<FName> StatDataNames;
-
-	UPROPERTY(EditAnywhere, Category = "Data")
-	TObjectPtr<class UDataTable> SeaCreatureDataTable;
 
 	FSeaCreatureData* Data;
 

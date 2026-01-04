@@ -51,6 +51,14 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 	else
 	{
 		BTToRun = PassiveBT;
+		if (BTToRun)
+		{
+			UE_LOG(LogTemp, Log, TEXT("%s is Passive. Found PassiveBT: %s"), *InPawn->GetName(), *BTToRun->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s is Passive, but PassiveBT variable is NOT SET in the AI Controller Blueprint!"), *InPawn->GetName());
+		}
 	}
 
 	if (BTToRun == nullptr) return;

@@ -45,10 +45,6 @@ ASeaCreature::ASeaCreature()
 	}
 
 	FishStateComponent = CreateDefaultSubobject<UFishStateComponent>(TEXT("FishStateComponent"));
-	
-	static ConstructorHelpers::FObjectFinder<UDataTable> SeaCreatureDataTableFinder(TEXT("/Script/Engine.DataTable'/Game/BluePrint/SeaCreature/Data/DT_SeaCreatureStat.DT_SeaCreatureStat'"));
-	if (SeaCreatureDataTableFinder.Succeeded())
-		SeaCreatureDataTable = SeaCreatureDataTableFinder.Object;
 
 	static ConstructorHelpers::FClassFinder<ADamagePopup> DamageWidgetClassFinder(TEXT("/Game/BluePrint/SeaCreature/UI/BP_DamagePopup.BP_DamagePopup_C"));
 	if (DamageWidgetClassFinder.Succeeded())
@@ -93,7 +89,7 @@ void ASeaCreature::BeginPlay()
 		GameInstance->OnGameEnded.AddUObject(this, &ASeaCreature::StopAIBehavior);
 	}*/
 	
-	Data = SeaCreatureDataTable->FindRow<FSeaCreatureData>(RowName, TEXT(""));
+	Data = SeaCreatureDataHandle.GetRow<FSeaCreatureData>(TEXT("SeaCreature BeginPlay"));
 
 	if (Data)
 	{

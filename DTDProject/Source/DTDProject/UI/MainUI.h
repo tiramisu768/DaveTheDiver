@@ -61,6 +61,12 @@ public:
 	void ShowGameResultUI(bool bSuccess);
 	void ShowShopUI();
 
+	UFUNCTION(BlueprintCallable)
+	void SaveAndOpenLevel(const FName MapName);
+
+	UFUNCTION(BlueprintCallable)
+	bool LoadSaveProgress();
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -96,6 +102,13 @@ protected:
 	//Shop UI
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UShopUI> ShopWidget;
+
+	//Loading
+	UPROPERTY(EditDefaultsOnly,Category="Loading")
+	TSubclassOf<UUserWidget> LoadingWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category ="Save")
+	FString SaveSlotName = TEXT("PlayerSaveSlot");
 
 	//¸Ê ÈÄº¸
 	UPROPERTY(EditDefaultsOnly, Category="Flow")

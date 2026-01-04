@@ -23,9 +23,6 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UButton> Button_ExitGame;
 
-	UPROPERTY(meta = (BindWidget, Optional))
-	TObjectPtr<UShopUI> ShopWidget;
-
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UButton>> NavigatableButtons;
 
@@ -41,9 +38,5 @@ protected:
 public:
 	void OnNewGameClicked();
 	void OnExitClicked();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category ="Lobby")
-	void ShowShop();
-	virtual void ShowShop_Implementation();
 	
 };

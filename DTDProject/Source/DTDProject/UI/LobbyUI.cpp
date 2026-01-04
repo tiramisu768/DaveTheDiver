@@ -27,11 +27,6 @@ void ULobbyUI::NativeConstruct()
     SelectedButtonIndex = 0;
     UpdateButtonFocus();
 
-    if (ShopWidget)
-    {
-        ShopWidget->SetVisibility(ESlateVisibility::Hidden);
-    }
-
     // 키 입력을 받도록 설정
     bIsFocusable = true;
 }
@@ -85,13 +80,4 @@ void ULobbyUI::OnExitClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("Exit Game Button Clicked!"));
 	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
-}
-
-void ULobbyUI::ShowShop_Implementation()
-{
-    if (ShopWidget)
-    {
-        ShopWidget->SetVisibility(ESlateVisibility::Visible);
-        UE_LOG(LogTemp, Warning, TEXT("Shop shown from Lobby UI"));
-    }
 }

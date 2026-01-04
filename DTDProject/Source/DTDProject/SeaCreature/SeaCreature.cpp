@@ -24,7 +24,6 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
-#include "GameInstance/MyGameInstance.h"
 
 ASeaCreature::ASeaCreature()
 {
@@ -88,10 +87,11 @@ void ASeaCreature::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	////////////GI
+	/*if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
 	{
 		GameInstance->OnGameEnded.AddUObject(this, &ASeaCreature::StopAIBehavior);
-	}
+	}*/
 	
 	Data = SeaCreatureDataTable->FindRow<FSeaCreatureData>(RowName, TEXT(""));
 
@@ -153,10 +153,11 @@ void ASeaCreature::BeginPlay()
 void ASeaCreature::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	///////////GI
+	/*if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
 	{
 		GameInstance->OnGameEnded.RemoveAll(this);
-	}
+	}*/
 }
 
 // Called every frame

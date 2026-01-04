@@ -17,7 +17,7 @@
 #include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
-#include "GameInstance/MyGameInstance.h"
+#include "Save/PlayerSave.h"
 
 void UMainUI::NativeConstruct()
 {
@@ -240,39 +240,51 @@ void UMainUI::HandleResultConfirmRequested(bool bSuccess, int32 SelectedIndex)
 {
 	UE_LOG(LogTemp, Log, TEXT("success=%d selectedIdx=%d"),bSuccess?1:0,SelectedIndex);
 
+	UPlayerSave* Save = nullptr;
+	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
+	{
+		USaveGame* Loaded = UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0);
+		Save = Cast<UPlayerSave>(Loaded);
+	}
+	if (!Save)
+	{
+		Save = Cast<UPlayerSave>(UGameplayStatics::CreateSaveGameObject(UPlayerSave::StaticClass()));
+	}
+
 	if (APlayerController* PlayerController = GetOwningPlayer())
 	{
 		APawn* Pawn = PlayerController->GetPawn();
 		if (Pawn)
 		{
 			if (UInventoryComponent* Inventory = Pawn->FindComponentByClass<UInventoryComponent>())
-			{
-				if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance()))
+			{		
+				if (bSuccess)
 				{
-					if (bSuccess)
+					int32 TotalPrice = 0;
+					for (const FCaughtFishInfo& Fish : Inventory->GetCaughtFishList())
 					{
-						int32 TotalPrice = 0;
-						for (const FCaughtFishInfo& Fish : Inventory->GetCaughtFishList())
-						{
-							TotalPrice += Fish.Grade * 10 + static_cast<int32>(Fish.Weight * 5);
-						}
-						GI->AddCoins(TotalPrice);
-						GI->SetTempCaughtFishList(Inventory->GetCaughtFishList());
-						GI->RequestShowShopOnLobby();
+						TotalPrice += Fish.Grade * 10 + static_cast<int32>(Fish.Weight * 5);
 					}
-					else
-					{
-						const TArray<FCaughtFishInfo>& FishList = Inventory->GetCaughtFishList();
-						if (FishList.IsValidIndex(SelectedIndex))
-						{
-							const FCaughtFishInfo& SelectedFish = FishList[SelectedIndex];
-							const int32 Reward = SelectedFish.Grade * 10 + static_cast<int32>(SelectedFish.Weight * 5);
-							GI->AddCoins(Reward);
-							GI->SetSelectedFish(SelectedFish);
-						}
-					}
-					Inventory->SellAllFish();
+					Save->Coins += TotalPrice;
+					Save->TempCaughtFishList = Inventory->GetCaughtFishList();
+
+					Save->bHasSelectedFish = false;
 				}
+				else
+				{
+					const TArray<FCaughtFishInfo>& FishList = Inventory->GetCaughtFishList();
+					if (FishList.IsValidIndex(SelectedIndex))
+					{
+						const FCaughtFishInfo& SelectedFish = FishList[SelectedIndex];
+						const int32 Reward = SelectedFish.Grade * 10 + static_cast<int32>(SelectedFish.Weight * 5);
+						Save->Coins += Reward;
+						Save->SelectedFish = SelectedFish;
+						Save->bHasSelectedFish = true;
+					}
+				}
+
+				// 기존 동작: 인벤토리 비움
+				Inventory->SellAllFish();
 			}
 		}
 		PlayerController->SetPause(false);
@@ -318,7 +330,16 @@ void UMainUI::HandleShopConfirmRequested()
 
 void UMainUI::HandleShopClosed()
 {
-	StartRandomMap();
+	if (MapCandidates.Num() == 0)
+	{
+		StartRandomMap();
+		return;
+	}
+
+	const int32 Index = FMath::RandRange(0, MapCandidates.Num() - 1);
+	const FName MapToLoad = MapCandidates[Index];
+	UE_LOG(LogTemp, Log, TEXT("HandleShopClosed - selected map: %s"), *MapToLoad.ToString());
+	SaveAndOpenLevel(MapToLoad);
 }
 
 void UMainUI::ShowGameResultUI(bool bSuccess)
@@ -341,5 +362,53 @@ void UMainUI::ShowShopUI()
 	{
 		ShopWidget->SetVisibility(ESlateVisibility::Visible);
 	}
+}
+
+void UMainUI::SaveAndOpenLevel(const FName MapName)
+{   //savegame 생성/갱신
+	UPlayerSave* Save = Cast<UPlayerSave>(UGameplayStatics::CreateSaveGameObject(UPlayerSave::StaticClass()));
+	if (!Save)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Fail SaveAndOpenLevel"));
+		return;
+	}
+	//현재 인벤토리 데이터 저장
+	if (APlayerController* Controller = GetOwningPlayer())
+	{
+		if (APawn* Pawn = Controller->GetPawn())
+		{
+			if (UInventoryComponent* Inventory = Pawn->FindComponentByClass<UInventoryComponent>())
+			{
+				Save->TempCaughtFishList = Inventory->GetCaughtFishList();
+			}
+		}
+	}
+
+	//Coin채우기
+	//슬롯에 저장
+	//다음 맵 이름 저장
+	Save->NextMapName = MapName;
+
+	//파일에 저장
+	if (!UGameplayStatics::SaveGameToSlot(Save, SaveSlotName, 0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SaveAndOpenLevel fail"));
+	}
+
+	//로딩레벨로 전환
+	UGameplayStatics::OpenLevel(GetWorld(), FName("LoadingLevel"));
+}
+
+bool UMainUI::LoadSaveProgress()
+{
+	if (!UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0)) return false;
+
+	USaveGame* Loaded = UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0);
+	UPlayerSave* PlayerSave = Cast<UPlayerSave>(Loaded);
+	if (!PlayerSave) return false;
+
+	UE_LOG(LogTemp, Log, TEXT("LoadSaveProgress coin %d, hasSelected %d"),PlayerSave->Coins,PlayerSave->bHasSelectedFish?1:0);
+
+	return true;
 }
 

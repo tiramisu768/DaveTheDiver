@@ -19,7 +19,6 @@
 #include "Components/Image.h"
 #include "ActorComponent/InventoryComponent.h"
 #include "ActorComponent/StateComponent/RoboComponent.h"
-#include "GameInstance/MyGameInstance.h"
 
 AMyCharacterController::AMyCharacterController()
 {
@@ -432,10 +431,11 @@ void AMyCharacterController::EndMyGame(bool IsSuccess)
 		MainWidgetInstance->ShowGameResultUI(IsSuccess);
 	}
 
-	if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
-	{
-		GameInstance->OnGameEnded.Broadcast();
-	}
+	///////////GI
+	//if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	//{
+	//	GameInstance->OnGameEnded.Broadcast();
+	//}
 }
 
 void AMyCharacterController::OnPossess(APawn* aPawn)

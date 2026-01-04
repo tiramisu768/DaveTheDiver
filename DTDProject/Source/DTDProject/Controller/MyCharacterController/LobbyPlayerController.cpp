@@ -3,7 +3,6 @@
 
 #include "Controller/MyCharacterController/LobbyPlayerController.h"
 #include "Blueprint/UserWidget.h"
-#include "GameInstance/MyGameInstance.h"
 #include "UI/LobbyUI.h"
 
 ALobbyPlayerController::ALobbyPlayerController()
@@ -31,17 +30,4 @@ void ALobbyPlayerController::BeginPlay()
 	bShowMouseCursor = true;
 	FInputModeUIOnly InputMode;
 	SetInputMode(InputMode);
-
-	if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance()))
-	{
-		if (GI->ShouldShowShopOnLobby())
-		{
-			GI->ClearShowShopOnLobby();
-
-			if (ULobbyUI* Lobby = Cast<ULobbyUI>(LobbyWidgetInstance))
-			{
-				Lobby->ShowShop();
-			}
-		}
-	}
 }

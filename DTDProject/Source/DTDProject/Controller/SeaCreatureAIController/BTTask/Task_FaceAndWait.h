@@ -6,9 +6,12 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "Task_FaceAndWait.generated.h"
 
-/**
- * 
- */
+struct FBTFaceAndWaitMemory
+{
+	float RemainingWaitTime;
+	TWeakObjectPtr<AActor> RememberedTarget;
+};
+
 UCLASS()
 class DTDPROJECT_API UTask_FaceAndWait : public UBTTaskNode
 {
@@ -17,13 +20,18 @@ class DTDPROJECT_API UTask_FaceAndWait : public UBTTaskNode
 public:
 	UTask_FaceAndWait();
 
-	UPROPERTY(EditAnywhere, Category="Settings")
+protected:
+	UPROPERTY(EditAnywhere, Category = "Settings")
 	float WaitTime = 3.0f;
 
-	UPROPERTY(EditAnywhere, Category ="Settings")
+	UPROPERTY(EditAnywhere, Category = "Settings")
 	float RotationSpeed = 5.0f;
 
-protected:
+	virtual uint16 GetInstanceMemorySize() const override
+	{
+		return sizeof(FBTFaceAndWaitMemory);
+	}
+
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type Result) override;

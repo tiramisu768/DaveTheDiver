@@ -26,12 +26,14 @@ EBTNodeResult::Type UTask_FaceAndWait::ExecuteTask(UBehaviorTreeComponent& Owner
     float Now = OwnerComp.GetWorld()->GetTimeSeconds();
     if (LastAttack > 0.f && (Now - LastAttack) < CooldownAfterAttack)
     {
-        BlackboardComp->SetValueAsFloat(ASeaCreatureAIController::FaceStartTimeKey, Now);
-        return EBTNodeResult::InProgress;
+        return EBTNodeResult::Failed;
     }
 
     AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
     if (!Target) return EBTNodeResult::Failed;
+
+    FBTFaceAndWaitMemory* MyMemory = (FBTFaceAndWaitMemory*)NodeMemory;
+    MyMemory->RememberedTarget = Target;
 
     BlackboardComp->SetValueAsFloat(ASeaCreatureAIController::FaceStartTimeKey, Now);
     return EBTNodeResult::InProgress;
@@ -40,6 +42,9 @@ EBTNodeResult::Type UTask_FaceAndWait::ExecuteTask(UBehaviorTreeComponent& Owner
 void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+
+    FBTFaceAndWaitMemory* MyMemory = (FBTFaceAndWaitMemory*)NodeMemory;
+    AActor* TargetActor = MyMemory->RememberedTarget.Get();
 
     UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
     ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
@@ -50,45 +55,11 @@ void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
         return;
     }
 
-    AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
-
-    //타겟이 사라졌거나 너무 멀어지면 추적 포기 (Succeeded)
-    const float DistToTarget = FVector::Dist(SeaCreature->GetActorLocation(), Target->GetActorLocation());
-    bool bFaceFinished = false;
-    if (Target == nullptr)
+    if (TargetActor)
     {
-        bFaceFinished = true;
-    }
-    else
-    {
-        if (DistToTarget > SeaCreature->GetData()->SafeDistance)
-        {
-            bFaceFinished = true;
-        }
-        else
-        {
-            bFaceFinished = false;
-        }
-    }
-
-    if (bFaceFinished)
-    {
-        BlackboardComp->ClearValue(ASeaCreatureAIController::TargetActorKey);
-        BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsThreatImminentKey, false);
-        FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-        return;
-    }
-
-    const FVector SeaCreatureLoc = SeaCreature->GetActorLocation();
-    FVector TargetLoc = Target->GetActorLocation();
-    TargetLoc.Z = SeaCreatureLoc.Z;
-    FVector Dir = TargetLoc - SeaCreatureLoc;
-
-    if (!Dir.IsNearlyZero())
-    {
+        FVector Dir = TargetActor->GetActorLocation() - SeaCreature->GetActorLocation();
         FRotator Desired = Dir.Rotation();
-        FRotator Current = SeaCreature->GetActorRotation();
-        FRotator NewRot = FMath::RInterpTo(Current, FRotator(0.f, Desired.Yaw, 0.f), DeltaSeconds, RotationSpeed);
+        FRotator NewRot = FMath::RInterpTo(SeaCreature->GetActorRotation(), FRotator(0.f, Desired.Yaw, 0.f), DeltaSeconds, RotationSpeed);
         SeaCreature->SetActorRotation(NewRot);
     }
 
@@ -96,9 +67,14 @@ void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
     const float Elapsed = OwnerComp.GetWorld()->GetTimeSeconds() - StartTime;
     if (Elapsed >= WaitTime)
     {
-        BlackboardComp->SetValueAsBool(ASeaCreatureAIController::ChaseTargetLocationKey,true);
+        if (TargetActor)
+        {
+            BlackboardComp->SetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey, TargetActor->GetActorLocation());
+        }
+
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
     }
+
 }
 
 void UTask_FaceAndWait::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type Result)

@@ -69,7 +69,7 @@ void UTask_ChargeStraight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 	{
 		BlackboardComp->ClearValue(ASeaCreatureAIController::TargetActorKey);
 		BlackboardComp->ClearValue(TEXT("LastKnowTargetLocation"));
-		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, false);
+		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::ChaseTargetLocationKey, false);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed); //succeed??
 		return;
 	}
@@ -78,7 +78,7 @@ void UTask_ChargeStraight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 	if (DistToTarget <= SeaCreature->GetData()->AttackRange)
 	{
 		// 돌격이 끝났으니 충전 플래그 클리어 (Attack Task가 다시 클리어할 수도 있음)
-		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, false);
+		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::ChaseTargetLocationKey, false);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return;
 	}

@@ -161,7 +161,12 @@ public:
 
 	void StopAIBehavior();
 
+	bool IsTracker() const { return bTracker; }
+
 protected:
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI")
+	bool bTracker = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FDataTableRowHandle SeaCreatureDataHandle;
 

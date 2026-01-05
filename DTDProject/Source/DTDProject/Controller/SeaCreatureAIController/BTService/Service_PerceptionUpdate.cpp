@@ -55,6 +55,22 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		if (FishData)
 		{
 			const bool bIsThreatImminent = MinDistSq < FMath::Square(FishData->ActionTriggerDistance);
+			// 디버그 로그를 출력해야 하는 개체인지 확인합니다.
+			ASeaCreature* MyCreature = Cast<ASeaCreature>(AIController->GetPawn());
+			if (MyCreature && MyCreature->IsTracker())
+			{
+				// 이제 이 로그는 bEnableDebugLogging이 true인 상어에 대해서만 출력됩니다.
+				if (FishData->Disposition == ESeaDisposition::Monster)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("[%s] Threat: %d | DistSq: %.2f | MyLocation: %s | TargetLocation: %s"),
+						*MyCreature->GetName(),
+						bIsThreatImminent ? 1 : 0,
+						MinDistSq,
+						*MyCreature->GetActorLocation().ToString(),
+						*NearestTarget->GetActorLocation().ToString()
+					);
+				}
+			}
 			BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsThreatImminentKey, bIsThreatImminent);
 		}
 	}

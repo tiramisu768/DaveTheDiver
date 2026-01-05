@@ -55,7 +55,7 @@ EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 		{
 			if (BBPtr)
 			{
-				BBPtr->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, false);
+				BBPtr->SetValueAsBool(ASeaCreatureAIController::ChaseTargetLocationKey, false);
 				BBPtr->ClearValue(ASeaCreatureAIController::FaceStartTimeKey);
 
 				if (WorldPtr)

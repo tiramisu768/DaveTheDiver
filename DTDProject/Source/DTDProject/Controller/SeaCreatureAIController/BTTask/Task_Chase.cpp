@@ -64,7 +64,7 @@ void UTask_Chase::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
 	{
 		BlackboardComp->ClearValue(ASeaCreatureAIController::TargetActorKey);
 		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsThreatImminentKey, false);
-		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, false);
+		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::ChaseTargetLocationKey, false);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return;
 	}

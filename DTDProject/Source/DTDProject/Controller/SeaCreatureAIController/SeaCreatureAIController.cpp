@@ -13,8 +13,9 @@ const FName ASeaCreatureAIController::TargetActorKey = TEXT("TargetActor");
 const FName ASeaCreatureAIController::HomeLocationKey = TEXT("HomeLocation");
 const FName ASeaCreatureAIController::IsFarFromHomeKey = TEXT("IsFarFromHome");
 const FName ASeaCreatureAIController::IsThreatImminentKey = TEXT("IsThreatImminent");
+const FName ASeaCreatureAIController::IsChargingKey = TEXT("IsCharging");
 const FName ASeaCreatureAIController::ChaseTargetLocationKey = TEXT("ChaseTargetLocation");
-const FName ASeaCreatureAIController::AttackReadyAtKey = TEXT("AttackReadyAt");
+const FName ASeaCreatureAIController::IsReadyToAttackKey = TEXT("IsReadyToAttack");
 const FName ASeaCreatureAIController::LastAttackEndTimeKey = TEXT("LastAttackEndTime");
 const FName ASeaCreatureAIController::FaceStartTimeKey = TEXT("FaceStartTime");
 

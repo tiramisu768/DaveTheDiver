@@ -70,6 +70,7 @@ void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
         if (TargetActor)
         {
             BlackboardComp->SetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey, TargetActor->GetActorLocation());
+            BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, true);
         }
 
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

@@ -327,6 +327,7 @@ void ASeaCreature::Attack(AMyRobo* Target)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Monster Attack!"));
 	if (FishStateComponent->IsDead() || Data->AttackMontage == nullptr || Target == nullptr)
 		return;
+
 	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(Data->AttackMontage))
 		return;
 	FVector TargetDirection = Target->GetActorLocation() - GetActorLocation();

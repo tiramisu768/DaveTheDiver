@@ -54,7 +54,7 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		const FSeaCreatureData* FishData = Cast<ASeaCreature>(AIController->GetPawn())->GetData();
 		if (FishData)
 		{
-			const bool bIsThreatImminent = MinDistSq < FMath::Square(FishData->ActionTriggerDistance);
+			const bool bIsThreatImminent = MinDistSq < FMath::Square(FishData->SightRadius);
 			// 디버그 로그를 출력해야 하는 개체인지 확인합니다.
 			ASeaCreature* MyCreature = Cast<ASeaCreature>(AIController->GetPawn());
 			if (MyCreature && MyCreature->IsTracker())

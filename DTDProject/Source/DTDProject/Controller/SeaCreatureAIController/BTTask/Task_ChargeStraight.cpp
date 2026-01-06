@@ -28,13 +28,14 @@ EBTNodeResult::Type UTask_ChargeStraight::ExecuteTask(UBehaviorTreeComponent& Ow
 	SeaCreature->MovementComponent->MaxSpeed = SeaCreature->GetData()->ChaseSpeed;
 	SeaCreature->MovementComponent->Acceleration = SeaCreature->GetData()->Acceleration;
 
-	FVector Goal = BlackboardComp->GetValueAsVector(TEXT("LastKnowTargetLocation"));
-	AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
+	FVector Goal = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey);
+
+	/*AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
 	if (Goal.IsNearlyZero() && Target)
 	{
 		Goal = Target->GetActorLocation();
-		BlackboardComp->SetValueAsVector(TEXT("LastKnowTargetLocation"), Goal);
-	}
+		BlackboardComp->SetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey, Goal);
+	}*/
 
 	if (Goal.IsNearlyZero()) return EBTNodeResult::Failed;
 
@@ -54,39 +55,23 @@ void UTask_ChargeStraight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 		return;
 	}
 
-	FVector Goal = BlackboardComp->GetValueAsVector(TEXT("LastKnowTargetLocation"));
+	FVector Goal = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey);
 	if (Goal.IsNearlyZero())
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;
 	}
 
-	//타겟이 사라졌거나 너무 멀어지면 추격 포기 (Succeeded)
 	FVector Pos = SeaCreature->GetActorLocation();
-	const float DistToTarget = FVector::Dist2D(Pos, Goal);
-
-	if (DistToTarget > SeaCreature->GetData()->SafeDistance)
+	if (FVector::Dist(Pos, Goal) <= SeaCreature->GetData()->AttackRange)
 	{
-		BlackboardComp->ClearValue(ASeaCreatureAIController::TargetActorKey);
-		BlackboardComp->ClearValue(TEXT("LastKnowTargetLocation"));
-		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::ChaseTargetLocationKey, false);
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed); //succeed??
-		return;
-	}
-
-	//타겟이 공격 범위 안에 들어오면 추격 성공 (Succeeded)
-	if (DistToTarget <= SeaCreature->GetData()->AttackRange)
-	{
-		// 돌격이 끝났으니 충전 플래그 클리어 (Attack Task가 다시 클리어할 수도 있음)
-		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::ChaseTargetLocationKey, false);
+		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsReadyToAttackKey,true);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return;
 	}
 
-
 	FVector Dir = Goal-Pos;
 	Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
-	Dir.Z = 0.f;
 	Dir.Normalize();
 
 	if (!Dir.IsNearlyZero())

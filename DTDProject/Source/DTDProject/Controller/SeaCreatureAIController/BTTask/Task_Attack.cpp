@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Controller/SeaCreatureAIController/BTTask/Task_Attack.h"
 #include "Controller/SeaCreatureAIController/SeaCreatureAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -20,24 +17,9 @@ EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!BlackboardComp) return EBTNodeResult::Failed;
-
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	if (SeaCreature == nullptr)
 	{
-		return EBTNodeResult::Failed;
-	}
-
-	const FSeaCreatureData* Data = SeaCreature->GetData();
-	if (Data == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UTask_Attack::ExecuteTask - SeaCreature Data is null"));
-		return EBTNodeResult::Failed;
-	}
-	if (Data->Disposition == ESeaDisposition::Passive)
-	{
-		UE_LOG(LogTemp, Verbose, TEXT("UTask_Attack aborted: Creature is Passive (no attack)."));
 		return EBTNodeResult::Failed;
 	}
 
@@ -47,28 +29,11 @@ EBTNodeResult::Type UTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 		return EBTNodeResult::Failed;
 	}
 
-	UBehaviorTreeComponent* OwnerCompPtr = &OwnerComp;
-	UBlackboardComponent* BBPtr = BlackboardComp;
-	UWorld* WorldPtr = OwnerComp.GetWorld();
-
-	SeaCreature->OnAttackMontageEndedDelegate.BindLambda([this,OwnerCompPtr,BBPtr,WorldPtr]()
+	SeaCreature->OnAttackMontageEndedDelegate.BindLambda([&]()
 		{
-			if (BBPtr)
-			{
-				BBPtr->SetValueAsBool(ASeaCreatureAIController::ChaseTargetLocationKey, false);
-				BBPtr->ClearValue(ASeaCreatureAIController::FaceStartTimeKey);
-
-				if (WorldPtr)
-				{
-					BBPtr->SetValueAsFloat(ASeaCreatureAIController::LastAttackEndTimeKey, WorldPtr->GetTimeSeconds());
-				}
-			}
-
-			if (OwnerCompPtr)
-			{
-				this->FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Succeeded);
-			}
-		});
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	);
 
 	SeaCreature->Attack(Target);
 

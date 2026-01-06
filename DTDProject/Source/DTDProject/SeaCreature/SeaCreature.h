@@ -80,9 +80,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
 	TObjectPtr<UAnimMontage> AttackMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
-	float AttackRange = 50.0f; //물고기 공격 시작 범위
+	float AttackRange = 200.0f; //물고기 공격 시작 범위
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
-	float ChaseSpeed = { 10.0f };
+	float ChaseSpeed = { 500.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
 	float AttackSpeed{ 10.0f };
 };

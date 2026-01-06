@@ -17,9 +17,6 @@ class DTDPROJECT_API UTask_ChargeStraight : public UBTTaskNode
 public:
 	UTask_ChargeStraight();
 
-	UPROPERTY(EditAnywhere, Category ="Settings")
-	float AcceptanceRadius = 100.0f;
-
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	float MaxChargeDistance = 2000.0f;
 

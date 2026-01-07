@@ -42,7 +42,7 @@ private:
 	TObjectPtr<class UBehaviorTree> AggressiveBT;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	TObjectPtr<class UBehaviorTree> MonsterBT;
+	TObjectPtr<class UBehaviorTree> TerritorialBT;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<class UBlackboardData> BlackboardAsset;

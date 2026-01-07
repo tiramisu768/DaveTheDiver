@@ -13,7 +13,7 @@ enum class ESeaDisposition :uint8
 {
 	Passive UMETA(DisplayName = "Passive"),
 	Aggressive UMETA(DisplayName = "Aggressive"),
-	Monster UMETA(DisplayName = "Monster")
+	Territorial UMETA(DisplayName = "Territorial")
 };
 
 USTRUCT(BlueprintType)
@@ -95,6 +95,7 @@ class UWidgetComponent;
 class USphereComponent;
 class UDataTable;
 class UAnimMontage;
+class UAttackStrategy;
 
 DECLARE_DELEGATE(FOnAttackMontageEndedDelegate);
 UCLASS()
@@ -175,6 +176,9 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	UPROPERTY()
+	TObjectPtr<UAttackStrategy> AttackStrategy;
+
 	float HomeReturnDist=0.f;
 
 	FSeaCreatureData* Data;

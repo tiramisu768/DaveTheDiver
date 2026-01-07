@@ -41,9 +41,9 @@ void ASeaCreatureAIController::PlayBehaviorTree(APawn* InPawn)
 	if (FishData == nullptr) return;
 
 	UBehaviorTree* BTToRun = nullptr;
-	if (FishData->Disposition == ESeaDisposition::Monster)
+	if (FishData->Disposition == ESeaDisposition::Territorial)
 	{
-		BTToRun = MonsterBT;
+		BTToRun = TerritorialBT;
 	}
 	else if (FishData->Disposition == ESeaDisposition::Aggressive)
 	{

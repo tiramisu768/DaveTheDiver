@@ -60,7 +60,7 @@ void UService_PerceptionUpdate::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 			if (MyCreature && MyCreature->IsTracker())
 			{
 				// 이제 이 로그는 bEnableDebugLogging이 true인 상어에 대해서만 출력됩니다.
-				if (FishData->Disposition == ESeaDisposition::Monster)
+				if (FishData->Disposition == ESeaDisposition::Territorial)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("[%s] Threat: %d | DistSq: %.2f | MyLocation: %s | TargetLocation: %s"),
 						*MyCreature->GetName(),

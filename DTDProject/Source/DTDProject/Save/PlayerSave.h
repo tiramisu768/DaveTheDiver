@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
+#include "ActorComponent/InventoryComponent.h"
 #include "PlayerSave.generated.h"
 
 /**

@@ -24,6 +24,9 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
+#include "SeaCreature/AttackStrategy.h"
+#include "SeaCreature/AggressiveAttackStrategy.h"
+#include "SeaCreature/TerritorialAttackStrategy.h"
 
 ASeaCreature::ASeaCreature()
 {
@@ -109,19 +112,21 @@ void ASeaCreature::BeginPlay()
 			MovementComponent->Deceleration = Data->Acceleration;
 		}
 
-		if (Data->Disposition == ESeaDisposition::Monster)
+		switch (Data->Disposition)
 		{
-			HomeReturnDist = Data->WanderRadius - 400.f;
-		}
-		else if (Data->Disposition == ESeaDisposition::Aggressive)
-		{
+		case ESeaDisposition::Aggressive:
+			AttackStrategy = NewObject<UAggressiveAttackStrategy>(this);
 			HomeReturnDist = Data->WanderRadius - 300.f;
-		}
-		else
-		{
+			break;
+		case ESeaDisposition::Territorial:
+			AttackStrategy = NewObject<UTerritorialAttackStrategy>(this);
+			HomeReturnDist = Data->WanderRadius - 400.f;
+			break;
+		case ESeaDisposition::Passive:
+			AttackStrategy = nullptr;
 			HomeReturnDist = Data->WanderRadius - 100.f;
+			break;
 		}
-
 		SteeringComp->InitParams(Data->WanderRadius, Data->SlowRadius);
 	}
 
@@ -324,18 +329,9 @@ void ASeaCreature::OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AA
 
 void ASeaCreature::Attack(AMyRobo* Target)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Monster Attack!"));
-	if (FishStateComponent->IsDead() || Data->AttackMontage == nullptr || Target == nullptr)
-		return;
-
-	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(Data->AttackMontage))
-		return;
-	FVector TargetDirection = Target->GetActorLocation() - GetActorLocation();
-	FRotator LookAtRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
-	SetActorRotation(LookAtRotation);
-	if (Data->AttackMontage && Mesh && Mesh->GetAnimInstance())
+	if (AttackStrategy)
 	{
-		Mesh->GetAnimInstance()->Montage_Play(Data->AttackMontage);
+		AttackStrategy->ExecuteAttack(this, Target);
 	}
 }
 

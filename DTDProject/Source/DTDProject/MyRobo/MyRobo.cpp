@@ -688,7 +688,9 @@ void AMyRobo::BeginPlay()
 		MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultMeleeWeaponClass, SpawnParams);
 		if(MeleeWeapon)
 		{
-			MeleeWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, MeleeWeaponSocketName);
+			MeleeWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::
+				SnapToTargetNotIncludingScale, 
+				MeleeWeaponSocketName);
 			MeleeWeapon->RowName = TEXT("Melee");
 			MeleeWeapon->PostInitializeComponents();
 			MeleeWeapon->SetActorHiddenInGame(true);

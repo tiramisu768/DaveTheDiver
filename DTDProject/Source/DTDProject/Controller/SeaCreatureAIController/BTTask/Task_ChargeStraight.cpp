@@ -7,6 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Components/SphereComponent.h"
 
 UTask_ChargeStraight::UTask_ChargeStraight()
 {
@@ -29,13 +30,6 @@ EBTNodeResult::Type UTask_ChargeStraight::ExecuteTask(UBehaviorTreeComponent& Ow
 	SeaCreature->MovementComponent->Acceleration = SeaCreature->GetData()->Acceleration;
 
 	FVector Goal = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey);
-
-	/*AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
-	if (Goal.IsNearlyZero() && Target)
-	{
-		Goal = Target->GetActorLocation();
-		BlackboardComp->SetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey, Goal);
-	}*/
 
 	if (Goal.IsNearlyZero()) return EBTNodeResult::Failed;
 
@@ -63,7 +57,23 @@ void UTask_ChargeStraight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 	}
 
 	FVector Pos = SeaCreature->GetActorLocation();
+	bool bAttackReady = false;
+
 	if (FVector::Dist(Pos, Goal) <= SeaCreature->GetData()->AttackRange)
+	{
+		bAttackReady = true;
+	}
+
+	if (!bAttackReady)
+	{
+		AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
+		if (Target && SeaCreature->SphereComponent && SeaCreature->SphereComponent->IsOverlappingActor(Target))
+		{
+			bAttackReady = true;
+		}
+	}
+
+	if (bAttackReady)
 	{
 		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsReadyToAttackKey,true);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

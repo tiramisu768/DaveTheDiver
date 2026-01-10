@@ -15,7 +15,14 @@ class DTDPROJECT_API UTask_TerritorialAttack : public UBTTaskNode
 	GENERATED_BODY()
 public:
 	UTask_TerritorialAttack();
+
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type Result) override;
+
+private:
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	UPROPERTY()
+	TWeakObjectPtr<UBehaviorTreeComponent> MyOwnerComp;
 };

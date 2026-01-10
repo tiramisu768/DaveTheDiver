@@ -25,43 +25,37 @@ EBTNodeResult::Type UTask_TerritorialAttack::ExecuteTask(UBehaviorTreeComponent&
 	if (!BlackboardComp) return EBTNodeResult::Failed;
 
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
-	if (SeaCreature == nullptr)
-	{
-		return EBTNodeResult::Failed;
-	}
+	if (SeaCreature == nullptr) return EBTNodeResult::Failed;
+
+	UAnimInstance* AnimInstance = SeaCreature->GetMesh() ? SeaCreature->GetMesh()->GetAnimInstance() : nullptr;
 
 	const FSeaCreatureData* Data = SeaCreature->GetData();
-	if (Data == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UTask_Attack::ExecuteTask - SeaCreature Data is null"));
-		return EBTNodeResult::Failed;
-	}
-	if (Data->Disposition == ESeaDisposition::Passive)
-	{
-		UE_LOG(LogTemp, Verbose, TEXT("UTask_Attack aborted: Creature is Passive (no attack)."));
-		return EBTNodeResult::Failed;
-	}
+	if (Data == nullptr) return EBTNodeResult::Failed;
 
 	AMyRobo* Target = Cast<AMyRobo>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
-	if (Target == nullptr)
-	{
-		return EBTNodeResult::Failed;
-	}
+	if (Target == nullptr) return EBTNodeResult::Failed;
 
-	SeaCreature->OnAttackMontageEndedDelegate.BindLambda([this, &OwnerComp]()
-		{
-			UBlackboardComponent* BBPtr = OwnerComp.GetBlackboardComponent();
-			if (BBPtr && OwnerComp.GetWorld())
-			{
-				BBPtr->SetValueAsFloat(ASeaCreatureAIController::LastAttackEndTimeKey, OwnerComp.GetWorld()->GetTimeSeconds());
-			}
+	MyOwnerComp = &OwnerComp;
 
-			this->FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		});
+	AnimInstance->OnMontageEnded.AddDynamic(this, &UTask_TerritorialAttack::OnMontageEnded);
 
 	SeaCreature->Attack(Target);
 
 	return EBTNodeResult::InProgress;
+}
+
+void UTask_TerritorialAttack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (MyOwnerComp.IsValid() && !bInterrupted)
+	{
+		UBlackboardComponent* BBPtr = MyOwnerComp->GetBlackboardComponent();
+		if (BBPtr && MyOwnerComp->GetWorld())
+		{
+			BBPtr->SetValueAsFloat(ASeaCreatureAIController::LastAttackEndTimeKey, MyOwnerComp->GetWorld()->GetTimeSeconds());
+		}
+
+		FinishLatentTask(*MyOwnerComp.Get(), EBTNodeResult::Succeeded);
+	}
 }
 
 void UTask_TerritorialAttack::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type Result)
@@ -80,10 +74,13 @@ void UTask_TerritorialAttack::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, 
 
 	// 델리게이트 바인딩 해제
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
-	if (SeaCreature && SeaCreature->OnAttackMontageEndedDelegate.IsBound())
+	if (SeaCreature)
 	{
-		SeaCreature->OnAttackMontageEndedDelegate.Unbind();
+		if (UAnimInstance* Anim = SeaCreature->GetMesh()->GetAnimInstance())
+		{
+			Anim->OnMontageEnded.RemoveDynamic(this, &UTask_TerritorialAttack::OnMontageEnded);
+		}
 	}
-
+	MyOwnerComp.Reset();
 }
 

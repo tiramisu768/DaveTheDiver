@@ -22,6 +22,7 @@ void UFishStateComponent::Heal(float HealAmount)
 	Super::Heal(HealAmount);
 }
 
+// FSeaCreatureData로부터 스탯(최대 체력 등)을 로드하는 역할을 담당하도록 설계
 void UFishStateComponent::LoadStatsFromDataTable()
 {
 }

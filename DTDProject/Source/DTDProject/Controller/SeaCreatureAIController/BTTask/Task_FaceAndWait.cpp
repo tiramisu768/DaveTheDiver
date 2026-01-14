@@ -21,14 +21,6 @@ EBTNodeResult::Type UTask_FaceAndWait::ExecuteTask(UBehaviorTreeComponent& Owner
     UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
     if (!BlackboardComp) return EBTNodeResult::Failed;
 
- /*   const float CooldownAfterAttack = 1.0f;
-    float LastAttack = BlackboardComp->GetValueAsFloat(ASeaCreatureAIController::LastAttackEndTimeKey);
-    float Now = OwnerComp.GetWorld()->GetTimeSeconds();
-    if (LastAttack > 0.f && (Now - LastAttack) < CooldownAfterAttack)
-    {
-        return EBTNodeResult::Failed;
-    }*/
-
     AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
     if (!Target) return EBTNodeResult::Failed;
 

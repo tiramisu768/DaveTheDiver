@@ -612,7 +612,6 @@ void AMyRobo::HitBy(AActor* DamageCauser, const FHitResult& HitResult)
 
 		if (!RoboComponent->IsDead())
 		{
-			GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("Robo is in danger.")));
 			if (HitReactionMontage && BodyComponent && BodyComponent->GetAnimInstance())
 			{
 				BodyComponent->GetAnimInstance()->Montage_Play(HitReactionMontage);
@@ -660,7 +659,6 @@ void AMyRobo::PostInitializeComponents()
 void AMyRobo::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("PossessedBy Call!!"));
 
 	if (RoboComponent)
 	{
@@ -671,8 +669,6 @@ void AMyRobo::PossessedBy(AController* NewController)
 void AMyRobo::BeginPlay()
 {
 	Super::BeginPlay();
-
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("BeginPlay Call!!"));
 
 	LongPressWidget->SetHiddenInGame(true);
 	PickupWidget->SetHiddenInGame(true);

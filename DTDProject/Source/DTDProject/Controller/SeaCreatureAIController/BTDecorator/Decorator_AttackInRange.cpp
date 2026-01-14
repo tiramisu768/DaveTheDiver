@@ -35,17 +35,5 @@ bool UDecorator_AttackInRange::CalculateRawConditionValue(UBehaviorTreeComponent
 
 	const bool bIsInAttackRange = DistanceToTarget <= AttackRange;
 
-	// 디버그 메시지 추가
-	if (GEngine)
-	{
-		FString DebugMsg = FString::Printf(TEXT("AttackInRange: Dist: %.1f / Range: %.1f -> %s"),
-			DistanceToTarget,
-			AttackRange,
-			bIsInAttackRange ? TEXT("TRUE") : TEXT("FALSE"));
-
-		// 메시지 키, 유지 시간, 색상, 실제 메시지
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, DebugMsg);
-	}
-
 	return bIsInAttackRange;
 }

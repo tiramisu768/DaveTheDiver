@@ -50,27 +50,44 @@ void UTask_ChargeStraight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 	}
 
 	FVector Goal = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey);
-	if (Goal.IsNearlyZero())
+	AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
+
+	if (Goal.IsNearlyZero() || Target == nullptr)
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;
 	}
 
-	FVector Pos = SeaCreature->GetActorLocation();
 	bool bAttackReady = false;
 
-	if (FVector::Dist(Pos, Goal) <= SeaCreature->GetData()->AttackRange)
+	FVector StartLocation = SeaCreature->SphereComponent-> GetComponentLocation();
+	FVector EndLocation = StartLocation + (Goal - StartLocation).GetSafeNormal() * SeaCreature->GetData()->ChaseSpeed * DeltaSeconds;
+
+	FHitResult HitResult;
+	FCollisionShape  SphereShape = FCollisionShape::MakeSphere(SeaCreature->SphereComponent->GetScaledSphereRadius());
+	FCollisionQueryParams CollisionParams(TEXT("ChargeSweep"),false, SeaCreature);
+	CollisionParams.bFindInitialOverlaps = false;
+
+	bool bHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		FQuat::Identity,
+		ECC_GameTraceChannel5,
+		SphereShape,
+		CollisionParams
+	);
+
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 0.1f, 0, 1.0f);
+
+	if (bHit && HitResult.GetActor() == Target)
 	{
 		bAttackReady = true;
 	}
 
-	if (!bAttackReady)
+	if (!bAttackReady && FVector::DistSquared(StartLocation, Goal) <= FMath::Square(SeaCreature->GetData()->AttackRange))
 	{
-		AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(ASeaCreatureAIController::TargetActorKey));
-		if (Target && SeaCreature->SphereComponent && SeaCreature->SphereComponent->IsOverlappingActor(Target))
-		{
-			bAttackReady = true;
-		}
+		bAttackReady = true;
 	}
 
 	if (bAttackReady)
@@ -80,7 +97,7 @@ void UTask_ChargeStraight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 		return;
 	}
 
-	FVector Dir = Goal-Pos;
+	FVector Dir = Goal-StartLocation;
 	Dir += SeaCreature->SteeringComp->ComputeAvoidanceDir();
 	Dir.Normalize();
 

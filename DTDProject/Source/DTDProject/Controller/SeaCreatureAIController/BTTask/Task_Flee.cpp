@@ -17,7 +17,7 @@ UTask_Flee::UTask_Flee()
 EBTNodeResult::Type UTask_Flee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("FLEE TASK STARTED!"));
+
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	SeaCreature->MovementComponent->MaxSpeed = FishData->FleeSpeed;
@@ -62,15 +62,11 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 
 	if (bFleeFinished)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("FLEE TEST!"));
 		BlackboardComp->ClearValue(ASeaCreatureAIController::TargetActorKey);
 
 		const FVector HomeLocation = BlackboardComp->GetValueAsVector(ASeaCreatureAIController::HomeLocationKey);
 		const float HomeReturnDistance = FishData->WanderRadius;
 		const float CurrentDistance = FVector::Dist(SeaCreature->GetActorLocation(), HomeLocation);
-
-		FString DebugMsg = FString::Printf(TEXT("Flee Finish.CD : %.2f"), CurrentDistance);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, DebugMsg);
 
 		BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsFarFromHomeKey, CurrentDistance > HomeReturnDistance);
 

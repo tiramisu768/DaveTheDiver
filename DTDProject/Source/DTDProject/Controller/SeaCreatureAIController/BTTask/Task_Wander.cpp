@@ -17,7 +17,7 @@ UTask_Wander::UTask_Wander()
 EBTNodeResult::Type UTask_Wander::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("WANDER TASK STARTED!"));
+
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
 	const FSeaCreatureData* FishData = SeaCreature->GetData();
 	SeaCreature->MovementComponent->MaxSpeed = FishData->WanderSpeed;
@@ -61,7 +61,5 @@ void UTask_Wander::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 
 EBTNodeResult::Type UTask_Wander::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Wander TaskABORTED!"));
-
 	return EBTNodeResult::Aborted;
 }

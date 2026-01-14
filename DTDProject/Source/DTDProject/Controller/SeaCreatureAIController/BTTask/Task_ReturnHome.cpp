@@ -19,7 +19,7 @@ UTask_ReturnHome::UTask_ReturnHome()
 EBTNodeResult::Type UTask_ReturnHome::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("RETURNHOME TASK STARTED!"));
+ 
     ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
     UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
     if (SeaCreature == nullptr || BlackboardComp == nullptr)

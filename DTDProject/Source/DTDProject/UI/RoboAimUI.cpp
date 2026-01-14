@@ -46,7 +46,7 @@ void URoboAimUI::UpdateAimPos(FVector2D MoveDelta)
 
             CanvasSlot->SetPosition(CurrentPos);
             // 위치 로그 출력
-            GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Purple, FString::Printf(TEXT("AbsoluteNewPos:%s "), *CurrentPos.ToString()));
+            /*GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Purple, FString::Printf(TEXT("AbsoluteNewPos:%s "), *CurrentPos.ToString()));*/
         }
     }
 }

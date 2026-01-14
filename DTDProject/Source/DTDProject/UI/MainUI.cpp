@@ -186,10 +186,6 @@ void UMainUI::StopAiming()
 {
 	if (AimWidget)
 	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("[MainUI] AimWidget is valid. Hiding widget."));
-		}
 		AimWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

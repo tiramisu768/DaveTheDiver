@@ -9,6 +9,9 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FResultConfirmed, bool, bSuccess);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FResultConfirmRequested, bool, bSuccess, int32, SelectedIndex);
 
+class UOResultUI;
+class UXResultUI;
+
 UCLASS()
 class DTDPROJECT_API UResultTableUI : public UResponsiveUI
 {
@@ -23,14 +26,17 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Result")
 	FResultConfirmRequested OnConfirmRequested;
 
-	UFUNCTION(BlueprintImplementableEvent, Category="Result")
-	void PopulateFishList(const TArray<struct FCaughtFishInfo>& FishList);
-
 	UFUNCTION(BlueprintCallable, Category="Result")
 	void SelectFishAtIndex(int32 Index);
 
 protected:
 	virtual void NativeConstruct() override;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UOResultUI> BP_OResult;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UXResultUI> BP_XResult;
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ConfirmButton;

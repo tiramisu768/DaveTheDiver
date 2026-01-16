@@ -387,17 +387,12 @@ void ASeaCreature::PostInitializeComponents()
 
 void ASeaCreature::OnMontageEnded_Handler(UAnimMontage* Montage, bool bInterrupted)
 {
-	FString MontageName = Montage ? Montage->GetName() : TEXT("NULL");
-	UE_LOG(LogTemp, Warning, TEXT("[%s] OnMontageEnded_Handler: Montage '%s' ended. Interrupted: %d"), *GetName(), *MontageName, bInterrupted);
-
 	if (Montage == Data->HitbyMontage)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] -> Detected HitbyMontage. Calling OnHitMontageEnded."), *GetName());
 		OnHitMontageEnded(bInterrupted);
 	}
 	else if (Montage == Data->AttackMontage)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] -> Detected AttackMontage. Calling OnAttackMontageEnded."), *GetName());
 		OnAttackMontageEnded(bInterrupted);
 	}
 }
@@ -410,7 +405,6 @@ void ASeaCreature::OnHitMontageEnded(bool bInterrupted)
 		{
 			if (UBrainComponent* Brain = AIController->GetBrainComponent())
 			{
-				UE_LOG(LogTemp, Error, TEXT("[%s] OnHitMontageEnded: Resuming AI logic."), *GetName());
 				Brain->ResumeLogic(TEXT("Hit"));
 			}
 		}
@@ -419,7 +413,6 @@ void ASeaCreature::OnHitMontageEnded(bool bInterrupted)
 
 void ASeaCreature::OnAttackMontageEnded(bool bInterrupted)
 {
-	UE_LOG(LogTemp, Log, TEXT("[%s] OnAttackMontageEnded: Executing OnAttackMontageEndedDelegate."), *GetName());
 	OnAttackMontageEndedDelegate.ExecuteIfBound();
 }
 

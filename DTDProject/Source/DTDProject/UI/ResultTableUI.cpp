@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "ActorComponent/InventoryComponent.h"
 #include "ShopUI.h"
+#include "UI/OResultUI.h"
+#include "UI/XResultUI.h"
 
 void UResultTableUI::SetGameEnd(bool bWasSuccessful)
 {
@@ -49,19 +51,14 @@ void UResultTableUI::SetGameEnd(bool bWasSuccessful)
 		SelectedFishIndex = -1;
 		UpdateConfirmButtonState();
 
-		if (APlayerController* Controller = GetOwningPlayer())
+		if(BP_XResult)
 		{
-			if (APawn* Pawn = Controller->GetPawn())
+			if (APawn* Pawn = GetOwningPlayerPawn())
 			{
-				if (UInventoryComponent* InventoryComponent = Pawn->FindComponentByClass<UInventoryComponent>())
+				if (UInventoryComponent* Inventory = Pawn->FindComponentByClass<UInventoryComponent>())
 				{
-					const TArray<FCaughtFishInfo>& FishList = InventoryComponent->GetCaughtFishList();
-					PopulateFishList(FishList);
-				}
-				else
-				{
-					TArray<FCaughtFishInfo> Empty;
-					PopulateFishList(Empty);
+					const auto& FishList = Inventory->GetCaughtFishList();
+					BP_XResult->PopulateFishList(FishList);
 				}
 			}
 		}

@@ -104,6 +104,11 @@ void ASeaCreature::BeginPlay()
 		if (Data->AnimClass)
 		{
 			GetMesh()->SetAnimInstanceClass(Data->AnimClass);
+
+			if (UAnimInstance* AnimInstance = Mesh->GetAnimInstance())
+			{
+				AnimInstance->OnMontageEnded.AddDynamic(this, &ASeaCreature::OnMontageEnded_Handler);
+			}
 		}
 
 		if (MovementComponent)
@@ -191,6 +196,14 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 	if (FishStateComponent->IsDead() || Data->HitbyMontage == nullptr)
 		return;
 
+	if (AAIController* AIController = Cast<AAIController>(GetController()))
+	{
+		if (UBrainComponent* Brain = AIController->GetBrainComponent())
+		{
+			Brain->PauseLogic(TEXT("Hit"));
+		}
+	}
+
 	FishStateComponent->TakeDamage(DamageAmount,HitResult);
 	SpawnDamagePopup(DamageAmount);
 	/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, HitResult.Location,
@@ -214,7 +227,7 @@ void ASeaCreature::HitBy(float DamageAmount, const FHitResult& HitResult)
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("Not isDead")));
+		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Red, FString::Printf(TEXT("Not dead yet")));
 		if (Data->HitbyMontage && Mesh && Mesh->GetAnimInstance())
 		{
 			Mesh->GetAnimInstance()->Montage_Play(Data->HitbyMontage);
@@ -370,33 +383,47 @@ void ASeaCreature::AttackTrace()
 void ASeaCreature::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	// 1. Mesh 포인터가 유효한지 먼저 확인합니다.
-	if (Mesh == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("ASeaCreature::PostInitializeComponents - Mesh component is NULL for %s!"), *GetName());
-		return; // Mesh가 없으면 더 이상 진행하지 않고 함수를 종료합니다.
-	}
-
-	// 2. Mesh가 유효하다는 것이 보장된 상태에서 AnimInstance를 가져옵니다.
-	UAnimInstance* AnimInstance = Mesh->GetAnimInstance();
-	if (AnimInstance)
-	{
-		AnimInstance->OnMontageEnded.AddDynamic(this, &ASeaCreature::OnAttackMontageEnded);
-	}
-	else
-	{
-		// AnimInstance가 없는 경우도 로그를 남겨서 디버깅을 돕습니다.
-		UE_LOG(LogTemp, Warning, TEXT("ASeaCreature::PostInitializeComponents - AnimInstance is NULL for %s."), *GetName());
-	}
 }
 
-void ASeaCreature::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void ASeaCreature::OnMontageEnded_Handler(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Montage == Data->AttackMontage || Montage == Data->HitbyMontage)
+	FString MontageName = Montage ? Montage->GetName() : TEXT("NULL");
+	UE_LOG(LogTemp, Warning, TEXT("[%s] OnMontageEnded_Handler: Montage '%s' ended. Interrupted: %d"), *GetName(), *MontageName, bInterrupted);
+
+	if (Montage == Data->HitbyMontage)
 	{
-		OnAttackMontageEndedDelegate.ExecuteIfBound();
+		UE_LOG(LogTemp, Warning, TEXT("[%s] -> Detected HitbyMontage. Calling OnHitMontageEnded."), *GetName());
+		OnHitMontageEnded(bInterrupted);
+	}
+	else if (Montage == Data->AttackMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] -> Detected AttackMontage. Calling OnAttackMontageEnded."), *GetName());
+		OnAttackMontageEnded(bInterrupted);
 	}
 }
+
+void ASeaCreature::OnHitMontageEnded(bool bInterrupted)
+{
+	if (!bInterrupted)
+	{
+		if (AAIController* AIController = Cast<AAIController>(GetController()))
+		{
+			if (UBrainComponent* Brain = AIController->GetBrainComponent())
+			{
+				UE_LOG(LogTemp, Error, TEXT("[%s] OnHitMontageEnded: Resuming AI logic."), *GetName());
+				Brain->ResumeLogic(TEXT("Hit"));
+			}
+		}
+	}
+}
+
+void ASeaCreature::OnAttackMontageEnded(bool bInterrupted)
+{
+	UE_LOG(LogTemp, Log, TEXT("[%s] OnAttackMontageEnded: Executing OnAttackMontageEndedDelegate."), *GetName());
+	OnAttackMontageEndedDelegate.ExecuteIfBound();
+}
+
+
 
 void ASeaCreature::SpawnDamagePopup(float DamageAmount)
 {

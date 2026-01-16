@@ -156,7 +156,11 @@ public:
 	void PostInitializeComponents() override;
 
 	UFUNCTION()
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void OnMontageEnded_Handler(UAnimMontage* Montage, bool bInterrupted);
+
+	void OnHitMontageEnded(bool bInterrupted);
+
+	void OnAttackMontageEnded(bool bInterrupted);
 
 	void SpawnDamagePopup(float DamageAmount);
 

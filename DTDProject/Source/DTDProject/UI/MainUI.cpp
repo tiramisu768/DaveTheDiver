@@ -231,7 +231,7 @@ FVector2D UMainUI::GetCrosshairScreenPosition() const
 	}
 	return FVector2D::ZeroVector;
 }
-
+//코인 정산 및 결과창 닫기
 void UMainUI::HandleResultConfirmRequested(bool bSuccess, int32 SelectedIndex)
 {
 	UE_LOG(LogTemp, Log, TEXT("success=%d selectedIdx=%d"),bSuccess?1:0,SelectedIndex);
@@ -246,11 +246,15 @@ void UMainUI::HandleResultConfirmRequested(bool bSuccess, int32 SelectedIndex)
 	{
 		Save = Cast<UPlayerSave>(UGameplayStatics::CreateSaveGameObject(UPlayerSave::StaticClass()));
 	}
+	if (!Save)
+	{
+		UE_LOG(LogTemp, Error, TEXT("HandleResultConfirmRequested: Failed to load or create SaveGame object."));
+		return;
+	}
 
 	if (APlayerController* PlayerController = GetOwningPlayer())
-	{
-		APawn* Pawn = PlayerController->GetPawn();
-		if (Pawn)
+	{		
+		if (APawn* Pawn = PlayerController->GetPawn())
 		{
 			if (UInventoryComponent* Inventory = Pawn->FindComponentByClass<UInventoryComponent>())
 			{		
@@ -279,13 +283,15 @@ void UMainUI::HandleResultConfirmRequested(bool bSuccess, int32 SelectedIndex)
 					}
 				}
 
-				// 기존 동작: 인벤토리 비움
+				//인벤토리 비움
 				Inventory->SellAllFish();
 			}
 		}
-		PlayerController->SetPause(false);
-		PlayerController->SetShowMouseCursor(false);
+		/*PlayerController->SetPause(false);
+		PlayerController->SetShowMouseCursor(false);*/
 	}
+
+	UGameplayStatics::SaveGameToSlot(Save, SaveSlotName, 0);
 
 	if (ResultTableWidget)
 	{
@@ -293,35 +299,35 @@ void UMainUI::HandleResultConfirmRequested(bool bSuccess, int32 SelectedIndex)
 	}
 }
 
+// 결과창 닫히고 구매창 열 때 호출
 void UMainUI::HandleResultConfirmed(bool bSuccess)
 {
-	UE_LOG(LogTemp, Log, TEXT("success=%d"),bSuccess?1:0);
+	if ( ShopWidget)
+	{
+		int32 CurrentCoins = 0;
+		if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
+		{
+			if (UPlayerSave* LoadedSave = Cast<UPlayerSave>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0)))
+			{
+				CurrentCoins = LoadedSave->Coins;
+			}
+		}
 
-	if (bSuccess && ShopWidget)
-	{
+		ShopWidget->UpdateCoinCount(CurrentCoins);
 		ShopWidget->ShowUI();
-	}
-	else
-	{
-		StartRandomMap();
 	}
 }
 
+// 구매창 
 void UMainUI::HandleShopConfirmRequested()
 {
-	UE_LOG(LogTemp, Log, TEXT("MainUI::HandleShopConfirmRequested called"));
-
-	if (!ShopWidget)
+	if (APlayerController* PlayerController = GetOwningPlayer())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("MainUI::HandleShopConfirmRequested - ShopWidget is null"));
-		return;
+		PlayerController->SetPause(false);
+		PlayerController->SetShowMouseCursor(false);
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("MainUI::HandleShopConfirmRequested - ShopWidget name: %s, OnConfirmRequested bound?: %d"),
-		*ShopWidget->GetName(), ShopWidget->OnConfirmRequested.IsBound() ? 1 : 0);
-
-	// 기존 동작: MainUI가 Shop 닫음
-	ShopWidget->HideUI();
+	ShopWidget->HideUI();	
 }
 
 void UMainUI::HandleShopClosed()
@@ -361,31 +367,29 @@ void UMainUI::ShowShopUI()
 }
 
 void UMainUI::SaveAndOpenLevel(const FName MapName)
-{   //savegame 생성/갱신
-	UPlayerSave* Save = Cast<UPlayerSave>(UGameplayStatics::CreateSaveGameObject(UPlayerSave::StaticClass()));
-	if (!Save)
+{   
+	UPlayerSave* Save = nullptr;
+
+	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName,0))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Fail SaveAndOpenLevel"));
-		return;
+		Save = Cast<UPlayerSave>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0));
 	}
-	//현재 인벤토리 데이터 저장
-	if (APlayerController* Controller = GetOwningPlayer())
+	else
 	{
-		if (APawn* Pawn = Controller->GetPawn())
-		{
-			if (UInventoryComponent* Inventory = Pawn->FindComponentByClass<UInventoryComponent>())
-			{
-				Save->TempCaughtFishList = Inventory->GetCaughtFishList();
-			}
-		}
+		// 이 시점에서 세이브 파일이 없는 것은 비정상적인 상황일 수 있습니다.
+		UE_LOG(LogTemp, Error, TEXT("SaveAndOpenLevel: Save file does not exist unexpectedly!"));
+		Save = Cast<UPlayerSave>(UGameplayStatics::CreateSaveGameObject(UPlayerSave::StaticClass()));
 	}
 
-	//Coin채우기
-	//슬롯에 저장
+	if (!Save)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Fail Load"));
+		return;
+	}
+
 	//다음 맵 이름 저장
 	Save->NextMapName = MapName;
 
-	//파일에 저장
 	if (!UGameplayStatics::SaveGameToSlot(Save, SaveSlotName, 0))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SaveAndOpenLevel fail"));

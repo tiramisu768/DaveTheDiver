@@ -53,6 +53,8 @@ void UResultTableUI::SetGameEnd(bool bWasSuccessful)
 
 		if(BP_XResult)
 		{
+			BP_XResult->OnFishSelectedDelegate.BindUObject(this, &UResultTableUI::SelectFishAtIndex);
+
 			if (APawn* Pawn = GetOwningPlayerPawn())
 			{
 				if (UInventoryComponent* Inventory = Pawn->FindComponentByClass<UInventoryComponent>())

@@ -291,7 +291,10 @@ void ASeaCreature::Die()
 
 	GetWorld()->GetTimerManager().SetTimer(DeathRotateTimerHandle, [this]()
 		{
-			RotateToDeadPose(0.01f);
+			if(IsValid(this))
+			{
+				RotateToDeadPose(0.01f);
+			}
 		}, 0.01f, true
 	);
 	//////////10초 후 자동삭제로 하고 20초 내에 로보가 물고기에 부딪히면 수확 및 삭제////////

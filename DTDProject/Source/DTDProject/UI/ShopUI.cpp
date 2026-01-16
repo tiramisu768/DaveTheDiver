@@ -3,6 +3,7 @@
 
 #include "UI/ShopUI.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 
@@ -23,6 +24,14 @@ void UShopUI::NativeConstruct()
 
 	OnHidden.AddDynamic(this, &UShopUI::BroadcastShopClosed);
 	UE_LOG(LogTemp, Log, TEXT("%s::NativeConstruct - OnHidden bound?: %d"), *GetName(), OnHidden.IsBound() ? 1 : 0);
+}
+
+void UShopUI::UpdateCoinCount(int32 NewCoinAmount)
+{
+	if (CoinText)
+	{
+		CoinText->SetText(FText::AsNumber(NewCoinAmount));
+	}
 }
 
 void UShopUI::OnConfirmClicked()

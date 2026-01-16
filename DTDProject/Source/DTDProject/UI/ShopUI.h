@@ -21,11 +21,16 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Shop")
 	FShopClosed OnShopClosed;
 
+	void UpdateCoinCount(int32 NewCoinAmount);
+
 protected:
 	virtual void NativeConstruct() override;
 
-	UPROPERTY(meta= (BindWidget))
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> ConfirmButton;
+
+	UPROPERTY(meta= (BindWidget))
+	TObjectPtr<class UTextBlock> CoinText;
 
 private:
 	UFUNCTION()

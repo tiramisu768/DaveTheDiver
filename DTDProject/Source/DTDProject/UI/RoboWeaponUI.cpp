@@ -4,6 +4,8 @@
 #include "UI/RoboWeaponUI.h"
 #include "MainUI.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "Weapon/Weapon.h"
 
 void URoboWeaponUI::PlaySwitchToolIconAnimation(int32 SelectedIndex)
 {
@@ -102,5 +104,20 @@ void URoboWeaponUI::NativeConstruct()
 	if (SecondToolIcon)
 	{
 		SecondToolIcon->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void URoboWeaponUI::SetBulletCount(int32 Count, bool bIsInfinite)
+{
+	if (BulletCountText)
+	{
+		if (bIsInfinite)
+		{
+			BulletCountText->SetText(FText::FromString(TEXT("8")));
+		}
+		else
+		{
+			BulletCountText->SetText(FText::AsNumber(Count));
+		}
 	}
 }

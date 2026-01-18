@@ -60,11 +60,6 @@ ASeaCreature::ASeaCreature()
 	CollectSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectSphere"));
 	CollectSphere->SetupAttachment(RootComponent);
 
-	//move to data
-	/*static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageObjectFinder(TEXT("/Script/Engine.AnimMontage'/Game/BluePrint/SeaCreature/Animation/AM_Attack_PinkShark.AM_Attack_PinkShark'"));
-	if (AttackMontageObjectFinder.Succeeded())
-		AttackMontage = AttackMontageObjectFinder.Object;*/
-
 	static ConstructorHelpers::FClassFinder<AAIController> AIControllerClassFinder(TEXT("/Game/BluePrint/SeaCreature/AI/BP_SeaCreatureAIController.BP_SeaCreatureAIController_C"));
 	if (AIControllerClassFinder.Succeeded())
 	{
@@ -79,6 +74,8 @@ ASeaCreature::ASeaCreature()
 
 	SteeringComp = CreateDefaultSubobject<USeaCreatureSteeringComponent>(TEXT("SteeringComponent"));
 	//GetMesh()->AttachToComponent(GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::KeepWorld, true));
+
+	DeadPoseTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DeadPoseTimeline"));
 }
 
 // Called when the game starts or when spawned
@@ -164,6 +161,13 @@ void ASeaCreature::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		GameInstance->OnGameEnded.RemoveAll(this);
 	}*/
+}
+
+void ASeaCreature::UpdateDeadPoseRotation(float Value)
+{
+	const FRotator CurrentRotation = GetActorRotation();
+	const FRotator TargetRotation = FRotator(CurrentRotation.Pitch, CurrentRotation.Yaw, 90.f);
+	SetActorRotation(FMath::Lerp(CurrentRotation, TargetRotation, Value));
 }
 
 // Called every frame
@@ -289,14 +293,14 @@ void ASeaCreature::Die()
 	M->SetLinearDamping(2.5f);
 	M->SetAngularDamping(3.5f);
 
-	GetWorld()->GetTimerManager().SetTimer(DeathRotateTimerHandle, [this]()
-		{
-			if(IsValid(this))
-			{
-				RotateToDeadPose(0.01f);
-			}
-		}, 0.01f, true
-	);
+	if (DeadPoseCurve)
+	{
+		FOnTimelineFloat ProgressFunction;
+		ProgressFunction.BindUFunction(this, FName("UpdateDeadPoseRotation"));
+		DeadPoseTimeline->AddInterpFloat(DeadPoseCurve, ProgressFunction);
+		DeadPoseTimeline->PlayFromStart();
+	}
+
 	//////////10초 후 자동삭제로 하고 20초 내에 로보가 물고기에 부딪히면 수확 및 삭제////////
 	//GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [this]()
 	//	{

@@ -217,6 +217,15 @@ void AWeapon::TryFire(ACharacter* OwnerCharacter, const FVector& FireDirection)
 	StartCooldown();
 }
 
+void AWeapon::ReloadToMax()
+{
+	if (WeaponStats)
+	{
+		CurrentAmmo = WeaponStats->MaxAmmo;
+		OnWeaponStateChanged.Broadcast(CurrentAmmo, 0.0f);
+	}
+}
+
 
 bool AWeapon::ConsumeAmmo(int32 Amount)
 {

@@ -113,6 +113,10 @@ void AMyCharacterController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FInputModeGameOnly GameOnlyInputMode;
+	SetInputMode(GameOnlyInputMode);
+	bShowMouseCursor = false;
+
 	ControlledRobo = Cast<AMyRobo>(GetCharacter());
 
 	if (MainWidgetClass)

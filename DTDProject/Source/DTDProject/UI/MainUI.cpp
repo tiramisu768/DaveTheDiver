@@ -66,6 +66,8 @@ void UMainUI::NativeConstruct()
 	{
 		MapCandidates.Add(FName("Map1Level"));
 		MapCandidates.Add(FName("Map2Level"));
+		/*MapCandidates.Add(FName("Map3Level"));
+		MapCandidates.Add(FName("Map4Level"));*/
 	}
 
 }
@@ -136,6 +138,15 @@ void UMainUI::PlayToolSwitchAnimation(int32 SelectedIndex)
 	}
 }
 
+void UMainUI::SetupRoboDelegates(AMyRobo* InRobo)
+{
+	if (InRobo)
+	{
+		InRobo->OnWeaponSlotUpdated.AddUObject(this, &UMainUI::OnUpdateWeaponSlot);
+		InRobo->OnActiveRangedWeaponChanged.AddDynamic(this, &UMainUI::OnActiveWeaponChanged);
+	}
+}
+//슬롯무기 아이콘 업데이트
 void UMainUI::OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon)
 {
 	if (!NewWeapon || !EquipmentWidget) return;
@@ -146,6 +157,30 @@ void UMainUI::OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon)
 		{
 			EquipmentWidget->UpdateWeaponIcon(WeaponSlot, IconTexture);
 		}
+	}
+}
+//활성화된 무기가 바꼈을 때 탄약UI 처리
+void UMainUI::OnActiveWeaponChanged(AWeapon* NewActiveWeapon)
+{
+	if (BoundRangedWeapon.IsValid())
+	{
+		BoundRangedWeapon->OnWeaponStateChanged.RemoveAll(this);
+	}
+
+	if (NewActiveWeapon)
+	{
+		NewActiveWeapon->OnWeaponStateChanged.AddDynamic(this, &UMainUI::UpdateWeaponState);
+		BoundRangedWeapon = NewActiveWeapon;
+		UpdateWeaponState(NewActiveWeapon->GetCurrentAmmo(), 0.f);
+	}
+}
+//탄약 개수를 실제 UI에 반영
+void UMainUI::UpdateWeaponState(int32 CurrentAmmo, float CooldownPercent)
+{
+	if (EquipmentWidget && BoundRangedWeapon.IsValid())
+	{
+		const bool bIsInfinite = (BoundRangedWeapon->GetWeaponStats() && BoundRangedWeapon->GetWeaponStats()->MaxAmmo <= 0);
+		EquipmentWidget->SetBulletCount(CurrentAmmo, bIsInfinite);
 	}
 }
 

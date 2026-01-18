@@ -35,6 +35,7 @@ public:
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void BeginPlay() override;
+	void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 	UPROPERTY(EditAnywhere, Category = "Robo State | Oxygen")
 	float OxygenConsumptionRate = 1.0f; // 초당 산소 소모량

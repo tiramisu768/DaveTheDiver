@@ -9,6 +9,7 @@
 #include "RoboWeaponUI.generated.h"
 
 class UImage; 
+class UTextBlock;
 
 UCLASS()
 class DTDPROJECT_API URoboWeaponUI : public UUserWidget
@@ -19,6 +20,7 @@ public:
 	void PlaySwitchRangedIconAnimation(int32 SelectedIndex);
 	void UpdateToolIcon(int32 SlotIndex, UTexture2D* Icon);
 	void UpdateWeaponIcon(EWeaponSlot WeaponSlot, UTexture2D* Icon);
+	void SetBulletCount(int32 Count, bool bIsInfinite);
 
 protected:
 	virtual void NativeConstruct() override;

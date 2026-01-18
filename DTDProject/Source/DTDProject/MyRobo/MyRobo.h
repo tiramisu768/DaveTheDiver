@@ -20,6 +20,7 @@ class ARandomBox;
 
 DECLARE_MULTICAST_DELEGATE(FOnSurfaced);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWeaponSlotUpdated, EWeaponSlot, AWeapon*);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActiveRangedWeaponChanged, AWeapon*, NewActiveWeapon);
 
 UENUM(BlueprintType)
 enum class EWeaponState :uint8
@@ -39,6 +40,8 @@ public:
 
 	FOnSurfaced OnSurfaced;
 	FOnWeaponSlotUpdated OnWeaponSlotUpdated;
+	UPROPERTY(BlueprintAssignable)
+	FOnActiveRangedWeaponChanged OnActiveRangedWeaponChanged;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 

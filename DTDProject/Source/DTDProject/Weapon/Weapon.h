@@ -33,10 +33,12 @@ public:
 	void StopFireMontage(ACharacter* OwnerCharacter);
 	void SpawnProjectileAtMuzzle(const FVector& Direction);
 	virtual void TryFire(ACharacter* OwnerCharacter, const FVector& FireDirection = FVector::ZeroVector);
+	void ReloadToMax();
 
 	EWeaponSlot GetSlotType() const;
 	const FWeaponData* GetWeaponStats() const { return WeaponStats; }
 	FVector GetMuzzleLocation() const;
+	int32 GetCurrentAmmo() const { return CurrentAmmo; }
 
 	virtual void Tick(float DeltaTime) override;
 

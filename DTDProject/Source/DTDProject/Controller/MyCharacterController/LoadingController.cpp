@@ -32,13 +32,13 @@ void ALoadingController::BeginPlay()
 		return;
 	}
 
-	const FName NextMap = Save->NextMapName;
-	if (NextMap.IsNone())
+	NextMapToLoad = Save->NextMapName;
+	if (NextMapToLoad.IsNone())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("LoadingController::BeginPlay - NextMap is None. Aborting OpenLevel. Check Save->NextMapName before switching to LoadingLevel."));
 		return;
 	}
-	UE_LOG(LogTemp, Log, TEXT("Loading next map:%s"),*NextMap.ToString());
+	UE_LOG(LogTemp, Log, TEXT("Loading next map:%s"),*NextMapToLoad.ToString());
 
 	UWorld* World = GetWorld();
 	if (!World)

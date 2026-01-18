@@ -259,8 +259,7 @@ void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 				}
 			});
 
-
-		OnWeaponSlotUpdated.AddUObject(InMainUI, &UMainUI::OnUpdateWeaponSlot);
+		InMainUI->SetupRoboDelegates(this);
 
 		BroadcastCurrentWeaponStates();
 	}
@@ -381,7 +380,7 @@ void AMyRobo::FireProjectile()
 
 	ActiveRangedWeapon->SpawnProjectileAtMuzzle(FireDirection);
 }
-
+//원거리 무기 교체
 void AMyRobo::SwitchActiveRangedWeapon()
 {
 	if (ActiveRangedWeapon == HarpoonWeapon)
@@ -393,6 +392,8 @@ void AMyRobo::SwitchActiveRangedWeapon()
 		ActiveRangedWeapon = HarpoonWeapon;
 	}
 	UpdateWeaponAttachments();
+
+	OnActiveRangedWeaponChanged.Broadcast(ActiveRangedWeapon);
 }
 
 AWeapon* AMyRobo::GetActiveWeapon() const
@@ -526,6 +527,7 @@ void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 	}
 }
 
+//게임 시작 시 무기 UI 초기화
 void AMyRobo::BroadcastCurrentWeaponStates()
 {
 	if (MeleeWeapon)
@@ -728,6 +730,8 @@ void AMyRobo::BeginPlay()
 	{
 		SetupMainUIReference(MainUI);
 	}
+
+	OnActiveRangedWeaponChanged.Broadcast(ActiveRangedWeapon);
 }
 
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName, float PlayRate)
@@ -833,6 +837,8 @@ void AMyRobo::PickupAcquirableWeapon()
 {
 	if (!AcquirableWeapon) return;
 
+	AcquirableWeapon->ReloadToMax();
+
 	ARandomBox* BoxOwner = Cast<ARandomBox>(AcquirableWeapon->GetOwner());
 
 	FVector DropLocation = AcquirableWeapon->GetActorLocation();
@@ -861,13 +867,13 @@ void AMyRobo::PickupAcquirableWeapon()
 	AcquirableWeapon->SetOwner(this);
 	AcquirableWeapon->SetActorHiddenInGame(true);
 
-	UE_LOG(LogTemp, Log, TEXT("[MyRobo] Broadcasting OnWeaponSlotUpdated for slot %s with new weapon %s."), *UEnum::GetValueAsString(SlotToFill), *AcquirableWeapon->GetName());
 	//UI에 특정 슬롯이 업데이트되었음을 알림
 	OnWeaponSlotUpdated.Broadcast(SlotToFill, AcquirableWeapon);
 
 	if (OldWeapon == ActiveRangedWeapon)
 	{
 		ActiveRangedWeapon = AcquirableWeapon;
+		OnActiveRangedWeaponChanged.Broadcast(ActiveRangedWeapon);
 	}
 
 	if (OldWeapon && BoxOwner)

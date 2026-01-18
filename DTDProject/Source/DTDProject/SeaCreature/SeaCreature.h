@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "Engine/DataTable.h"
 #include "Interface/AttackTraceNotify/AttackTraceNotify.h"
+#include "Components/TimelineComponent.h"
 #include "SeaCreature.generated.h"
 
 UENUM(BlueprintType)
@@ -178,6 +179,15 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UPROPERTY()
+	TObjectPtr<UTimelineComponent> DeadPoseTimeline;
+
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> DeadPoseCurve;
+
+	UFUNCTION()
+	void UpdateDeadPoseRotation(float Value);
 
 private:
 	UPROPERTY()

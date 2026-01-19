@@ -59,13 +59,19 @@ void UResultTableUI::SetGameEnd(bool bWasSuccessful)
 			{
 				if (UInventoryComponent* Inventory = Pawn->FindComponentByClass<UInventoryComponent>())
 				{
-					const auto& FishList = Inventory->GetCaughtFishList();
-					BP_XResult->PopulateFishList(FishList);
+					if (Inventory->GetCaughtFishList().Num() == 0)
+					{
+						ConfirmButton->SetIsEnabled(true);
+					}
+					else
+					{
+						const auto& FishList = Inventory->GetCaughtFishList();
+						BP_XResult->PopulateFishList(FishList);
+					}
 				}
 			}
 		}
 	}
-	UpdateConfirmButtonState();
 }
 
 void UResultTableUI::SelectFishAtIndex(int32 Index)

@@ -20,7 +20,11 @@ void URoboComponent::BeginPlay()
 		{
 			if(IsValid(this))
 			{
-				DecreaseOxygen();
+				UWorld* World = GetWorld();
+				if(World && World->GetAuthGameMode())
+				{
+					DecreaseOxygen();
+				}
 			}
 		}
 		,3.0f,true
@@ -79,10 +83,12 @@ void URoboComponent::DecreaseOxygen()
 		SetHP(CurrentHP - 1.f);
 	}
 }
-
+//화면에 붉은 경고 위젯 띄우기
 void URoboComponent::WarningOxygen()
 {
-	//화면에 붉은 경고 위젯 띄우기
+	UWorld* World = GetWorld();
+	if (!World) return;
+
 	if (AMyCharacterController* controller = Cast<AMyCharacterController>(GetWorld()->GetFirstPlayerController()))
 	{
 		if (UMainUI* MainUI = controller->GetMainUI())
@@ -97,7 +103,7 @@ void URoboComponent::ZeroOxygen()
 	//OnOxygenDepleted.Broadcast();
 
 	AMyRobo* Robo = Cast<AMyRobo>(GetOwner());
-	if (Robo)
+	if (Robo && IsValid(Robo))
 	{
 		// Robo의 Die 함수를 호출하여 사망 처리를 위임합니다.
 		Robo->DieRobo();

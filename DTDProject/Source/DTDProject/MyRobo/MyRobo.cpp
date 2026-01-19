@@ -259,9 +259,14 @@ void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 				}
 			});
 
-		InMainUI->SetupRoboDelegates(this);
+		OnWeaponSlotUpdated.AddUObject(InMainUI, &UMainUI::UpdateWeaponSlot);
 
 		BroadcastCurrentWeaponStates();
+
+		if (GunWeapon)
+		{
+			GunWeapon->OnGunAmmoUpdated.AddDynamic(InMainUI, &UMainUI::UpdateGunAmmo);
+		}
 	}
 }
 
@@ -338,7 +343,7 @@ void AMyRobo::FireProjectile()
 {
 	if (!ActiveRangedWeapon || !MainController) return;
 
-	// 1. 플레이어의 '진짜 조준 방향'을 컨트롤러로부터 직접 가져옵니다.
+	// 1. 플레이어의 '진짜 조준 방향'void AMyRobo::FireProjectile()을 컨트롤러로부터 직접 가져옵니다.
 	//    이것이 카메라의 각도와 무관한, 플레이어의 순수한 의도입니다.
 	const FRotator ControlRotation = MainController->GetControlRotation();
 	const FVector ControlDirection = ControlRotation.Vector();
@@ -392,8 +397,6 @@ void AMyRobo::SwitchActiveRangedWeapon()
 		ActiveRangedWeapon = HarpoonWeapon;
 	}
 	UpdateWeaponAttachments();
-
-	OnActiveRangedWeaponChanged.Broadcast(ActiveRangedWeapon);
 }
 
 AWeapon* AMyRobo::GetActiveWeapon() const
@@ -730,8 +733,6 @@ void AMyRobo::BeginPlay()
 	{
 		SetupMainUIReference(MainUI);
 	}
-
-	OnActiveRangedWeaponChanged.Broadcast(ActiveRangedWeapon);
 }
 
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName, float PlayRate)
@@ -873,7 +874,6 @@ void AMyRobo::PickupAcquirableWeapon()
 	if (OldWeapon == ActiveRangedWeapon)
 	{
 		ActiveRangedWeapon = AcquirableWeapon;
-		OnActiveRangedWeaponChanged.Broadcast(ActiveRangedWeapon);
 	}
 
 	if (OldWeapon && BoxOwner)

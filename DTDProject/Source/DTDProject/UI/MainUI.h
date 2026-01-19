@@ -36,12 +36,9 @@ public:
 	URoboWeaponUI* GetRoboWeaponUI() const { return EquipmentWidget; }
 	void PlayWeaponSwitchAnimation(int32 SelectedIndex);
 	void PlayToolSwitchAnimation(int32 SelectedIndex);
-	void SetupRoboDelegates(AMyRobo* InRobo);
 	UFUNCTION()
-	void OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon);
-	UFUNCTION()
-	void OnActiveWeaponChanged(AWeapon* NewActiveWeapon);
-	void UpdateWeaponState(int32 CurrentAmmo, float CooldownPercent);
+	void UpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* Weapon);
+	void UpdateGunAmmo(AWeapon* Sender, int32 CurrentAmmo, float CooldownPercent);
 	void OnUpdateToolSlot(int32 SlotIndex, FName NewToolRowName);
 	void OnChangeActiveTool(int32 NewActiveSlotIndex);
 

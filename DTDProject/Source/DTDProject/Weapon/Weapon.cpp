@@ -222,7 +222,7 @@ void AWeapon::ReloadToMax()
 	if (WeaponStats)
 	{
 		CurrentAmmo = WeaponStats->MaxAmmo;
-		OnWeaponStateChanged.Broadcast(CurrentAmmo, 0.0f);
+		OnGunAmmoUpdated.Broadcast(this, CurrentAmmo, 0.0f);
 	}
 }
 
@@ -234,7 +234,8 @@ bool AWeapon::ConsumeAmmo(int32 Amount)
 	if (CurrentAmmo >= Amount)
 	{
 		CurrentAmmo -= Amount;
-		OnWeaponStateChanged.Broadcast(CurrentAmmo, 0.0f);
+		OnGunAmmoUpdated.Broadcast(this,CurrentAmmo, 0.0f);
+		UE_LOG(LogTemp, Warning, TEXT("ConsumeAmmo Start1 %d"), CurrentAmmo);
 		return true;
 	}
 	return false;
@@ -265,13 +266,13 @@ void AWeapon::StartCooldown()
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &AWeapon::OnCooldownExpired, Cool, false);
-		OnWeaponStateChanged.Broadcast(CurrentAmmo, 1.0f);
+		OnGunAmmoUpdated.Broadcast(this, CurrentAmmo, 1.0f);
 	}
 }
 
 void AWeapon::OnCooldownExpired()
 {
-	OnWeaponStateChanged.Broadcast(CurrentAmmo, 0.0f);
+	OnGunAmmoUpdated.Broadcast(this,CurrentAmmo, 0.0f);
 }
 
 // Called every frame

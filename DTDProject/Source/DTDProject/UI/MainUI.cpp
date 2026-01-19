@@ -138,48 +138,33 @@ void UMainUI::PlayToolSwitchAnimation(int32 SelectedIndex)
 	}
 }
 
-void UMainUI::SetupRoboDelegates(AMyRobo* InRobo)
-{
-	if (InRobo)
-	{
-		InRobo->OnWeaponSlotUpdated.AddUObject(this, &UMainUI::OnUpdateWeaponSlot);
-		InRobo->OnActiveRangedWeaponChanged.AddDynamic(this, &UMainUI::OnActiveWeaponChanged);
-	}
-}
 //슬롯무기 아이콘 업데이트
-void UMainUI::OnUpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* NewWeapon)
+void UMainUI::UpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* Weapon)
 {
-	if (!NewWeapon || !EquipmentWidget) return;
+	if (!Weapon || !EquipmentWidget) return;
 
-	if (const FWeaponData* WeaponData = NewWeapon->GetWeaponStats())
+	if (const FWeaponData* WeaponData = Weapon->GetWeaponStats())
 	{
 		if (UTexture2D* IconTexture = WeaponData->Icon.LoadSynchronous())
 		{
 			EquipmentWidget->UpdateWeaponIcon(WeaponSlot, IconTexture);
 		}
 	}
-}
-//활성화된 무기가 바꼈을 때 탄약UI 처리
-void UMainUI::OnActiveWeaponChanged(AWeapon* NewActiveWeapon)
-{
-	if (BoundRangedWeapon.IsValid())
-	{
-		BoundRangedWeapon->OnWeaponStateChanged.RemoveAll(this);
-	}
 
-	if (NewActiveWeapon)
+	if (WeaponSlot == EWeaponSlot::Gun)
 	{
-		NewActiveWeapon->OnWeaponStateChanged.AddDynamic(this, &UMainUI::UpdateWeaponState);
-		BoundRangedWeapon = NewActiveWeapon;
-		UpdateWeaponState(NewActiveWeapon->GetCurrentAmmo(), 0.f);
+		const bool bIsInfinite = (Weapon->GetWeaponStats() && Weapon->GetWeaponStats()->MaxAmmo <= 0);
+		EquipmentWidget->SetBulletCount(Weapon->GetCurrentAmmo(), bIsInfinite);
 	}
 }
 //탄약 개수를 실제 UI에 반영
-void UMainUI::UpdateWeaponState(int32 CurrentAmmo, float CooldownPercent)
+void UMainUI::UpdateGunAmmo(AWeapon* Sender, int32 CurrentAmmo, float CooldownPercent)
 {
-	if (EquipmentWidget && BoundRangedWeapon.IsValid())
+	UE_LOG(LogTemp, Warning, TEXT("ConsumeAmmo Start2 %d"), CurrentAmmo);
+	if (EquipmentWidget && Sender)
 	{
-		const bool bIsInfinite = (BoundRangedWeapon->GetWeaponStats() && BoundRangedWeapon->GetWeaponStats()->MaxAmmo <= 0);
+		const bool bIsInfinite = (Sender->GetWeaponStats() && Sender->GetWeaponStats()->MaxAmmo <= 0);
+		UE_LOG(LogTemp, Warning, TEXT("UpdateGunAmmo %d"), bIsInfinite);
 		EquipmentWidget->SetBulletCount(CurrentAmmo, bIsInfinite);
 	}
 }

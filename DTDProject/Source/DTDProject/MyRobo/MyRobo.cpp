@@ -838,9 +838,12 @@ void AMyRobo::PickupAcquirableWeapon()
 {
 	if (!AcquirableWeapon) return;
 
-	AcquirableWeapon->ReloadToMax();
-
 	ARandomBox* BoxOwner = Cast<ARandomBox>(AcquirableWeapon->GetOwner());
+
+	if (BoxOwner)
+	{
+		AcquirableWeapon->ReloadToMax(); //첫 생성에만 풀충전
+	}
 
 	FVector DropLocation = AcquirableWeapon->GetActorLocation();
 
@@ -863,6 +866,21 @@ void AMyRobo::PickupAcquirableWeapon()
 		OldWeapon = GunWeapon;
 		GunWeapon = AcquirableWeapon;
 		break;
+	}
+
+	if (SlotToFill == EWeaponSlot::Gun && MainController)
+	{
+		if (UMainUI* MainUI = MainController->GetMainUI())
+		{
+			if (OldWeapon)
+			{
+				OldWeapon->OnGunAmmoUpdated.RemoveAll(MainUI);
+			}
+			if (GunWeapon)
+			{
+				GunWeapon->OnGunAmmoUpdated.AddDynamic(MainUI, &UMainUI::UpdateGunAmmo);
+			}
+		}
 	}
 
 	AcquirableWeapon->SetOwner(this);

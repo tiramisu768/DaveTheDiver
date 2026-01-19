@@ -8,7 +8,7 @@
 #include "Weapon/WeaponData.h"
 #include "Weapon.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponStateChanged, AWeapon*, Sender, int32, CurrentAmmo, float, CooldownRatio);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGunAmmoUpdated, AWeapon*, Sender, int32, CurrentAmmo, float, CooldownRatio);
 
 UCLASS()
 class DTDPROJECT_API AWeapon : public AActor
@@ -25,7 +25,7 @@ public:
 	UDataTable* WeaponDataTable;
 
 	UPROPERTY(BlueprintAssignable, Category="Weapon")
-	FOnWeaponStateChanged OnGunAmmoUpdated;
+	FOnGunAmmoUpdated OnGunAmmoUpdated;
 
 	void StartFire(ACharacter* OwnerCharacter, const FVector& FireDirection);
 	void StopFire(ACharacter* OwnerCharacter);

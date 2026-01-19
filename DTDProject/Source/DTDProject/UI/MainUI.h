@@ -38,6 +38,7 @@ public:
 	void PlayToolSwitchAnimation(int32 SelectedIndex);
 	UFUNCTION()
 	void UpdateWeaponSlot(EWeaponSlot WeaponSlot, AWeapon* Weapon);
+	UFUNCTION()
 	void UpdateGunAmmo(AWeapon* Sender, int32 CurrentAmmo, float CooldownPercent);
 	void OnUpdateToolSlot(int32 SlotIndex, FName NewToolRowName);
 	void OnChangeActiveTool(int32 NewActiveSlotIndex);

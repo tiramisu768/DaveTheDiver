@@ -2,8 +2,10 @@
 
 
 #include "ActorComponent/StateComponent/StateComponent.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values for this component's properties
 UStateComponent::UStateComponent()
@@ -11,7 +13,7 @@ UStateComponent::UStateComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> HitEffectFinder(TEXT("/Game/StackOBot/FX/JetpackThruster/FX_JetpackThruster.FX_JetpackThruster"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> HitEffectFinder(TEXT("/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Smoke/P_Smoke_A.P_Smoke_A"));
 	if (HitEffectFinder.Succeeded())
 	{
 		HitEffect = HitEffectFinder.Object;
@@ -29,7 +31,7 @@ void UStateComponent::BeginPlay()
 		USkeletalMeshComponent* OwnerMesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
 		if (OwnerMesh)
 		{
-			HitEffectComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			HitEffectComponent = UGameplayStatics::SpawnEmitterAttached(
 				HitEffect,
 				OwnerMesh,
 				NAME_None,
@@ -38,58 +40,20 @@ void UStateComponent::BeginPlay()
 				EAttachLocation::SnapToTarget,
 				false
 			);
+			if (HitEffectComponent)
+			{
+				HitEffectComponent->SetVisibility(false);
+			}
 		}
 	}
 
-}
-
-void UStateComponent::UpdateHitEffect()
-{
-	if (!HitEffect) return;
-
-	if (!HitEffectComponent)
-	{
-		USkeletalMeshComponent* OwnerMesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-		if (OwnerMesh)
-		{
-			HitEffectComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-				HitEffect,
-				OwnerMesh,
-				NAME_None,
-				FVector::ZeroVector,
-				FRotator::ZeroRotator,
-				EAttachLocation::SnapToTarget,
-				false
-			);
-		}
-	}
-
-	if (!HitEffectComponent) return;
-
-	if (IsDead())
-	{
-		HitEffectComponent->Deactivate();
-		GetWorld()->GetTimerManager().ClearTimer(HitEffectTimerHandle);
-	}
-	else if (CurrentHP <= 10.0f)
-	{
-		HitEffectComponent->Activate(true);
-		GetWorld()->GetTimerManager().ClearTimer(HitEffectTimerHandle);
-	}
-	else
-	{
-		if (!GetWorld()->GetTimerManager().IsTimerActive(HitEffectTimerHandle))
-		{
-			HideHitEffect();
-		}
-	}
 }
 
 void UStateComponent::HideHitEffect()
 {
 	if (HitEffectComponent && CurrentHP > 10.0f)
 	{
-		HitEffectComponent->Deactivate();
+		HitEffectComponent->SetVisibility(false);
 	}
 }
 
@@ -116,20 +80,24 @@ void UStateComponent::TakeDamage(float DamageAmount, const FHitResult& HitResult
 		return;
 	}
 
-	if (HitEffectComponent)
-	{
-		HitEffectComponent->Activate(true);
-	}
-
-	if (CurrentHP > 10.0f)
-	{
-		GetWorld()->GetTimerManager().SetTimer(HitEffectTimerHandle, this, &UStateComponent::HideHitEffect, 5.0f);
-	}
-
 	SetHP(CurrentHP - DamageAmount);
 	OnTakeDamage.ExecuteIfBound(DamageAmount);
 
-	UpdateHitEffect();
+	if (HitEffectComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Blood Start"));
+		HitEffectComponent->SetVisibility(true);
+
+		if (CurrentHP > 10.0f)
+		{
+			GetWorld()->GetTimerManager().SetTimer(HitEffectTimerHandle, this, &UStateComponent::HideHitEffect, 5.0f,false);
+		}
+		else
+		{
+			GetWorld()->GetTimerManager().ClearTimer(HitEffectTimerHandle);
+			SetComponentTickEnabled(true);
+		}
+	}
 }
 
 //È¸º¹
@@ -139,10 +107,35 @@ void UStateComponent::Heal(float HealAmount)
 		return;
 
 	SetHP(CurrentHP + HealAmount);
+
+	if (CurrentHP > 10.0f && IsComponentTickEnabled())
+	{
+		SetComponentTickEnabled(false);
+		if (!GetWorld()->GetTimerManager().IsTimerActive(HitEffectTimerHandle))
+		{
+			HideHitEffect();
+		}
+	}
 }
 
 // Called every frame
 void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (CurrentHP <= 10.0f && !IsDead())
+	{
+		if (HitEffectComponent && !HitEffectComponent->IsVisible())
+		{
+			HitEffectComponent->SetVisibility(true);
+		}
+	}
+	else
+	{
+		SetComponentTickEnabled(false);
+		if (!GetWorld()->GetTimerManager().IsTimerActive(HitEffectTimerHandle))
+		{
+			HideHitEffect();
+		}
+	}
 }

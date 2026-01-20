@@ -6,8 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "StateComponent.generated.h"
 
-class UNiagaraSystem;
-class UNiagaraComponent;
+class UParticleSystem;
+class UParticleSystemComponent;
 
 DECLARE_DELEGATE_OneParam(FOnHPChanged, float);
 DECLARE_DELEGATE_OneParam(FOnTakeDamage, float);
@@ -39,14 +39,13 @@ protected:
 	float MaxHP{ 100.0f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
-	TObjectPtr<UNiagaraSystem> HitEffect;
+	TObjectPtr<UParticleSystem> HitEffect;
 
 private:
-	void UpdateHitEffect();
 	void HideHitEffect();
 
 	UPROPERTY()
-	TObjectPtr<UNiagaraComponent> HitEffectComponent;
+	TObjectPtr<UParticleSystemComponent> HitEffectComponent;
 
 	FTimerHandle HitEffectTimerHandle;
 };

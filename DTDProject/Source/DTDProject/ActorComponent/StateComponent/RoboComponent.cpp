@@ -6,6 +6,7 @@
 #include "Engine/World.h"
 #include "MyRobo/MyRobo.h"
 #include "TimerManager.h"
+#include "GameFramework/GameModeBase.h"
 
 URoboComponent::URoboComponent()
 {
@@ -16,19 +17,10 @@ void URoboComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetWorld()->GetTimerManager().SetTimer(O2TimerHandle, [this]()
-		{
-			if(IsValid(this))
-			{
-				UWorld* World = GetWorld();
-				if(World && World->GetAuthGameMode())
-				{
-					DecreaseOxygen();
-				}
-			}
-		}
-		,3.0f,true
-	);
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUFunction(this, FName("OnOxygenTimerFired"));
+	GetWorld()->GetTimerManager().SetTimer(O2TimerHandle,TimerDelegate
+		,3.0f,true);
 }
 
 void URoboComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -36,6 +28,15 @@ void URoboComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 
 	Super::EndPlay(EndPlayReason);
+}
+
+void URoboComponent::OnOxygenTimerFired()
+{
+	UWorld* World = GetWorld();
+	if (World && World->GetAuthGameMode())
+	{
+		DecreaseOxygen();
+	}
 }
 
 void URoboComponent::StartDiving()

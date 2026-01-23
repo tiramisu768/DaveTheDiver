@@ -45,6 +45,5 @@ public:
     //FFishStats Stats; // 현재 물고기 종의 스탯 캐싱
 
     virtual void TakeDamage(float Amount,const FHitResult& HitResult) override;
-    virtual void Heal(float HealAmount) override;
     void LoadStatsFromDataTable();
 };

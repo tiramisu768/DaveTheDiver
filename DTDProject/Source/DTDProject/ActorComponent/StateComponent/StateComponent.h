@@ -27,7 +27,6 @@ public:
 	virtual void SetHP(float NewHP);
 	virtual void SetMaxHP(float NewMaxHP);
 	virtual void TakeDamage(float DamageAmount, const FHitResult& HitResult);
-	virtual void Heal(float HealAmount);
 	bool IsDead() const { return CurrentHP <= 0.0f; }
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

@@ -39,16 +39,6 @@ void URoboComponent::OnOxygenTimerFired()
 	}
 }
 
-void URoboComponent::StartDiving()
-{
-	bIsDiving = true;
-}
-
-void URoboComponent::StopDriving()
-{
-	bIsDiving = false;
-}
-
 void URoboComponent::SetHP(float NewHP)
 {
 	float OldHP = CurrentHP;
@@ -63,7 +53,7 @@ void URoboComponent::SetHP(float NewHP)
 	else if (CurrentHP <= 50 && OldHP > 50)
 	{
 		//산소 경고
-		WarningOxygen();
+		WarningOxygen(true);
 	}
 }
 
@@ -79,13 +69,10 @@ void URoboComponent::ConsumeOxygen(float DeltaTime)
 
 void URoboComponent::DecreaseOxygen()
 {
-	if (bIsDiving)
-	{
-		SetHP(CurrentHP - 1.f);
-	}
+	SetHP(CurrentHP - 1.f);
 }
-//화면에 붉은 경고 위젯 띄우기
-void URoboComponent::WarningOxygen()
+//화면에 산소고갈 경고 위젯 띄우기
+void URoboComponent::WarningOxygen(bool bIsWarning)
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
@@ -94,7 +81,7 @@ void URoboComponent::WarningOxygen()
 	{
 		if (UMainUI* MainUI = controller->GetMainUI())
 		{
-			MainUI->ShowHPWarningWidget();
+			MainUI->ShowHPWarningWidget(bIsWarning);
 		}
 	}
 }
@@ -116,9 +103,19 @@ void URoboComponent::TakeDamage(float DamageAmount, const FHitResult& HitResult)
 	Super::TakeDamage(DamageAmount,HitResult);
 }
 
-void URoboComponent::Heal(float HealAmount)
+void URoboComponent::RestoreOxygen(float RestoreAmount)
 {
-	Super::Heal(HealAmount);
+	if (RestoreAmount <= 0.0f || IsDead())
+		return;
+
+	float OldHP = CurrentHP;
+	SetHP(CurrentHP + RestoreAmount);
+
+	if (OldHP < 50.f && CurrentHP >= 50.f)
+	{
+		WarningOxygen(false);
+	}
+
 }
 
 // Called every frame

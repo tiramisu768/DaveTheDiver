@@ -25,7 +25,9 @@
 #include "Engine/OverlapResult.h"
 #include "Interface/InteractionObject.h"
 #include "Weapon/Weapon.h"
-#include "Object/RandomBox.h"
+#include "Object/LootSpawnerBox.h"
+#include "Object/InstantRewardBox.h"
+#include "Object/PickupItem.h"
 #include "Animation/AnimInstance.h"
 
 
@@ -163,7 +165,7 @@ void AMyRobo::Tick(float DeltaTime)
 		}
 	}
 
-	if (MainController)
+	if (MainController.IsValid())
 	{
 		if (APlayerCameraManager* CameraManager = MainController->PlayerCameraManager)
 		{
@@ -253,7 +255,7 @@ void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 
 		OnSurfaced.AddLambda([this]()
 			{
-				if (MainController)
+				if (MainController.IsValid())
 				{
 					MainController->EndMyGame(true);
 				}
@@ -313,7 +315,7 @@ void AMyRobo::StopFiring()
 
 void AMyRobo::PerformMeleeAttack()
 {
-	if (!MainController) return;
+	if (!MainController.IsValid()) return;
 
 	GetWorld()->GetTimerManager().ClearTimer(HolsterTimerHandle);
 
@@ -327,7 +329,7 @@ void AMyRobo::PerformMeleeAttack()
 
 void AMyRobo::PerformAttack(const FVector2D& ScreenPosition)
 {
-	if (!MainController) return;
+	if (!MainController.IsValid()) return;
 
 	GetWorld()->GetTimerManager().ClearTimer(HolsterTimerHandle);
 
@@ -341,7 +343,7 @@ void AMyRobo::PerformAttack(const FVector2D& ScreenPosition)
 // AnimNotify에서 호출될 실제 발사 함수
 void AMyRobo::FireProjectile()
 {
-	if (!ActiveRangedWeapon || !MainController) return;
+	if (!ActiveRangedWeapon || !MainController.IsValid()) return;
 
 	// 1. 플레이어의 '진짜 조준 방향'void AMyRobo::FireProjectile()을 컨트롤러로부터 직접 가져옵니다.
 	//    이것이 카메라의 각도와 무관한, 플레이어의 순수한 의도입니다.
@@ -451,11 +453,11 @@ void AMyRobo::ShowPickupWidget(bool bShow, AActor* TargetActor)
 void AMyRobo::StartSpaceHold()
 {
 	//상호작용 대상 아무것도 없음
-	if (!AcquirableWeapon && !CurrentInteractable)
+	if (!AcquirableActor.IsValid() && !CurrentInteractable)
 		return;
 
 	//길게 누르는 상호작용일 때 카메라 고정한다
-	if (!AcquirableWeapon && CurrentInteractable)
+	if (!AcquirableActor.IsValid() && CurrentInteractable)
 	{
 		FocusOnInteractionTarget(CurrentInteractable.GetInterface());
 	}
@@ -482,19 +484,19 @@ void AMyRobo::StopSpaceHold()
 	UpdateInteractionProgress(0.f);
 }
 
-void AMyRobo::SetAcquirableWeapon(AWeapon* Weapon)
+void AMyRobo::SetAcquirableActor(AActor* Actor)
 {
-	if (AcquirableWeapon)
+	if (AcquirableActor.IsValid())
 	{
-		ShowPickupWidget(false, AcquirableWeapon);
+		ShowPickupWidget(false, AcquirableActor.Get());
 	}
 
-	AcquirableWeapon = Weapon;
+	AcquirableActor = Actor;
 
-	if (AcquirableWeapon)
+	if (AcquirableActor.IsValid())
 	{
-		ShowPickupWidget(true, AcquirableWeapon);
-		UE_LOG(LogTemp, Log, TEXT("[MyRobo] Acquirable weapon set: %s"), *Weapon->GetName());
+		ShowPickupWidget(true, AcquirableActor.Get());
+		UE_LOG(LogTemp, Log, TEXT("[MyRobo] Acquirable weapon set: %s"), *Actor->GetName());
 	}
 	else
 	{
@@ -504,14 +506,14 @@ void AMyRobo::SetAcquirableWeapon(AWeapon* Weapon)
 
 void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 {
-	if (MainController)
+	if (MainController.IsValid())
 	{
 		if (Target)
 		{
 			AActor* TargetActor = Cast<AActor>(Target);
 			if (TargetActor)
 			{
-				DisableInput(MainController);
+				DisableInput(MainController.Get());
 				bIsCameraFixed = true;
 				MainController->SetIgnoreLookInput(true); //마우스 정지
 
@@ -523,7 +525,7 @@ void AMyRobo::FocusOnInteractionTarget(IInteractionObject* Target)
 		}
 		else
 		{
-			EnableInput(MainController);
+			EnableInput(MainController.Get());
 			bIsCameraFixed = false;
 			MainController->SetIgnoreLookInput(false); //마우스 정지해제
 		}
@@ -547,6 +549,35 @@ void AMyRobo::BroadcastCurrentWeaponStates()
 	{
 		// Gun 슬롯이 업데이트되었음을 알림
 		OnWeaponSlotUpdated.Broadcast(EWeaponSlot::Gun, GunWeapon);
+	}
+}
+
+void AMyRobo::OnToolReplaceConfirmed(int32 SlotIndexToDiscard)
+{
+	if (!InventoryComponent || !PendingToolToPickup.IsValid()) return;
+
+	APickupItem* NewTool = PendingToolToPickup.Get();
+	ALootSpawnerBox* BoxOwner = Cast<ALootSpawnerBox>(NewTool->GetOwner());
+
+	InventoryComponent->AddTool(NewTool);
+	NewTool->SetOwner(this);
+	NewTool->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ToolSocketName);
+	NewTool->SetActorHiddenInGame(true);
+
+	if (BoxOwner)
+	{
+		BoxOwner->ClearSpawnedItem();
+	}
+
+	SetAcquirableActor(nullptr);
+	PendingToolToPickup = nullptr;
+
+	if (MainController.IsValid())
+	{
+		if (UMainUI* MainUI = MainController->GetMainUI())
+		{
+		/*	MainUI->HideToolReplacementUI();*/
+		}
 	}
 }
 
@@ -632,9 +663,9 @@ void AMyRobo::DieRobo()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BodyComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	if (MainController)
+	if (MainController.IsValid())
 	{
-		DisableInput(MainController);
+		DisableInput(MainController.Get());
 
 		MainController->EndMyGame(false);
 	}
@@ -727,7 +758,7 @@ void AMyRobo::BeginPlay()
 
 
 	MainController = Cast<AMyCharacterController>(GetController());
-	if (!MainController) return;
+	if (!MainController.IsValid()) return;
 
 	if (UMainUI* MainUI = MainController->GetMainUI())
 	{
@@ -813,11 +844,22 @@ void AMyRobo::HandleShortPress()
 {
 	IsHolding = false;
 
-	if (AcquirableWeapon)
+	if (AcquirableActor.IsValid())
 	{
-		UE_LOG(LogTemp, Log, TEXT("[MyRobo] Short press detected. Attempting to pick up %s."), *AcquirableWeapon->GetName());
-		PickupAcquirableWeapon();
-		return;
+		if (AWeapon* WeaponToPickup = Cast<AWeapon>(AcquirableActor.Get()))
+		{
+			UE_LOG(LogTemp, Log, TEXT("[MyRobo] Short press detected. Attempting to pick up %s."), *WeaponToPickup->GetName());
+			PickupAcquirableWeapon();
+			return;
+		}
+
+		else if (APickupItem* ItemToPickup = Cast<APickupItem>(AcquirableActor.Get()))
+		{
+			UE_LOG(LogTemp, Log, TEXT("[MyRobo] Short press detected. Attempting to pick up %s."), *ItemToPickup->GetName());
+			PickupAcquirableTool();
+			return;
+		}
+
 	}
 }
 
@@ -836,18 +878,19 @@ void AMyRobo::UpdateInteractionProgress(float Percent)
 
 void AMyRobo::PickupAcquirableWeapon()
 {
-	if (!AcquirableWeapon) return;
+	AWeapon* WeaponToPickup = Cast<AWeapon>(AcquirableActor.Get());
+	if (!WeaponToPickup) return;
 
-	ARandomBox* BoxOwner = Cast<ARandomBox>(AcquirableWeapon->GetOwner());
+	ALootSpawnerBox* BoxOwner = Cast<ALootSpawnerBox>(AcquirableActor->GetOwner());
 
 	if (BoxOwner)
 	{
-		AcquirableWeapon->ReloadToMax(); //첫 생성에만 풀충전
+		WeaponToPickup->ReloadToMax(); //첫 생성에만 풀충전
 	}
 
-	FVector DropLocation = AcquirableWeapon->GetActorLocation();
+	FVector DropLocation = WeaponToPickup->GetActorLocation();
 
-	EWeaponSlot SlotToFill = AcquirableWeapon->GetSlotType();
+	EWeaponSlot SlotToFill = WeaponToPickup->GetSlotType();
 	AWeapon* OldWeapon = nullptr;
 
 	UE_LOG(LogTemp, Log, TEXT("[MyRobo] PickupAcquirableWeapon started for slot: %s"), *UEnum::GetValueAsString(SlotToFill));
@@ -856,19 +899,19 @@ void AMyRobo::PickupAcquirableWeapon()
 	{
 	case EWeaponSlot::Melee:
 		OldWeapon = MeleeWeapon;
-		MeleeWeapon = AcquirableWeapon;
+		MeleeWeapon = WeaponToPickup;
 		break;
 	case EWeaponSlot::Harpoon:
 		OldWeapon = HarpoonWeapon;
-		HarpoonWeapon = AcquirableWeapon;
+		HarpoonWeapon = WeaponToPickup;
 		break;
 	case EWeaponSlot::Gun:
 		OldWeapon = GunWeapon;
-		GunWeapon = AcquirableWeapon;
+		GunWeapon = WeaponToPickup;
 		break;
 	}
 
-	if (SlotToFill == EWeaponSlot::Gun && MainController)
+	if (SlotToFill == EWeaponSlot::Gun && MainController.IsValid())
 	{
 		if (UMainUI* MainUI = MainController->GetMainUI())
 		{
@@ -883,15 +926,15 @@ void AMyRobo::PickupAcquirableWeapon()
 		}
 	}
 
-	AcquirableWeapon->SetOwner(this);
-	AcquirableWeapon->SetActorHiddenInGame(true);
+	AcquirableActor->SetOwner(this);
+	AcquirableActor->SetActorHiddenInGame(true);
 
 	//UI에 특정 슬롯이 업데이트되었음을 알림
-	OnWeaponSlotUpdated.Broadcast(SlotToFill, AcquirableWeapon);
+	OnWeaponSlotUpdated.Broadcast(SlotToFill, WeaponToPickup);
 
 	if (OldWeapon == ActiveRangedWeapon)
 	{
-		ActiveRangedWeapon = AcquirableWeapon;
+		ActiveRangedWeapon = WeaponToPickup;
 	}
 
 	if (OldWeapon && BoxOwner)
@@ -906,7 +949,43 @@ void AMyRobo::PickupAcquirableWeapon()
 		BoxOwner->ClearSpawnedWeapon();
 	}
 
-	SetAcquirableWeapon(nullptr);
+	SetAcquirableActor(nullptr);
+}
+
+void AMyRobo::PickupAcquirableTool()
+{
+	APickupItem* ToolToPickup = Cast<APickupItem>(AcquirableActor.Get());
+	if (!ToolToPickup || !InventoryComponent) return;
+
+	if (InventoryComponent->IsToolInventoryFull())
+	{
+		PendingToolToPickup = ToolToPickup;
+		if (MainController.IsValid())
+		{
+			if (UMainUI* MainUI = MainController->GetMainUI())
+			{
+				/*MainUI->ShowToolReplacementUI(
+				InventoryComponent->GetToolFromSlot(0),
+				InventoryComponent->GetToolFromSlot(1)
+				);*/
+			}
+		}
+	}
+	else
+	{
+		ALootSpawnerBox* BoxOwner = Cast<ALootSpawnerBox>(ToolToPickup->GetOwner());
+
+		InventoryComponent->AddTool(ToolToPickup);
+		ToolToPickup->SetOwner(this);
+		ToolToPickup->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, ToolSocketName);
+		ToolToPickup->SetActorHiddenInGame(true);
+
+		if (BoxOwner)
+		{
+			BoxOwner->ClearSpawnedItem();
+		}
+	}
+	SetAcquirableActor(nullptr);
 }
 
 void AMyRobo::UpdateWeaponAttachments()
@@ -954,7 +1033,7 @@ void AMyRobo::HolsterWeapons()
 
 void AMyRobo::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (MainController)
+	if (MainController.IsValid())
 	{
 		MainController->SetIsAttacking(false);
 	}

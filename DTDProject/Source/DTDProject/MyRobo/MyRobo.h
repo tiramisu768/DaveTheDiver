@@ -16,7 +16,9 @@ class UAIPerceptionStimuliSourceComponent;
 class AMyCharacterController;
 class ASeaCreature;
 class UMainUI;
-class ARandomBox;
+class ALootSpawnerBox;
+class AInstantRewardBox;
+class APickupItem;
 
 DECLARE_MULTICAST_DELEGATE(FOnSurfaced);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWeaponSlotUpdated, EWeaponSlot, AWeapon*);
@@ -80,13 +82,15 @@ public:
 
 	void StopSpaceHold();
 	
-	void SetAcquirableWeapon(AWeapon* Weapon);
+	void SetAcquirableActor(AActor* Actor);
 
 	void FocusOnInteractionTarget(IInteractionObject* Target);
 
 	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 
 	void BroadcastCurrentWeaponStates();
+
+	void OnToolReplaceConfirmed(int32 SlotIndexToDiscard);
 
 	void AttackTrace() override;
 
@@ -146,7 +150,7 @@ protected:
 
 #pragma region Internal State
 	UPROPERTY()
-	TObjectPtr<AMyCharacterController> MainController;
+	TWeakObjectPtr<AMyCharacterController> MainController;
 
 	EWeaponState CurrentWeaponState = EWeaponState::Unarmed;
 	FTimerHandle HolsterTimerHandle;
@@ -170,6 +174,8 @@ protected:
 	void UpdateInteractionProgress(float Percent);
 
 	void PickupAcquirableWeapon();
+
+	void PickupAcquirableTool();
 
 	void UpdateWeaponAttachments();
 
@@ -204,7 +210,13 @@ private:
 	TObjectPtr<AWeapon> ActiveRangedWeapon;
 
 	UPROPERTY()
-	TObjectPtr<AWeapon> AcquirableWeapon;
+	TWeakObjectPtr<class AActor> AcquirableActor;
+
+	UPROPERTY()
+	TWeakObjectPtr<APickupItem> PendingToolToPickup;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Socket")
+	FName ToolSocketName;
 
 	FVector2D RangedTargetScreenPosition;
 #pragma endregion

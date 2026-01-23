@@ -113,12 +113,19 @@ void UMainUI::ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo)
 	}
 }
 
-void UMainUI::ShowHPWarningWidget()
+void UMainUI::ShowHPWarningWidget(bool bIsWarning)
 {
 	if (WarningHPWidget)
 	{
-		WarningHPWidget->SetVisibility(ESlateVisibility::Visible);
-		WarningHPWidget->SetOxygenWarning();
+		if(bIsWarning)
+		{
+			WarningHPWidget->SetVisibility(ESlateVisibility::Visible);
+			WarningHPWidget->SetOxygenWarning();
+		}
+		else
+		{
+			WarningHPWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
 

@@ -39,11 +39,16 @@ public:
 	bool AutoPickuponOverlap = true;
 
 protected:
-	UPROPERTY(VisibleAnywhere, Category="Components")
+	UFUNCTION(BlueprintImplementableEvent, Category ="PickupItem")
+	void InitializeMeshComponent();
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UMeshComponent> MeshComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<USphereComponent> SphereComp;
 
-	UPROPERTY(VisibleAnywhere, Category="Components")
-	TObjectPtr<UStaticMeshComponent> MeshComp;
+
 
 	virtual void BeginPlay() override;
 

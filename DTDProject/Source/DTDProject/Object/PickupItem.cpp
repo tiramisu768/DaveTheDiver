@@ -3,6 +3,7 @@
 
 #include "Object/PickupItem.h"
 #include "Components/SphereComponent.h"
+#include "Components/MeshComponent.h"
 #include "MyRobo/MyRobo.h"
 
 // Sets default values
@@ -13,9 +14,6 @@ APickupItem::APickupItem()
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("ShpereComp"));
 	RootComponent = SphereComp;
 
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-	MeshComp->SetupAttachment(RootComponent);
-
 	AutoPickuponOverlap = true;
 }
 
@@ -23,6 +21,8 @@ APickupItem::APickupItem()
 void APickupItem::BeginPlay()
 {
 	Super::BeginPlay();
+
+	InitializeComponents();
 
 	if (SphereComp)
 	{

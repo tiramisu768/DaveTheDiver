@@ -100,25 +100,6 @@ void UStateComponent::TakeDamage(float DamageAmount, const FHitResult& HitResult
 	}
 }
 
-//È¸º¹
-void UStateComponent::Heal(float HealAmount)
-{
-	if (HealAmount <= 0.0f || IsDead())
-		return;
-
-	SetHP(CurrentHP + HealAmount);
-
-	if (CurrentHP > 10.0f && IsComponentTickEnabled())
-	{
-		SetComponentTickEnabled(false);
-		if (!GetWorld()->GetTimerManager().IsTimerActive(HitEffectTimerHandle))
-		{
-			HideHitEffect();
-		}
-	}
-}
-
-// Called every frame
 void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);

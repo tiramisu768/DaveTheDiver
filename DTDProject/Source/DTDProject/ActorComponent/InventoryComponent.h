@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Tool/ToolData.h"
+#include "Object/PickupItem.h"
 #include "InventoryComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -60,6 +61,11 @@ public:
 
 	void SellAllFish();
 	void SwitchActiveTool();
+	bool IsToolInventoryFull() const;
+	void SetToolInSlot(int32 SlotIndex, APickupItem* Tool);
+	void AddTool(APickupItem* NewTool);
+	APickupItem* RemoveToolFromSlot(int32 SlotIndex);
+	APickupItem* GetToolFromSlot(int32 SlotIndex) const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -75,4 +81,10 @@ private:
 	TObjectPtr<UDataTable> ToolDataTable;
 
 	int32 ActiveToolSlotIndex;
+
+	UPROPERTY()
+	TArray<TObjectPtr<APickupItem>> ToolSlots;
+
+	UPROPERTY(EditDefaultsOnly,Category = "Inventory")
+	int32 MaxToolSlots = 2;
 };

@@ -16,6 +16,7 @@ class UFishRankUI;
 class URoboAimUI;
 class UWarningOxygenUI;
 class AWeapon;
+class APickupItem;
 class UResultTableUI;
 class UShopUI;
 
@@ -31,7 +32,7 @@ public:
 	void OverWeightNotification(bool becameOverweight);
 	UFUNCTION()
 	void ShowCollectedFishNotification(const FCaughtFishInfo& FishInfo);
-	void ShowHPWarningWidget();
+	void ShowHPWarningWidget(bool bIsWarning);
 
 	URoboWeaponUI* GetRoboWeaponUI() const { return EquipmentWidget; }
 	void PlayWeaponSwitchAnimation(int32 SelectedIndex);

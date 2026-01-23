@@ -20,16 +20,15 @@ public:
 	FOnOxygenDepleted OnOxygenDepleted;
 
 	URoboComponent();
-	void StartDiving();
-	void StopDriving();
+
 	virtual void SetHP(float NewHP) override;
 	void InitOxygen();
 	void ConsumeOxygen(float DeltaTime);
 	void DecreaseOxygen();
-	void WarningOxygen();
+	void WarningOxygen(bool bIsWarning);
 	void ZeroOxygen();
 	virtual void TakeDamage(float DamageAmount, const FHitResult& HitResult) override;
-	virtual void Heal(float HealAmount) override;
+	void RestoreOxygen(float RestoreAmount);
 	void UpdateCurrentDepth(float NewDepth);
 
 protected:
@@ -45,7 +44,6 @@ protected:
 private:
 	FTimerHandle O2TimerHandle;
 
-	bool bIsDiving = true; // 수면체크하게 되면 false로 바꾸기
 	UPROPERTY(EditAnywhere, Category = "State | Robo")
 	UWidgetComponent* RoboHPBarWidget;
 	float CurrentDepth = 0.0f;

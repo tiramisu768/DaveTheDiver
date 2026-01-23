@@ -107,7 +107,6 @@ void ABaseBox::UpdateOpenAnimation(float DeltaTime)
 		if (DynMat)
 		{
 			DynMat->SetScalarParameterValue(TEXT("Brightness"), Brightness);
-			UE_LOG(LogTemp, Log, TEXT("DynMat Name %s"),*DynMat->GetFName().ToString());
 		}
 	}
 	// 밝기가 최소치에 도달하면 Open 상태로 전환

@@ -143,8 +143,6 @@ public:
 
 	bool isDead();
 
-	void RotateToDeadPose(float DeltaTime);
-
 	void EnableCollectTrigger(bool isEnable);
 
 	UFUNCTION()
@@ -162,6 +160,8 @@ public:
 	void OnHitMontageEnded(bool bInterrupted);
 
 	void OnAttackMontageEnded(bool bInterrupted);
+
+	void OnDeathMontageEnded(bool bInterrupted);
 
 	void SpawnDamagePopup(float DamageAmount);
 
@@ -183,7 +183,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UTimelineComponent> DeadPoseTimeline;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Timeline")
 	TObjectPtr<UCurveFloat> DeadPoseCurve;
 
 	UFUNCTION()

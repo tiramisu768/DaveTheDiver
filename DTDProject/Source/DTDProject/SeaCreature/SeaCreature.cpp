@@ -262,63 +262,28 @@ void ASeaCreature::Die()
 	}
 
 	EnableCollectTrigger(true);
-	//사망직전 파닥파닥 애님
-	if (DeathFlapMontage && Mesh && Mesh->GetAnimInstance())
-	{
-		Mesh->GetAnimInstance()->Montage_Play(DeathFlapMontage);
-	}
 
 	// 이동 컴포넌트를 비활성화하여 움직임을 멈춘다
 	if (MovementComponent)
 	{
 		MovementComponent->Deactivate();
 	}
-
-	USkeletalMeshComponent* M = GetMesh();
-	// 현재 프레임 고정
-	M->bPauseAnims = true;
-	M->SetComponentTickEnabled(false);
-
-	//캡슐끄고, 메쉬의 콜리전을 Ragdoll로 설정
-	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	M->SetCollisionProfileName(TEXT("Ragdoll"));
-	M->SetAllBodiesSimulatePhysics(false);
-	M->SetSimulatePhysics(false);
-	M->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-
-	M->SetAllBodiesBelowSimulatePhysics(FName("Spine_006_077"), true, true);
-	M->SetAllBodiesBelowPhysicsBlendWeight(FName("Spine_006_077"), 0.5f);
-
-	// 물속 감쇠로 덜 출렁이게
-	M->SetLinearDamping(2.5f);
-	M->SetAngularDamping(3.5f);
-
-	if (DeadPoseCurve)
+	
+	//사망직전 파닥파닥 애님
+	if (DeathFlapMontage && Mesh && Mesh->GetAnimInstance())
 	{
-		FOnTimelineFloat ProgressFunction;
-		ProgressFunction.BindUFunction(this, FName("UpdateDeadPoseRotation"));
-		DeadPoseTimeline->AddInterpFloat(DeadPoseCurve, ProgressFunction);
-		DeadPoseTimeline->PlayFromStart();
+		Mesh->GetAnimInstance()->Montage_Play(DeathFlapMontage);
 	}
-
-	//////////10초 후 자동삭제로 하고 20초 내에 로보가 물고기에 부딪히면 수확 및 삭제////////
-	//GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [this]()
-	//	{
-	//		Destroy();
-	//	}, 10.0f, false
-	//);
+	else
+	{
+		// 몽타주가 없으면 바로 죽은 포즈로 전환
+		OnDeathMontageEnded(false);
+	}
 }
 
 bool ASeaCreature::isDead()
 {
 	return FishStateComponent->IsDead();
-}
-
-void ASeaCreature::RotateToDeadPose(float DeltaTime)
-{
-	//서서히 0→Roll ~90도 보간
-	const FRotator Target = FRotator(0.f, GetActorRotation().Yaw, 90.f);
-	SetActorRotation(FMath::RInterpTo(GetActorRotation(), Target, DeltaTime, 0.5f));
 }
 
 void ASeaCreature::EnableCollectTrigger(bool isEnable)
@@ -336,13 +301,6 @@ void ASeaCreature::OnCollectOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	if (AMyRobo* robo = Cast<AMyRobo>(OtherActor))
 	{
 		EnableCollectTrigger(false);
-		
-		if (DeathRotateTimerHandle.IsValid())
-		{
-			GetWorld()->GetTimerManager().ClearTimer(DeathRotateTimerHandle);
-			DeathRotateTimerHandle.Invalidate();
-		}
-
 		robo->CollectSeaCreature(this);
 	}
 }
@@ -402,6 +360,10 @@ void ASeaCreature::OnMontageEnded_Handler(UAnimMontage* Montage, bool bInterrupt
 	{
 		OnAttackMontageEnded(bInterrupted);
 	}
+	else if (Montage == DeathFlapMontage)
+	{
+		OnDeathMontageEnded(bInterrupted);
+	}
 }
 
 void ASeaCreature::OnHitMontageEnded(bool bInterrupted)
@@ -421,6 +383,43 @@ void ASeaCreature::OnHitMontageEnded(bool bInterrupted)
 void ASeaCreature::OnAttackMontageEnded(bool bInterrupted)
 {
 	OnAttackMontageEndedDelegate.ExecuteIfBound();
+}
+
+void ASeaCreature::OnDeathMontageEnded(bool bInterrupted)
+{
+	USkeletalMeshComponent* M = GetMesh();
+	// 현재 프레임 고정
+	M->bPauseAnims = true;
+	//M->SetComponentTickEnabled(false);
+
+	//캡슐끄고, 메쉬의 콜리전을 Ragdoll로 설정
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	M->SetCollisionProfileName(TEXT("Ragdoll"));
+	M->SetAllBodiesSimulatePhysics(false);
+	M->SetSimulatePhysics(false);
+	M->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
+	M->SetAllBodiesBelowSimulatePhysics(FName("Spine_006_077"), true, true);
+	M->SetAllBodiesBelowPhysicsBlendWeight(FName("Spine_006_077"), 0.5f);
+
+	// 물속 감쇠로 덜 출렁이게
+	M->SetLinearDamping(2.5f);
+	M->SetAngularDamping(3.5f);
+
+	if (DeadPoseCurve && DeadPoseTimeline)
+	{
+		FOnTimelineFloat ProgressFunction;
+		ProgressFunction.BindUFunction(this, FName("UpdateDeadPoseRotation"));
+		DeadPoseTimeline->AddInterpFloat(DeadPoseCurve, ProgressFunction);
+		DeadPoseTimeline->PlayFromStart();
+	}
+
+	//////////10초 후 자동삭제로 하고 20초 내에 로보가 물고기에 부딪히면 수확 및 삭제////////
+	//GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [this]()
+	//	{
+	//		Destroy();
+	//	}, 10.0f, false
+	//);
 }
 
 

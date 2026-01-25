@@ -12,8 +12,8 @@ void UXResultItem::SetItemInfo(const FCaughtFishInfo& Info, int32 Index)
 	if (!FishIconImage || !FishName || !FishGrade || !FishWeight) return;
 
 	FishName->SetText(FText::FromString(Info.FishName));
-	FishGrade->SetText(FText::AsNumber(Info.Grade));
-	FishWeight->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), Info.Weight)));
+	FishGrade->SetText(FText::FromString(FString::Printf(TEXT("Rank %d"), Info.Grade)));
+	FishWeight->SetText(FText::FromString(FString::Printf(TEXT("%.1f kg"), Info.Weight)));
 
 	if (UTexture2D* IconTexture = Info.FishIcon.LoadSynchronous())
 	{

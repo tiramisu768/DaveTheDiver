@@ -457,10 +457,10 @@ void AMyRobo::StartSpaceHold()
 		return;
 
 	//길게 누르는 상호작용일 때 카메라 고정한다
-	if (!AcquirableActor.IsValid() && CurrentInteractable)
+	/*if (!AcquirableActor.IsValid() && CurrentInteractable)
 	{
 		FocusOnInteractionTarget(CurrentInteractable.GetInterface());
-	}
+	}*/
 
 	IsHolding = true;
 	HoldElapsed = 0.f;
@@ -470,10 +470,10 @@ void AMyRobo::StartSpaceHold()
 void AMyRobo::StopSpaceHold()
 {
 	//카메라고정 해제
-	if (bIsCameraFixed)
+	/*if (bIsCameraFixed)
 	{
 		FocusOnInteractionTarget(nullptr);
-	}
+	}*/
 
 	if (HoldElapsed < HoldDuration)
 	{

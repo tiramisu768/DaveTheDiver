@@ -175,6 +175,12 @@ void AWeapon::SpawnProjectileAtMuzzle(const FVector& Direction)
 
 	if (SpawnedBullet)
 	{
+		if (WeaponStats->ProjectileSpeed > 0.f)
+		{
+			const float LifeSpan = WeaponStats->Range / WeaponStats->ProjectileSpeed;
+			SpawnedBullet->SetLifeSpan(LifeSpan);
+		}
+
 		if (UProjectileMovementComponent* ProjMove = SpawnedBullet->FindComponentByClass<UProjectileMovementComponent>())
 		{
 			ProjMove->InitialSpeed = WeaponStats->ProjectileSpeed;

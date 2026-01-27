@@ -103,13 +103,11 @@ void ALootSpawnerBox::SpawnLoot()
 
 void ALootSpawnerBox::HandleSpawnWeapon()
 {
-	if (!WeaponDataTable || WeaponDataTable->GetRowMap().Num() == 0) return;
+	if (!SpecificWeaponToSpawn.DataTable || SpecificWeaponToSpawn.RowName.IsNone()) return;
 	if (IsValid(SpawnedWeapon)) return;
 
-	TArray<FName> RowNames = WeaponDataTable->GetRowNames();
-	const FName RandomRowName = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
 	static const FString ContextString(TEXT("WeaponDataTable Context"));
-	FWeaponData* FoundWeaponData = WeaponDataTable->FindRow<FWeaponData>(RandomRowName, ContextString);
+	FWeaponData* FoundWeaponData = SpecificWeaponToSpawn.DataTable->FindRow<FWeaponData>(SpecificWeaponToSpawn.RowName, ContextString);
 
 	if (FoundWeaponData && FoundWeaponData->WeaponClass)
 	{
@@ -119,8 +117,7 @@ void ALootSpawnerBox::HandleSpawnWeapon()
 
 		if (IsValid(SpawnedWeapon))
 		{
-			SpawnedWeapon->RowName = RandomRowName;
-			SpawnedWeapon->PostInitializeComponents();
+			SpawnedWeapon->RowName = SpecificWeaponToSpawn.RowName;
 			if (IsValid(CurrentInteractingRobo))
 			{
 				CurrentInteractingRobo->SetAcquirableActor(SpawnedWeapon);

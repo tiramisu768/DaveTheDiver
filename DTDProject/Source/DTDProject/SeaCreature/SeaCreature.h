@@ -12,7 +12,7 @@
 UENUM(BlueprintType)
 enum class ESeaDisposition :uint8
 {
-	Passive UMETA(DisplayName = "Passive"),
+	Skittish UMETA(DisplayName = "Skittish"),
 	Aggressive UMETA(DisplayName = "Aggressive"),
 	Territorial UMETA(DisplayName = "Territorial")
 };
@@ -33,7 +33,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. Default Info")
 	float MaxHP;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "1. Default Info")
-	ESeaDisposition Disposition = ESeaDisposition::Passive;
+	ESeaDisposition Disposition = ESeaDisposition::Skittish;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2. Visual")
 	TSoftObjectPtr<UTexture2D> FishIcon;
@@ -71,7 +71,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "4. Common")
 	float Acceleration = { 1500.f }; //°¡¼Óµµ
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "5. Passive")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "5. Skittish")
 	float FleeSpeed = { 20.0f };
 
 

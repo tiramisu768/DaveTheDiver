@@ -36,7 +36,7 @@ protected:
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	TObjectPtr<class UBehaviorTree> PassiveBT;
+	TObjectPtr<class UBehaviorTree> SkittishBT;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<class UBehaviorTree> AggressiveBT;

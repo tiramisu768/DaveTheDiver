@@ -124,7 +124,7 @@ void ASeaCreature::BeginPlay()
 			AttackStrategy = NewObject<UTerritorialAttackStrategy>(this);
 			HomeReturnDist = Data->WanderRadius - 400.f;
 			break;
-		case ESeaDisposition::Passive:
+		case ESeaDisposition::Skittish:
 			AttackStrategy = nullptr;
 			HomeReturnDist = Data->WanderRadius - 100.f;
 			break;

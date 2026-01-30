@@ -37,7 +37,15 @@ EBTNodeResult::Type UTask_TerritorialAttack::ExecuteTask(UBehaviorTreeComponent&
 
 	MyOwnerComp = &OwnerComp;
 
-	AnimInstance->OnMontageEnded.AddDynamic(this, &UTask_TerritorialAttack::OnMontageEnded);
+	if(AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &UTask_TerritorialAttack::OnMontageEnded);
+	}
+	else
+	{
+		MyOwnerComp.Reset();
+		return EBTNodeResult::Failed;
+	}
 
 	SeaCreature->Attack(Target);
 
@@ -46,15 +54,22 @@ EBTNodeResult::Type UTask_TerritorialAttack::ExecuteTask(UBehaviorTreeComponent&
 
 void UTask_TerritorialAttack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (MyOwnerComp.IsValid() && !bInterrupted)
+	if (MyOwnerComp.IsValid())
 	{
 		UBlackboardComponent* BBPtr = MyOwnerComp->GetBlackboardComponent();
-		if (BBPtr && MyOwnerComp->GetWorld())
+		if(!bInterrupted)
 		{
-			BBPtr->SetValueAsFloat(ASeaCreatureAIController::LastAttackEndTimeKey, MyOwnerComp->GetWorld()->GetTimeSeconds());
-		}
+			if (BBPtr && MyOwnerComp->GetWorld())
+			{
+				BBPtr->SetValueAsFloat(ASeaCreatureAIController::LastAttackEndTimeKey, MyOwnerComp->GetWorld()->GetTimeSeconds());
+			}
 
-		FinishLatentTask(*MyOwnerComp.Get(), EBTNodeResult::Succeeded);
+			FinishLatentTask(*MyOwnerComp.Get(), EBTNodeResult::Succeeded);
+		}
+		else
+		{
+			FinishLatentTask(*MyOwnerComp.Get(), EBTNodeResult::Aborted);
+		}
 	}
 }
 

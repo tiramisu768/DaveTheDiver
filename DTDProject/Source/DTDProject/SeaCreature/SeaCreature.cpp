@@ -315,14 +315,29 @@ void ASeaCreature::Attack(AMyRobo* Target)
 
 void ASeaCreature::AttackTrace()
 {
+	if (!Data) return;
+
+	FVector StartLocation;
+	if (Mesh && Mesh->DoesSocketExist(FName("MouthSocket")))
+	{
+		StartLocation = Mesh->GetSocketLocation(FName("MouthSocket"));
+	}
+	else
+	{
+		StartLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
+	}
+
+	const FVector EndLocation = StartLocation + GetActorForwardVector() * Data->AttackTraceDistance;
+	const FVector BoxSize = Data->AttackTraceBoxSize;
+
 	TArray<AActor*> HitActors;
 	TArray<FHitResult> HitResults;
 	bool isHit = UKismetSystemLibrary::BoxTraceMulti(
 		this,
-		GetActorLocation(),
-		GetActorLocation() + GetActorForwardVector() * 100.0f,
-		FVector(50.0f, 50.0f, 50.0f),
-		FRotator::ZeroRotator,
+		StartLocation,
+		EndLocation,
+		BoxSize,
+		GetActorRotation(),
 		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel5),
 		false,
 		{},
@@ -399,8 +414,11 @@ void ASeaCreature::OnDeathMontageEnded(bool bInterrupted)
 	M->SetSimulatePhysics(false);
 	M->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
-	M->SetAllBodiesBelowSimulatePhysics(FName("Spine_006_077"), true, true);
-	M->SetAllBodiesBelowPhysicsBlendWeight(FName("Spine_006_077"), 0.5f);
+	FName DeathBone = Data ? Data->DeathPoseBoneName : FName("Spine_006_077");
+	float BlendWeight = Data ? Data->DeathPoseBlendWeight : 0.5f;
+
+	M->SetAllBodiesBelowSimulatePhysics(DeathBone, true, true);
+	M->SetAllBodiesBelowPhysicsBlendWeight(DeathBone, BlendWeight);
 
 	// ¹°¼Ó °¨¼è·Î ´ú Ãâ··ÀÌ°Ô
 	M->SetLinearDamping(2.5f);

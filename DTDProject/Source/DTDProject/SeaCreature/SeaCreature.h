@@ -86,6 +86,19 @@ public:
 	float ChaseSpeed = { 500.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
 	float AttackSpeed{ 10.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
+	float AttackTraceDistance = 100.0f; // 공격 판정이 뻗어 나가는 거리
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "6. Aggressive")
+	FVector AttackTraceBoxSize = FVector(50.f, 50.f, 50.f); // 공격 판정의 크기
+
+	// 사망 연출 관련
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "7. Death")
+	FName DeathPoseBoneName = FName("Spine_006_077");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "7. Death")
+	float DeathPoseBlendWeight = 0.5f;
 };
 
 

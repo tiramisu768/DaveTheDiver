@@ -19,10 +19,16 @@ EBTNodeResult::Type UTask_Flee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
 	ASeaCreature* SeaCreature = Cast<ASeaCreature>(OwnerComp.GetAIOwner()->GetPawn());
-	const FSeaCreatureData* FishData = SeaCreature->GetData();
-	SeaCreature->MovementComponent->MaxSpeed = FishData->FleeSpeed;
-	SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
-	return EBTNodeResult::InProgress;
+	if (SeaCreature)
+	{
+		SeaCreature->StartEffect();
+
+		const FSeaCreatureData* FishData = SeaCreature->GetData();
+		SeaCreature->MovementComponent->MaxSpeed = FishData->FleeSpeed;
+		SeaCreature->MovementComponent->Acceleration = FishData->Acceleration;
+		return EBTNodeResult::InProgress;
+	}
+	return EBTNodeResult::Failed;
 }
 
 void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
@@ -84,4 +90,18 @@ void UTask_Flee::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 		FRotator TargetRotation = Dir.Rotation();
 		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
 	}
+}
+
+void UTask_Flee::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (AIController)
+	{
+		ASeaCreature* SeaCreature = Cast<ASeaCreature>(AIController->GetPawn());
+		if (SeaCreature)
+		{
+			SeaCreature->StopEffect();
+		}
+	}
+	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }

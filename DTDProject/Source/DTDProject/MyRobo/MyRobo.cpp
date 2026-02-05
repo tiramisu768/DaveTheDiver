@@ -111,6 +111,21 @@ void AMyRobo::Tick(float DeltaTime)
 
 		if (RoboComponent)
 		{
+			const bool bIsSwimmingAndMoving = GetCharacterMovement()->IsSwimming() && (GetVelocity().SizeSquared() > 0.f);
+			if (bIsSwimmingAndMoving != bWasSwimmingAndMoving)
+			{
+				RoboComponent->ShowSwimBubbleEffect(bIsSwimmingAndMoving);
+				bWasSwimmingAndMoving = bIsSwimmingAndMoving;
+
+				if (UGameInstance* GameInstance = GetGameInstance())
+				{
+					if (USoundManagerSubsystem* SM = GameInstance->GetSubsystem<USoundManagerSubsystem>())
+					{
+						SM->PlaySFX(ESoundKey::Player_Swim);
+					}
+				}
+			}
+
 			RoboComponent->UpdateCurrentDepth(CurrentDepth);
 		}
 
@@ -1050,14 +1065,9 @@ void AMyRobo::EquipWeaponToSlot(AWeapon* WeaponToPickup, EWeaponSlot Slot)
 			{
 				OldWeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			}
-
 			BoxOwner->SetSpawnedWeapon(OldWeapon);
 		}
-
 	}
-
-
-
 }
 
 void AMyRobo::PickupAcquirableTool()

@@ -13,10 +13,16 @@ UStateComponent::UStateComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> HitEffectFinder(TEXT("/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Smoke/P_Smoke_A.P_Smoke_A"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> HitEffectFinder(TEXT("/Game/BluePrint/Effect/P_Smoke_A.P_Smoke_A"));
 	if (HitEffectFinder.Succeeded())
 	{
 		HitEffect = HitEffectFinder.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SwimBubbleEffectFinder(TEXT("/Game/BluePrint/Effect/P_Bubbles_A.P_Bubbles_A"));
+	if (SwimBubbleEffectFinder.Succeeded())
+	{
+		SwimBubbleEffect = SwimBubbleEffectFinder.Object;
 	}
 }
 
@@ -43,6 +49,28 @@ void UStateComponent::BeginPlay()
 			if (HitEffectComponent)
 			{
 				HitEffectComponent->SetVisibility(false);
+			}
+		}
+	}
+
+	if (SwimBubbleEffect && !SwimBubbleEffectComponent)
+	{
+		USkeletalMeshComponent* OwnerMesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+		if(OwnerMesh)
+		{
+			SwimBubbleEffectComponent = UGameplayStatics::SpawnEmitterAttached(
+				SwimBubbleEffect,
+				OwnerMesh,
+				TEXT("BubbleSocket"),
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				EAttachLocation::SnapToTarget,
+				false
+			);
+
+			if (SwimBubbleEffectComponent)
+			{
+				SwimBubbleEffectComponent->SetVisibility(false);
 			}
 		}
 	}
@@ -97,6 +125,14 @@ void UStateComponent::TakeDamage(float DamageAmount, const FHitResult& HitResult
 			GetWorld()->GetTimerManager().ClearTimer(HitEffectTimerHandle);
 			SetComponentTickEnabled(true);
 		}
+	}
+}
+
+void UStateComponent::ShowSwimBubbleEffect(bool bShow)
+{
+	if (SwimBubbleEffectComponent)
+	{
+		SwimBubbleEffectComponent->SetVisibility(bShow);
 	}
 }
 

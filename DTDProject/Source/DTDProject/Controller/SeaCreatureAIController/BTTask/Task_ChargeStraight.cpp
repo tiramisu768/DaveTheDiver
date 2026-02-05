@@ -26,6 +26,8 @@ EBTNodeResult::Type UTask_ChargeStraight::ExecuteTask(UBehaviorTreeComponent& Ow
 		return EBTNodeResult::Failed;
 	}
 
+	SeaCreature->StartEffect();
+
 	SeaCreature->MovementComponent->MaxSpeed = SeaCreature->GetData()->ChaseSpeed;
 	SeaCreature->MovementComponent->Acceleration = SeaCreature->GetData()->Acceleration;
 
@@ -107,4 +109,18 @@ void UTask_ChargeStraight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 		FRotator TargetRotation = Dir.Rotation();
 		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
 	}
+}
+
+void UTask_ChargeStraight::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (AIController)
+	{
+		ASeaCreature* SeaCreature = Cast<ASeaCreature>(AIController->GetPawn());
+		if (SeaCreature)
+		{
+			SeaCreature->StopEffect();
+		}
+	}
+	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }

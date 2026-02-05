@@ -21,12 +21,15 @@
 #include "Animation/AnimInstance.h"
 #include "AIController.h"
 #include "BrainComponent.h"
+#include "Controller/SeaCreatureAIController/SeaCreatureAIController.h" 
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
 #include "SeaCreature/AttackStrategy.h"
 #include "SeaCreature/AggressiveAttackStrategy.h"
 #include "SeaCreature/TerritorialAttackStrategy.h"
+#include "Sound/SoundManagerSubsystem.h"
 
 ASeaCreature::ASeaCreature()
 {
@@ -387,6 +390,12 @@ void ASeaCreature::OnHitMontageEnded(bool bInterrupted)
 	{
 		if (AAIController* AIController = Cast<AAIController>(GetController()))
 		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, false);
+				BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsReadyToAttackKey, false);
+			}
+
 			if (UBrainComponent* Brain = AIController->GetBrainComponent())
 			{
 				Brain->ResumeLogic(TEXT("Hit"));
@@ -477,6 +486,30 @@ void ASeaCreature::StopAIBehavior()
 	if (MovementComponent)
 	{
 		MovementComponent->Velocity = FVector::ZeroVector;
+	}
+}
+
+void ASeaCreature::StartEffect()
+{
+	/*if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GameInstance->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::Player_Swim);
+		}
+	}*/
+
+	if (FishStateComponent)
+	{
+		FishStateComponent->ShowSwimBubbleEffect(true);
+	}
+}
+
+void ASeaCreature::StopEffect()
+{
+	if (FishStateComponent)
+	{
+		FishStateComponent->ShowSwimBubbleEffect(false);
 	}
 }
 

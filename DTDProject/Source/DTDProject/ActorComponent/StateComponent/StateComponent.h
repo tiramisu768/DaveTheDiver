@@ -22,12 +22,12 @@ public:
 
 	UStateComponent();
 
-	//void SetDamage(float NewDamage) { Damage = NewDamage; }
 	float GetHPPercent() const { return CurrentHP / MaxHP; }
 	virtual void SetHP(float NewHP);
 	virtual void SetMaxHP(float NewMaxHP);
 	virtual void TakeDamage(float DamageAmount, const FHitResult& HitResult);
 	bool IsDead() const { return CurrentHP <= 0.0f; }
+	void ShowSwimBubbleEffect(bool bShow);
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
@@ -40,11 +40,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	TObjectPtr<UParticleSystem> HitEffect;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TObjectPtr<UParticleSystem> SwimBubbleEffect;
+
 private:
 	void HideHitEffect();
 
 	UPROPERTY()
 	TObjectPtr<UParticleSystemComponent> HitEffectComponent;
+
+	UPROPERTY()
+	TObjectPtr<UParticleSystemComponent> SwimBubbleEffectComponent;
 
 	FTimerHandle HitEffectTimerHandle;
 };

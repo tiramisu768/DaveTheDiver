@@ -182,6 +182,10 @@ public:
 
 	bool IsTracker() const { return bTracker; }
 
+	void StartEffect();
+
+	void StopEffect();
+
 protected:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI")
 	bool bTracker = true;

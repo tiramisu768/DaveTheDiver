@@ -243,6 +243,7 @@ private:
 #pragma endregion
 
 #pragma region Water
+	bool bWasSwimmingAndMoving = false;
 	float DepthBelowSurface = 0.f; // +면 수면 아래, -면 수면 위
 #pragma endregion
 };

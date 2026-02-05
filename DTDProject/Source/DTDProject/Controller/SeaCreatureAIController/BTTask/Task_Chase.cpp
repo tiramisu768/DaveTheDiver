@@ -7,6 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "SeaCreature/SeaCreature.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "ActorComponent/StateComponent/StateComponent.h"
 
 UTask_Chase::UTask_Chase()
 {
@@ -23,6 +24,8 @@ EBTNodeResult::Type UTask_Chase::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 	{
 		return EBTNodeResult::Failed;
 	}
+
+	SeaCreature->StartEffect();
 
 	SeaCreature->MovementComponent->MaxSpeed = SeaCreature->GetData()->ChaseSpeed;
 	SeaCreature->MovementComponent->Acceleration = SeaCreature->GetData()->Acceleration;
@@ -89,4 +92,18 @@ void UTask_Chase::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
 		FRotator TargetRotation = Dir.Rotation();
 		SeaCreature->SetActorRotation(FMath::RInterpTo(SeaCreature->GetActorRotation(), TargetRotation, DeltaSeconds, 2.0f));
 	}
+}
+
+void UTask_Chase::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (AIController)
+	{
+		ASeaCreature* SeaCreature = Cast<ASeaCreature>(AIController->GetPawn());
+		if (SeaCreature)
+		{
+			SeaCreature->StopEffect();
+		}
+	}
+	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }

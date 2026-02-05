@@ -18,6 +18,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "Save/PlayerSave.h"
+#include "Sound/SoundManagerSubsystem.h"
+#include "Sound/SoundData.h"
 
 void UMainUI::NativeConstruct()
 {
@@ -261,7 +263,13 @@ FVector2D UMainUI::GetCrosshairScreenPosition() const
 //코인 정산 및 결과창 닫기
 void UMainUI::HandleResultConfirmRequested(bool bSuccess, int32 SelectedIndex)
 {
-	UE_LOG(LogTemp, Log, TEXT("success=%d selectedIdx=%d"),bSuccess?1:0,SelectedIndex);
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::UI_Confirm);
+		}
+	}
 
 	UPlayerSave* Save = nullptr;
 	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
@@ -348,6 +356,14 @@ void UMainUI::HandleResultConfirmed(bool bSuccess)
 // 구매창 
 void UMainUI::HandleShopConfirmRequested()
 {
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::UI_Confirm);
+		}
+	}
+
 	if (APlayerController* PlayerController = GetOwningPlayer())
 	{
 		PlayerController->SetPause(false);

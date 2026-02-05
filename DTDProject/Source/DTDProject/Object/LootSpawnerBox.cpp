@@ -56,38 +56,6 @@ void ALootSpawnerBox::OnBoxOpened()
 	SpawnLoot();
 }
 
-void ALootSpawnerBox::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	Super::OnBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
-	if (AMyRobo* Robo = Cast<AMyRobo>(OtherActor))
-	{
-		// 상자가 이미 열려있고, 스폰된 아이템이 있다면 획득 가능하도록 설정합니다.
-		if (IsOpen)
-		{
-			if (IsValid(SpawnedWeapon))
-			{
-				Robo->SetAcquirableActor(SpawnedWeapon);
-			}
-			else if (IsValid(SpawnedTool))
-			{
-				Robo->SetAcquirableActor(SpawnedTool);
-			}
-		}
-	}
-}
-
-void ALootSpawnerBox::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	Super::OnEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
-
-	if (AMyRobo* Robo = Cast<AMyRobo>(OtherActor))
-	{
-		// 로봇이 영역을 떠나면 획득 가능한 아이템 설정을 모두 해제합니다.
-		Robo->SetAcquirableActor(nullptr);
-	}
-}
-
 void ALootSpawnerBox::SpawnLoot()
 {
 	switch (LootType)
@@ -118,10 +86,6 @@ void ALootSpawnerBox::HandleSpawnWeapon()
 		if (IsValid(SpawnedWeapon))
 		{
 			SpawnedWeapon->RowName = SpecificWeaponToSpawn.RowName;
-			if (IsValid(CurrentInteractingRobo))
-			{
-				CurrentInteractingRobo->SetAcquirableActor(SpawnedWeapon);
-			}
 		}
 	}
 }
@@ -134,11 +98,6 @@ void ALootSpawnerBox::HandleSpawnTool()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnedTool = GetWorld()->SpawnActor<APickupItem>(ToolPickupClass, GetSpawnInFrontOfBox(), FRotator::ZeroRotator, SpawnParams);
-
-	if (IsValid(SpawnedTool) && IsValid(CurrentInteractingRobo))
-	{
-		CurrentInteractingRobo->SetAcquirableActor(SpawnedTool);
-	}
 }
 
 FVector ALootSpawnerBox::GetSpawnInFrontOfBox(float ZOffset, float ForwardDist) const

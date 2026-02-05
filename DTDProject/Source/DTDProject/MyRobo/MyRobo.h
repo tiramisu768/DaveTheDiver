@@ -219,6 +219,8 @@ private:
 	FName ToolSocketName;
 
 	FVector2D RangedTargetScreenPosition;
+
+	void EquipWeaponToSlot(AWeapon* WeaponToPickup, EWeaponSlot Slot);
 #pragma endregion
 
 #pragma region Interaction

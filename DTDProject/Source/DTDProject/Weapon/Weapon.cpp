@@ -7,6 +7,7 @@
 #include "GameFrameWork/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
@@ -14,14 +15,19 @@ AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	ParentMesh = CreateDefaultSubobject<USceneComponent>(TEXT("ParentMesh"));
+	CollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionComponent"));
+	SetRootComponent(CollisionComponent);
 
-	RootComponent = ParentMesh;
+	CollisionComponent->SetCollisionProfileName(TEXT("Weapon"));
+	CollisionComponent->SetGenerateOverlapEvents(true);
+	CollisionComponent->SetBoxExtent(FVector(50.f, 50.f, 50.f));
 
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
+	WeaponMesh->SetupAttachment(CollisionComponent);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	WeaponMesh->SetupAttachment(RootComponent);
-
+	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnBeginOverlap);
+	CollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnEndOverlap);
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +43,23 @@ void AWeapon::BeginPlay()
 	if (WeaponStats)
 	{
 		CurrentAmmo = WeaponStats->MaxAmmo;
+	}
+}
+
+void AWeapon::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (AMyRobo* Robo = Cast<AMyRobo>(OtherActor))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Weapon Begin"));
+		Robo->SetAcquirableActor(this);
+	}
+}
+
+void AWeapon::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (AMyRobo* Robo = Cast<AMyRobo>(OtherActor))
+	{
+		Robo->SetAcquirableActor(nullptr);
 	}
 }
 

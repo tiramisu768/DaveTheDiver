@@ -19,6 +19,8 @@
 #include "Components/Image.h"
 #include "ActorComponent/InventoryComponent.h"
 #include "ActorComponent/StateComponent/RoboComponent.h"
+#include "Sound/SoundManagerSubsystem.h"
+
 
 AMyCharacterController::AMyCharacterController()
 {
@@ -245,16 +247,11 @@ void AMyCharacterController::OnFireTriggered(const FInputActionValue& value)
 					ControlledRobo->StartFiring(TraceDir);
 				}
 
-				/*FVector2D ScreenPosition = MainWidgetInstance->GetCrosshairScreenPosition();
-
-				IsAttacking = true;
-				ControlledRobo->PerformAttack(ScreenPosition);*/
 			}
 			
 		}
 		else
 		{   //근접 공격
-			//if (IsAttacking) return;
 			IsAttacking = true;
 			ControlledRobo->PerformMeleeAttack();
 		}
@@ -279,6 +276,14 @@ void AMyCharacterController::BeginAim(const FInputActionValue& value)
 {
 	IsAiming = true;
 	IsAttacking = false;
+
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::Player_Aim);
+		}
+	}
 
 	if (MainWidgetInstance)
 	{
@@ -320,6 +325,14 @@ void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 	if (IsAiming) return;
 	//툴전환막는것도 추가해야함
 
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::UI_Switch);
+		}
+	}
+
 	if (MainWidgetInstance)
 	{
 		MainWidgetInstance->PlayWeaponSwitchAnimation(CurrentWeaponIndex);
@@ -343,6 +356,14 @@ void AMyCharacterController::UseToolInput(const FInputActionValue& value)
 
 void AMyCharacterController::SwitchToolInput(const FInputActionValue& value)
 {
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::UI_Switch);
+		}
+	}
+
 	if (ControlledRobo && ControlledRobo->GetInventoryComponent())
 	{
 		ControlledRobo->GetInventoryComponent()->SwitchActiveTool();

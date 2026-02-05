@@ -8,6 +8,8 @@
 #include "Weapon/WeaponData.h"
 #include "Weapon.generated.h"
 
+class UBoxComponent;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGunAmmoUpdated, AWeapon*, Sender, int32, CurrentAmmo, float, CooldownRatio);
 
 UCLASS()
@@ -55,14 +57,17 @@ private:
 
 	bool bIsFiring = false;
 	FVector CurrentFireDirection;
-
+	UFUNCTION()
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtehrBodyIndex);
 	bool ConsumeAmmo(int32 Amount = 1);
 	bool CanFire() const;
 	void StartCooldown();
 	void OnCooldownExpired();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	USceneComponent* ParentMesh;
+	UBoxComponent* CollisionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* WeaponMesh;

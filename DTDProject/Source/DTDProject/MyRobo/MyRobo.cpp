@@ -15,6 +15,7 @@
 #include "ActorComponent/StateComponent/RoboComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "BuoyancyComponent.h"
 #include "WaterBodyComponent.h"
@@ -29,7 +30,7 @@
 #include "Object/InstantRewardBox.h"
 #include "Object/PickupItem.h"
 #include "Animation/AnimInstance.h"
-
+#include "Sound/SoundManagerSubsystem.h"
 
 AMyRobo::AMyRobo()
 {
@@ -286,6 +287,11 @@ void AMyRobo::BeginRangedAim()
 void AMyRobo::EndRangedAim()
 {
 	PlayRangedStopAimMontage();
+
+	if (!bIsFiring)
+	{
+		StartHolsterTimer();
+	}
 }
 
 void AMyRobo::StartFiring(const FVector& FireDirection)
@@ -317,6 +323,15 @@ void AMyRobo::PerformMeleeAttack()
 {
 	if (!MainController.IsValid()) return;
 
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::Weapon_Melee);
+		}
+	}
+
+
 	GetWorld()->GetTimerManager().ClearTimer(HolsterTimerHandle);
 
 	if (MeleeWeapon)
@@ -344,6 +359,29 @@ void AMyRobo::PerformAttack(const FVector2D& ScreenPosition)
 void AMyRobo::FireProjectile()
 {
 	if (!ActiveRangedWeapon || !MainController.IsValid()) return;
+
+	if (ActiveRangedWeapon == HarpoonWeapon)
+	{
+
+		if (GetGameInstance())
+		{
+			if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+			{
+				SM->PlaySFX(ESoundKey::Weapon_Pistol);
+			}
+		}
+	}
+	else if (ActiveRangedWeapon == GunWeapon)
+	{
+
+		if (GetGameInstance())
+		{
+			if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+			{
+				SM->PlaySFX(ESoundKey::Weapon_Shoot);
+			}
+		}
+	}
 
 	// 1. 플레이어의 '진짜 조준 방향'void AMyRobo::FireProjectile()을 컨트롤러로부터 직접 가져옵니다.
 	//    이것이 카메라의 각도와 무관한, 플레이어의 순수한 의도입니다.
@@ -456,6 +494,21 @@ void AMyRobo::StartSpaceHold()
 	if (!AcquirableActor.IsValid() && !CurrentInteractable)
 		return;
 
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			if (CurrentInteractable)
+			{
+				SM->PlaySFX(ESoundKey::Interaction_Start);
+			}
+			else if (AcquirableActor.IsValid())
+			{
+
+				SM->PlaySFX(ESoundKey::Interaction_Pickup); 
+			}
+		}
+	}
 	//길게 누르는 상호작용일 때 카메라 고정한다
 	/*if (!AcquirableActor.IsValid() && CurrentInteractable)
 	{
@@ -608,6 +661,14 @@ void AMyRobo::AttackTrace()
 			ASeaCreature* SeaCreature = Cast<ASeaCreature>(result.GetActor());
 			if (SeaCreature != nullptr)
 			{
+				if (GetGameInstance())
+				{
+					if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+					{
+						SM->PlaySFX(ESoundKey::Player_Hurt);
+					}
+				}
+
 				SeaCreature->HitBy(WeaponDamage, result);
 			}
 		}
@@ -617,6 +678,14 @@ void AMyRobo::AttackTrace()
 void AMyRobo::CollectSeaCreature(ASeaCreature* FishToCollect)
 {
 	if (!FishToCollect || !FishToCollect->GetData()) return;
+
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::Player_Collect);
+		}
+	}
 
 	if(InventoryComponent)
 	{
@@ -635,6 +704,14 @@ void AMyRobo::CollectSeaCreature(ASeaCreature* FishToCollect)
 void AMyRobo::HitBy(AActor* DamageCauser, const FHitResult& HitResult)
 {
 	if (!RoboComponent || !DamageCauser) return;
+
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->PlaySFX(ESoundKey::Player_Hurt);
+		}
+	}
 
 	ASeaCreature* Fish = Cast<ASeaCreature>(DamageCauser);
 
@@ -726,6 +803,10 @@ void AMyRobo::BeginPlay()
 			MeleeWeapon->RowName = TEXT("Melee");
 			MeleeWeapon->PostInitializeComponents();
 			MeleeWeapon->SetActorHiddenInGame(true);
+			if (UBoxComponent* Collision = Cast<UBoxComponent>(MeleeWeapon->GetRootComponent()))
+			{
+				Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
 		}
 	}
 
@@ -738,6 +819,10 @@ void AMyRobo::BeginPlay()
 			HarpoonWeapon->RowName = TEXT("Harpoon");
 			HarpoonWeapon->PostInitializeComponents();
 			HarpoonWeapon->SetActorHiddenInGame(true);
+			if (UBoxComponent* Collision = Cast<UBoxComponent>(HarpoonWeapon->GetRootComponent()))
+			{
+				Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
 		}
 	}
 
@@ -750,6 +835,10 @@ void AMyRobo::BeginPlay()
 			GunWeapon->RowName = TEXT("Gun");
 			GunWeapon->PostInitializeComponents();
 			GunWeapon->SetActorHiddenInGame(true);
+			if (UBoxComponent* Collision = Cast<UBoxComponent>(GunWeapon->GetRootComponent()))
+			{
+				Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
 		}
 	}
 
@@ -881,21 +970,28 @@ void AMyRobo::PickupAcquirableWeapon()
 	AWeapon* WeaponToPickup = Cast<AWeapon>(AcquirableActor.Get());
 	if (!WeaponToPickup) return;
 
-	ALootSpawnerBox* BoxOwner = Cast<ALootSpawnerBox>(AcquirableActor->GetOwner());
+	EWeaponSlot Slot = WeaponToPickup->GetSlotType();
 
-	if (BoxOwner)
+	EquipWeaponToSlot(WeaponToPickup, Slot);
+
+	SetAcquirableActor(nullptr);
+}
+
+void AMyRobo::EquipWeaponToSlot(AWeapon* WeaponToPickup, EWeaponSlot Slot)
+{
+	if (!WeaponToPickup) return;
+
+	AActor* OriginalOwner = WeaponToPickup->GetOwner();
+
+	if (UBoxComponent* Collision = Cast<UBoxComponent>(WeaponToPickup->GetRootComponent()))
 	{
-		WeaponToPickup->ReloadToMax(); //첫 생성에만 풀충전
+		Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
+	AWeapon* OldWeapon = nullptr;
 	FVector DropLocation = WeaponToPickup->GetActorLocation();
 
-	EWeaponSlot SlotToFill = WeaponToPickup->GetSlotType();
-	AWeapon* OldWeapon = nullptr;
-
-	UE_LOG(LogTemp, Log, TEXT("[MyRobo] PickupAcquirableWeapon started for slot: %s"), *UEnum::GetValueAsString(SlotToFill));
-
-	switch (SlotToFill)
+	switch (Slot)
 	{
 	case EWeaponSlot::Melee:
 		OldWeapon = MeleeWeapon;
@@ -911,7 +1007,7 @@ void AMyRobo::PickupAcquirableWeapon()
 		break;
 	}
 
-	if (SlotToFill == EWeaponSlot::Gun && MainController.IsValid())
+	if (Slot == EWeaponSlot::Gun && MainController.IsValid())
 	{
 		if (UMainUI* MainUI = MainController->GetMainUI())
 		{
@@ -926,30 +1022,42 @@ void AMyRobo::PickupAcquirableWeapon()
 		}
 	}
 
-	AcquirableActor->SetOwner(this);
-	AcquirableActor->SetActorHiddenInGame(true);
+	WeaponToPickup->SetOwner(this);
+	WeaponToPickup->SetActorHiddenInGame(true);
+
+	if (ALootSpawnerBox* BoxOwner = Cast<ALootSpawnerBox>(OriginalOwner))
+	{
+		WeaponToPickup->ReloadToMax(); // 상자에서 나온 무기만 풀충전합니다.
+	}
 
 	//UI에 특정 슬롯이 업데이트되었음을 알림
-	OnWeaponSlotUpdated.Broadcast(SlotToFill, WeaponToPickup);
+	OnWeaponSlotUpdated.Broadcast(Slot, WeaponToPickup);
 
 	if (OldWeapon == ActiveRangedWeapon)
 	{
 		ActiveRangedWeapon = WeaponToPickup;
 	}
 
-	if (OldWeapon && BoxOwner)
+	if (OldWeapon)
 	{
-		OldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		OldWeapon->SetActorLocation(DropLocation);
-		OldWeapon->SetActorHiddenInGame(false);
-		BoxOwner->SetSpawnedWeapon(OldWeapon);
-	}
-	else if (BoxOwner)
-	{
-		BoxOwner->ClearSpawnedWeapon();
+		if (ALootSpawnerBox* BoxOwner = Cast<ALootSpawnerBox>(OriginalOwner))
+		{
+			OldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			OldWeapon->SetActorLocation(DropLocation);
+			OldWeapon->SetActorHiddenInGame(false);
+
+			if (UBoxComponent* OldWeaponCollision = Cast<UBoxComponent>(OldWeapon->GetRootComponent()))
+			{
+				OldWeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+
+			BoxOwner->SetSpawnedWeapon(OldWeapon);
+		}
+
 	}
 
-	SetAcquirableActor(nullptr);
+
+
 }
 
 void AMyRobo::PickupAcquirableTool()

@@ -7,20 +7,29 @@
 #include "TimerManager.h"
 #include "Engine/World.h"
 
-void USoundManagerSubsystem::PlaySFX(ESoundKey SoundKey)
+UAudioComponent* USoundManagerSubsystem::PlaySFX(ESoundKey SoundKey)
 {
-	if (!SoundDataTable || SoundKey==ESoundKey::None) return;
+	if (!SoundDataTable || SoundKey==ESoundKey::None) return nullptr;
 
 	const FName SoundName = GetSoundKeyAsName(SoundKey);
-	if (SoundName.IsNone()) return;
+	if (SoundName.IsNone()) return nullptr;
 
 	const FString ContextString = TEXT("SoundManagerSubsystem::PlaySFX");
 	if (FSoundData* Row = SoundDataTable->FindRow<FSoundData>(SoundName, ContextString))
 	{
 		if (USoundBase* SoundToPlay = Row->Sound.LoadSynchronous())
 		{
-			PlaySFX_Internal(SoundToPlay, Row->DefaultVolume);
+			return PlaySFX_Internal(SoundToPlay, Row->DefaultVolume);
 		}
+	}
+	return nullptr;
+}
+
+void USoundManagerSubsystem::StopSFX(UAudioComponent* AudioComponent)
+{
+	if (AudioComponent && AudioComponent->IsPlaying())
+	{
+		AudioComponent->Stop();
 	}
 }
 
@@ -41,14 +50,14 @@ void USoundManagerSubsystem::PlayBGM(ESoundKey SoundKey, bool bLoop)
 	}
 }
 
-void USoundManagerSubsystem::PlaySFX_Internal(USoundBase* Sound, float Volume)
+UAudioComponent* USoundManagerSubsystem::PlaySFX_Internal(USoundBase* Sound, float Volume)
 {
-	if (!Sound) return;
+	if (!Sound) return nullptr;
 	UWorld* World = GetWorld();
-	if (!World) return;
+	if (!World) return nullptr;
 
 	const float FinalVol = MasterVolume * SFXVolume * Volume;
-	UGameplayStatics::PlaySound2D(World, Sound, FinalVol);
+	return UGameplayStatics::SpawnSound2D(World, Sound, FinalVol);
 }
 
 void USoundManagerSubsystem::PlayBGM_Internal(USoundBase* Music, float Volume, bool bLoop)

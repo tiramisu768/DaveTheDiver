@@ -61,7 +61,10 @@ void UTask_FaceAndWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
     {
         if (TargetActor)
         {
-            BlackboardComp->SetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey, TargetActor->GetActorLocation());
+            FVector TargetBaseLocation = TargetActor->GetActorLocation();
+            FVector TargetCenterLocation = TargetBaseLocation + FVector(0.f, 0.f, 50.f);
+
+            BlackboardComp->SetValueAsVector(ASeaCreatureAIController::ChaseTargetLocationKey, TargetCenterLocation);
             BlackboardComp->SetValueAsBool(ASeaCreatureAIController::IsChargingKey, true);
         }
 

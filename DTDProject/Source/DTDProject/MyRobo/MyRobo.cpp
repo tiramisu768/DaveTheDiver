@@ -342,7 +342,14 @@ void AMyRobo::PerformMeleeAttack()
 	{
 		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
 		{
-			SM->PlaySFX(ESoundKey::Weapon_Melee);
+			if (MeleeWeapon->GetClass()->GetName().Contains(TEXT("BP_Melee2")))
+			{
+				SM->PlaySFX(ESoundKey::Weapon_Bat);
+			}
+			else
+			{
+				SM->PlaySFX(ESoundKey::Weapon_Melee);
+			}
 		}
 	}
 
@@ -513,15 +520,16 @@ void AMyRobo::StartSpaceHold()
 	{
 		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
 		{
-			if (CurrentInteractable)
-			{
-				SM->PlaySFX(ESoundKey::Interaction_Start);
-			}
-			else if (AcquirableActor.IsValid())
+			if (AcquirableActor.IsValid())
 			{
 
-				SM->PlaySFX(ESoundKey::Interaction_Pickup); 
+				SM->PlaySFX(ESoundKey::Interaction_Pickup);
 			}
+			else if (CurrentInteractable)
+			{
+				InteractionSoundComponent = SM->PlaySFX(ESoundKey::Interaction_Start);
+			}
+
 		}
 	}
 	//길게 누르는 상호작용일 때 카메라 고정한다
@@ -542,6 +550,14 @@ void AMyRobo::StopSpaceHold()
 	{
 		FocusOnInteractionTarget(nullptr);
 	}*/
+
+	if (GetGameInstance())
+	{
+		if (USoundManagerSubsystem* SM = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>())
+		{
+			SM->StopSFX(InteractionSoundComponent);
+		}
+	}
 
 	if (HoldElapsed < HoldDuration)
 	{

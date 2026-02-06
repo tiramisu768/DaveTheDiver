@@ -20,7 +20,10 @@ class DTDPROJECT_API USoundManagerSubsystem : public UGameInstanceSubsystem
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Sound")
-	void PlaySFX(ESoundKey SoundKey);
+	UAudioComponent* PlaySFX(ESoundKey SoundKey);
+
+	UFUNCTION(BlueprintCallable)
+	void StopSFX(UAudioComponent* AudioComponent);
 
 	UFUNCTION(BlueprintCallable, Category = "Sound")
 	void PlayBGM(ESoundKey SoundKey, bool bLoop = true);
@@ -67,7 +70,7 @@ private:
 	float FadeElapsed = 0.f;
 
 	FName GetSoundKeyAsName(ESoundKey SoundKey) const;
-	void PlaySFX_Internal(USoundBase* Sound, float Volume = 1.0f);
+	UAudioComponent* PlaySFX_Internal(USoundBase* Sound, float Volume = 1.0f);
 	void PlayBGM_Internal(USoundBase* Music, float Volume = 1.0f, bool bLoop = true);
 	void EnsureMusicComponent();
 	void UpdateFadeTick();

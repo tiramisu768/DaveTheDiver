@@ -13,7 +13,7 @@ void AInstantRewardBox::OnBoxOpened()
 	switch (RewardType)
 	{
 	case EInstantRewardType::Ammo:
-		if (AWeapon* ActiveWeapon = CurrentInteractingRobo->GetActiveWeapon())
+		if (AWeapon* ActiveWeapon = CurrentInteractingRobo->GetGunWeapon())
 		{
 			ActiveWeapon->ReloadToMax();
 			UE_LOG(LogTemp, Log, TEXT("[InstantRewardBox] Added ammo to %s"),*ActiveWeapon->GetName());

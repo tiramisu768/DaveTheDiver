@@ -72,6 +72,8 @@ public:
 	UFUNCTION(BlueprintCallable,Category="Weapon")
 	AWeapon* GetActiveWeapon() const;
 
+	AWeapon* GetGunWeapon() const { return GunWeapon; }
+
 	void SetCurrentInteractable(TScriptInterface<IInteractionObject> NewInteractable) { CurrentInteractable = NewInteractable; }
 
 	void ShowLongPressWidget(bool bShow, AActor* TargetActor);
@@ -229,6 +231,9 @@ private:
 
 	TSubclassOf<class UUserWidget> LongPressWidgetClass;
 	TSubclassOf<class UUserWidget> PickupWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> InteractionSoundComponent;
 
 	float HoldDuration = 2.0f;
 	bool IsHolding = false;

@@ -263,10 +263,6 @@ void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 			InventoryComponent->OnToolSlotUpdated.AddUObject(InMainUI, &UMainUI::OnUpdateToolSlot);
 			InventoryComponent->OnActiveToolChanged.AddUObject(InMainUI, &UMainUI::OnChangeActiveTool);
 
-			//최종 결과 보여줄 때
-		/*InventoryComponent->OnInventoryChanged.BindLambda([InMainUI](const TArray<FCaughtFishInfo>& FishList) {
-			InMainUI->ShowCollectedFishNotification(FishList,3.0f);
-			});*/
 		}
 
 		OnSurfaced.AddLambda([this]()

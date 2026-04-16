@@ -102,6 +102,31 @@ public:
 
 	void DieRobo();
 
+	bool DeprojectAimToWorld(FVector& WorldPosition, FVector& WorldDirection);
+	
+	UFUNCTION(Client,Reliable)
+	void Client_DrawAimWidget();
+
+	UFUNCTION(Server,Reliable)
+	void Server_CanAttack();
+
+	UFUNCTION(Server, Reliable)
+	void Server_MeleeAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayMeleeAttackMontage();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetAim(bool bIsAim);
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	//프라이빗으로 옮기기
+	UPROPERTY(Replicated)
+	bool IsAttacking;
+	UPROPERTY(Replicated)
+	bool IsAiming;
+
 protected:
 	virtual void PostInitializeComponents() override;
 

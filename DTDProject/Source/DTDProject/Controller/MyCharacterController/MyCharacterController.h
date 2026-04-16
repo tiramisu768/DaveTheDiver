@@ -26,8 +26,8 @@ class DTDPROJECT_API AMyCharacterController : public APlayerController
 public:
 	AMyCharacterController();
 	UMainUI* GetMainUI() const { return Cast<UMainUI>(MainWidgetInstance); }
-	bool GetIsAttacking() const { return IsAttacking; }
-	void SetIsAttacking(bool bNewState) { IsAttacking = bNewState; }
+	/*bool GetIsAttacking() const { return IsAttacking; }
+	void SetIsAttacking(bool bNewState) { IsAttacking = bNewState; }*/
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void SetupInputComponent() override;
@@ -51,6 +51,8 @@ public:
 	bool DeprojectAimToWorld(FVector& WorldPosition, FVector& WorldDirection);
 	//	bool GetIsMoveInput() const { return isMoveInput; }
 	void EndMyGame(bool IsSuccess);
+
+	void MeleeAttackStart(const FInputActionValue& Value);
 
 private:
 	EPlayerGameState CurrentGameState;
@@ -99,11 +101,11 @@ private:
 	bool isMoveInput{ false };
 #pragma endregion
 	//Aim 상태 관리
-	bool IsAttacking;
+	//bool IsAttacking;
 	FVector AimDirection;
 	FVector2D AimScreenPos;
 
-	bool IsAiming;
+	//bool IsAiming;
 
 	//무기 선택 상태 관리
 	int32 CurrentWeaponIndex = 0;

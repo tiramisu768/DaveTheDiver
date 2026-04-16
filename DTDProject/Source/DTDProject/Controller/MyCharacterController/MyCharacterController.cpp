@@ -189,8 +189,9 @@ void AMyCharacterController::SetupInputComponent()
 
 void AMyCharacterController::MoveInput(const FInputActionValue& value)
 {
+	if (ControlledRobo == nullptr) return;
 	isMoveInput = true;
-	IsAttacking = true;
+	ControlledRobo->IsAttacking = true;
 	FVector2D MoveValue = value.Get<FVector2D>();
 	if (ControlledRobo)
 	{
@@ -201,15 +202,17 @@ void AMyCharacterController::MoveInput(const FInputActionValue& value)
 
 void AMyCharacterController::MoveEndInput(const FInputActionValue& value)
 {
+	if (ControlledRobo == nullptr) return;
 	isMoveInput = false;
-	IsAttacking = false;
+	ControlledRobo->IsAttacking = false;
 }
 
 void AMyCharacterController::LookInput(const FInputActionValue& value)
 {
+	if (ControlledRobo == nullptr) return;
 	FVector2D MoveValue = value.Get<FVector2D>();
 
-	if (!IsAiming)
+	if (!ControlledRobo->IsAiming)
 	{
 		AddYawInput(MoveValue.X);
 		AddPitchInput(MoveValue.Y);
@@ -233,49 +236,50 @@ void AMyCharacterController::DashInput(const FInputActionValue& value)
 
 void AMyCharacterController::OnFireTriggered(const FInputActionValue& value)
 {
-	if (IsAttacking) return;
 
-	if (ControlledRobo)
-	{
-		if (IsAiming)
-		{
-			if(MainWidgetInstance)
-			{
-				FVector TraceStart, TraceDir;
-				if (DeprojectAimToWorld(TraceStart, TraceDir))
-				{
-					ControlledRobo->StartFiring(TraceDir);
-				}
+	ControlledRobo->Server_CanAttack();
+	//if (ControlledRobo->IsAttacking) return;
 
-			}
-			
-		}
-		else
-		{   //근접 공격
-			IsAttacking = true;
-			ControlledRobo->PerformMeleeAttack();
-		}
-	}
+	//if (ControlledRobo)
+	//{
+	//	if (ControlledRobo->IsAiming)
+	//	{
+	//		if(MainWidgetInstance)
+	//		{
+	//			FVector TraceStart, TraceDir;
+	//			if (DeprojectAimToWorld(TraceStart, TraceDir))
+	//			{
+	//				ControlledRobo->StartFiring(TraceDir);
+	//			}
+
+	//		}
+	//	}
+	//	else
+	//	{   //근접 공격
+	//		ControlledRobo->IsAttacking = true;
+	//		ControlledRobo->PerformMeleeAttack();
+	//	}
+	//}
 }
 
 void AMyCharacterController::OnFireStopped(const FInputActionValue& value)
 {
 	if (!ControlledRobo) return;
 
-	if (IsAiming)
+	if (ControlledRobo->IsAiming)
 	{
 		ControlledRobo->StopFiring();
 	}
 	else
 	{
-		IsAttacking = false;
+		ControlledRobo->IsAttacking = false;
 	}
 }
 
 void AMyCharacterController::BeginAim(const FInputActionValue& value)
 {
-	IsAiming = true;
-	IsAttacking = false;
+	ControlledRobo->Server_SetAim(true);
+	ControlledRobo->IsAttacking = false;
 
 	if (GetGameInstance())
 	{
@@ -300,14 +304,14 @@ void AMyCharacterController::BeginAim(const FInputActionValue& value)
 
 void AMyCharacterController::EndAim(const FInputActionValue& value)
 {
-	IsAiming = false;
+	ControlledRobo->Server_SetAim(false);
 
 	if (MainWidgetInstance)
 	{
 		MainWidgetInstance->StopAiming();
 	}
 
-	if (IsAttacking)
+	if (ControlledRobo->IsAttacking)
 	{
 		return;
 	}
@@ -322,7 +326,7 @@ void AMyCharacterController::EndAim(const FInputActionValue& value)
 
 void AMyCharacterController::SwitchWeaponInput(const FInputActionValue& value)
 {
-	if (IsAiming) return;
+	if (ControlledRobo->IsAiming) return;
 	//툴전환막는것도 추가해야함
 
 	if (GetGameInstance())
@@ -446,6 +450,8 @@ bool AMyCharacterController::DeprojectAimToWorld(FVector& WorldPosition, FVector
 
 void AMyCharacterController::EndMyGame(bool IsSuccess)
 {
+	if (!IsLocalPlayerController()) return;
+
 	if (IsPaused()) return;
 
 	SetPause(true);
@@ -461,6 +467,14 @@ void AMyCharacterController::EndMyGame(bool IsSuccess)
 	//{
 	//	GameInstance->OnGameEnded.Broadcast();
 	//}
+}
+
+void AMyCharacterController::MeleeAttackStart(const FInputActionValue& Value)
+{
+	if (ControlledRobo)
+	{
+		ControlledRobo->Server_MeleeAttack();
+	}
 }
 
 void AMyCharacterController::OnPossess(APawn* aPawn)

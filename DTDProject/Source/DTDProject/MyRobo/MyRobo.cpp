@@ -31,6 +31,7 @@
 #include "Object/PickupItem.h"
 #include "Animation/AnimInstance.h"
 #include "Sound/SoundManagerSubsystem.h"
+#include "Net/UnrealNetwork.h"
 
 AMyRobo::AMyRobo()
 {
@@ -265,13 +266,13 @@ void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 
 		}
 
-		OnSurfaced.AddLambda([this]()
+	/*	OnSurfaced.AddLambda([this]()
 			{
 				if (MainController.IsValid())
 				{
 					MainController->EndMyGame(true);
 				}
-			});
+			});*/
 
 		OnWeaponSlotUpdated.AddUObject(InMainUI, &UMainUI::UpdateWeaponSlot);
 
@@ -781,6 +782,43 @@ void AMyRobo::DieRobo()
 	// }
 }
 
+void AMyRobo::Client_DrawAimWidget_Implementation()
+{
+	if (MainController-> GetMainUI())
+	{
+		FVector TraceStart, TraceDir;
+		if (MainController->DeprojectAimToWorld(TraceStart, TraceDir))
+		{
+			StartFiring(TraceDir);
+		}
+
+	}
+}
+
+void AMyRobo::Server_SetAim_Implementation(bool bIsAim)
+{
+	IsAiming = bIsAim;
+}
+
+void AMyRobo::Server_CanAttack_Implementation()
+{
+	if (HasAuthority())
+	{
+		if (IsAttacking) return;
+
+		if (IsAiming)
+		{ //원거리 공격
+			Client_DrawAimWidget_Implementation();
+		}
+		else
+		{   //근접 공격
+			IsAttacking = true;
+			Multicast_PlayMeleeAttackMontage();
+		}
+	}
+}
+
+
 //컴포넌트 초기화 이후 호출, 컨트롤러가 널일 확률 높음
 void AMyRobo::PostInitializeComponents()
 {
@@ -905,6 +943,25 @@ void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEn
 				}
 			}
 		}
+	}
+}
+
+
+void AMyRobo::Server_MeleeAttack_Implementation()
+{
+	if (HasAuthority())
+	{
+		Multicast_PlayMeleeAttackMontage();
+	}
+}
+
+void AMyRobo::Multicast_PlayMeleeAttackMontage_Implementation()
+{
+	if (MeleeWeapon && MeleeWeapon->GetWeaponStats() && MeleeWeapon->GetWeaponStats()->AttackMontage)
+	{
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
+		PlayMontageFullBody(MeleeWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
 	}
 }
 
@@ -1163,10 +1220,11 @@ void AMyRobo::HolsterWeapons()
 
 void AMyRobo::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (MainController.IsValid())
-	{
-		MainController->SetIsAttacking(false);
-	}
+	IsAttacking = false;
+	//if (MainController.IsValid())
+	//{
+	//	MainController->SetIsAttacking(false);
+	//}
 
 	if (!bIsFiring)
 	{
@@ -1205,4 +1263,11 @@ float AMyRobo::GetDepthBelowSurface() const
 		return FMath::Max(0.f, Depth / 100.0f); // cm 단위를 m 단위로 변경
 	}
 	return 0.0f; // 물 밖에 있거나 수면 위에 있으면 0을 반환
+}
+
+void AMyRobo::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AMyRobo, IsAiming);
+	DOREPLIFETIME(AMyRobo, IsAttacking);
 }

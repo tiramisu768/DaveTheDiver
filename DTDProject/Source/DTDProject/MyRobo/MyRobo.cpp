@@ -782,19 +782,6 @@ void AMyRobo::DieRobo()
 	// }
 }
 
-void AMyRobo::Client_DrawAimWidget_Implementation()
-{
-	if (MainController-> GetMainUI())
-	{
-		FVector TraceStart, TraceDir;
-		if (MainController->DeprojectAimToWorld(TraceStart, TraceDir))
-		{
-			StartFiring(TraceDir);
-		}
-
-	}
-}
-
 void AMyRobo::Server_SetAim_Implementation(bool bIsAim)
 {
 	IsAiming = bIsAim;
@@ -808,7 +795,7 @@ void AMyRobo::Server_CanAttack_Implementation()
 
 		if (IsAiming)
 		{ //원거리 공격
-			Client_DrawAimWidget_Implementation();
+			Multicast_DrawAimWidget();
 		}
 		else
 		{   //근접 공격
@@ -920,6 +907,27 @@ void AMyRobo::BeginPlay()
 	}
 }
 
+void AMyRobo::Server_DrawAimWidget_Implementation()
+{
+	if (HasAuthority())
+	{
+		Multicast_DrawAimWidget_Implementation();
+	}
+}
+
+void AMyRobo::Multicast_DrawAimWidget_Implementation()
+{
+	if (MainController->GetMainUI())
+	{
+		FVector TraceStart, TraceDir;
+		if (MainController->DeprojectAimToWorld(TraceStart, TraceDir))
+		{
+			StartFiring(TraceDir);
+		}
+
+	}
+}
+
 void AMyRobo::PlayMontageFullBody(TObjectPtr<UAnimMontage> Montage, FOnMontageEnded& EndDelegate, FName SectionName, float PlayRate)
 {
 	if (Montage == nullptr) return;
@@ -964,6 +972,24 @@ void AMyRobo::Multicast_PlayMeleeAttackMontage_Implementation()
 		PlayMontageFullBody(MeleeWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
 	}
 }
+
+void AMyRobo::Server_RangedAim_Implementation()
+{
+	if (HasAuthority())
+	{
+		Multicast_PlayRangedAttackMontage();
+	}
+}
+
+void AMyRobo::Multicast_PlayRangedAimMontage_Implementation()
+{
+	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AimMontage)
+	{
+		FOnMontageEnded EndDelegate;
+		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AimMontage, EndDelegate, FName("Default"));
+	}
+}
+
 
 void AMyRobo::PlayMeleeAttackMontage()
 {

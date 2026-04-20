@@ -104,8 +104,11 @@ public:
 
 	bool DeprojectAimToWorld(FVector& WorldPosition, FVector& WorldDirection);
 	
-	UFUNCTION(Client,Reliable)
-	void Client_DrawAimWidget();
+	UFUNCTION(Server, Reliable)
+	void Server_DrawAimWidget();
+
+	UFUNCTION(Server, Reliable)
+	void Multicast_DrawAimWidget();
 
 	UFUNCTION(Server,Reliable)
 	void Server_CanAttack();
@@ -115,6 +118,12 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayMeleeAttackMontage();
+
+	UFUNCTION(Server, Reliable)
+	void Server_RangedAim();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayRangedAimMontage();
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetAim(bool bIsAim);

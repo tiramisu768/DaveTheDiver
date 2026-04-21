@@ -91,7 +91,11 @@ void AWeapon::StartFire(ACharacter* OwnerCharacter, const FVector& FireDirection
 	bIsFiring = true;
 	CurrentFireDirection = FireDirection;
 
-	PlayFireMontage(OwnerCharacter);
+	//PlayFireMontage(OwnerCharacter);
+	if (AMyRobo* Robo = Cast<AMyRobo>(OwnerCharacter))
+	{
+		Robo->Multicast_PlayRangedAttackMontage();
+	}
 
 	if (WeaponStats->bAutomatic && WeaponStats->FireRate > 0.f)
 	{
@@ -115,6 +119,7 @@ void AWeapon::StopFire(ACharacter* OwnerCharacter)
 	StopFireMontage(OwnerCharacter);
 }
 
+//ªË¡¶?
 void AWeapon::PlayFireMontage(ACharacter* OwnerCharacter)
 {
 	if (!OwnerCharacter || !WeaponStats) return;

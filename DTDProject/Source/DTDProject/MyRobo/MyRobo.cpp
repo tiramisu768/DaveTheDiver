@@ -285,7 +285,7 @@ void AMyRobo::SetupMainUIReference(UMainUI* InMainUI)
 	}
 }
 
-void AMyRobo::BeginRangedAim()
+void AMyRobo::BeginRangedAim_Implementation()
 {
 	if (GetWorld())
 	{
@@ -293,12 +293,14 @@ void AMyRobo::BeginRangedAim()
 	}
 	CurrentWeaponState = EWeaponState::RangedAttaching;
 	UpdateWeaponAttachments();
-	PlayRangedAimMontage();
+	//PlayRangedAimMontage();
+	Multicast_PlayRangedAimMontage();
 }
 
 void AMyRobo::EndRangedAim()
 {
-	PlayRangedStopAimMontage();
+	//PlayRangedStopAimMontage();
+	Multicast_PlayRangedStopAimMontage();
 
 	if (!bIsFiring)
 	{
@@ -357,10 +359,12 @@ void AMyRobo::PerformMeleeAttack()
 	{
 		CurrentWeaponState = EWeaponState::MeleeAttaching;
 		UpdateWeaponAttachments();
-		PlayMeleeAttackMontage();
+		//PlayMeleeAttackMontage();
+		Multicast_PlayMeleeAttackMontage();
 	}
 }
 
+//삭제?
 void AMyRobo::PerformAttack(const FVector2D& ScreenPosition)
 {
 	if (!MainController.IsValid()) return;
@@ -371,7 +375,8 @@ void AMyRobo::PerformAttack(const FVector2D& ScreenPosition)
 	{
 		RangedTargetScreenPosition = ScreenPosition;
 		StopAnimMontage();
-		PlayRangedAttackMontage();
+		//PlayRangedAttackMontage();
+		Multicast_PlayRangedAttackMontage();
 	}
 }
 // AnimNotify에서 호출될 실제 발사 함수
@@ -787,6 +792,11 @@ void AMyRobo::Server_SetAim_Implementation(bool bIsAim)
 	IsAiming = bIsAim;
 }
 
+void AMyRobo::Server_SetAttack_Implementation(bool bIsAttack)
+{
+	IsAttacking = bIsAttack;
+}
+
 void AMyRobo::Server_CanAttack_Implementation()
 {
 	if (HasAuthority())
@@ -795,12 +805,12 @@ void AMyRobo::Server_CanAttack_Implementation()
 
 		if (IsAiming)
 		{ //원거리 공격
-			Multicast_DrawAimWidget();
+			DrawAimWidget();
 		}
 		else
 		{   //근접 공격
-			IsAttacking = true;
-			Multicast_PlayMeleeAttackMontage();
+			Server_SetAttack(true);
+			PerformMeleeAttack();
 		}
 	}
 }
@@ -907,16 +917,10 @@ void AMyRobo::BeginPlay()
 	}
 }
 
-void AMyRobo::Server_DrawAimWidget_Implementation()
+void AMyRobo::DrawAimWidget()
 {
-	if (HasAuthority())
-	{
-		Multicast_DrawAimWidget_Implementation();
-	}
-}
+	if (MainController->IsLocalController() == false) return;
 
-void AMyRobo::Multicast_DrawAimWidget_Implementation()
-{
 	if (MainController->GetMainUI())
 	{
 		FVector TraceStart, TraceDir;
@@ -977,7 +981,7 @@ void AMyRobo::Server_RangedAim_Implementation()
 {
 	if (HasAuthority())
 	{
-		Multicast_PlayRangedAttackMontage();
+		Multicast_PlayRangedAimMontage();
 	}
 }
 
@@ -990,6 +994,41 @@ void AMyRobo::Multicast_PlayRangedAimMontage_Implementation()
 	}
 }
 
+void AMyRobo::Server_RangedStopAim_Implementation()
+{
+	if (HasAuthority())
+	{
+		Multicast_PlayRangedStopAimMontage();
+	}
+}
+
+void AMyRobo::Multicast_PlayRangedStopAimMontage_Implementation()
+{
+	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AimMontage)
+	{
+		FOnMontageEnded EndDelegate;
+		//EndDelegate.BindUObject(this, &AMyRobo::OnStopAimMontageEnded);
+		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AimMontage, EndDelegate, NAME_None, -1.0f); //NAME_None : 특정 세션으로 점프하지말고, 그냥 처음부터 재생해라.
+	}
+}
+
+void AMyRobo::Server_RangedAttack_Implementation()
+{
+	if (HasAuthority())
+	{
+		Multicast_PlayRangedAttackMontage();
+	}
+}
+
+void AMyRobo::Multicast_PlayRangedAttackMontage_Implementation()
+{
+	if (ActiveRangedWeapon && ActiveRangedWeapon->GetWeaponStats() && ActiveRangedWeapon->GetWeaponStats()->AttackMontage)
+	{
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AMyRobo::OnAttackMontageEnded);
+		PlayMontageFullBody(ActiveRangedWeapon->GetWeaponStats()->AttackMontage, EndDelegate);
+	}
+}
 
 void AMyRobo::PlayMeleeAttackMontage()
 {
@@ -1246,11 +1285,7 @@ void AMyRobo::HolsterWeapons()
 
 void AMyRobo::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	IsAttacking = false;
-	//if (MainController.IsValid())
-	//{
-	//	MainController->SetIsAttacking(false);
-	//}
+	Server_SetAttack(false);
 
 	if (!bIsFiring)
 	{

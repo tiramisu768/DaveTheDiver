@@ -191,7 +191,7 @@ void AMyCharacterController::MoveInput(const FInputActionValue& value)
 {
 	if (ControlledRobo == nullptr) return;
 	isMoveInput = true;
-	ControlledRobo->IsAttacking = true;
+	ControlledRobo->Server_SetAttack(true);
 	FVector2D MoveValue = value.Get<FVector2D>();
 	if (ControlledRobo)
 	{
@@ -204,7 +204,7 @@ void AMyCharacterController::MoveEndInput(const FInputActionValue& value)
 {
 	if (ControlledRobo == nullptr) return;
 	isMoveInput = false;
-	ControlledRobo->IsAttacking = false;
+	ControlledRobo->Server_SetAttack(false);
 }
 
 void AMyCharacterController::LookInput(const FInputActionValue& value)
@@ -272,14 +272,14 @@ void AMyCharacterController::OnFireStopped(const FInputActionValue& value)
 	}
 	else
 	{
-		ControlledRobo->IsAttacking = false;
+		ControlledRobo->Server_SetAttack(false);
 	}
 }
 
 void AMyCharacterController::BeginAim(const FInputActionValue& value)
 {
 	ControlledRobo->Server_SetAim(true);
-	ControlledRobo->IsAttacking = false;
+	ControlledRobo->Server_SetAttack(false);
 
 	if (GetGameInstance())
 	{

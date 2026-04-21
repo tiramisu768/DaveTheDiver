@@ -52,6 +52,7 @@ public:
 
 	void SetupMainUIReference(UMainUI* InMainUI);
 
+	UFUNCTION(Server,Reliable)
 	void BeginRangedAim();
 
 	void EndRangedAim();
@@ -103,12 +104,8 @@ public:
 	void DieRobo();
 
 	bool DeprojectAimToWorld(FVector& WorldPosition, FVector& WorldDirection);
-	
-	UFUNCTION(Server, Reliable)
-	void Server_DrawAimWidget();
 
-	UFUNCTION(Server, Reliable)
-	void Multicast_DrawAimWidget();
+	void DrawAimWidget();
 
 	UFUNCTION(Server,Reliable)
 	void Server_CanAttack();
@@ -126,7 +123,22 @@ public:
 	void Multicast_PlayRangedAimMontage();
 
 	UFUNCTION(Server, Reliable)
+	void Server_RangedStopAim();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayRangedStopAimMontage();
+
+	UFUNCTION(Server, Reliable)
+	void Server_RangedAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayRangedAttackMontage();
+
+	UFUNCTION(Server, Reliable)
 	void Server_SetAim(bool bIsAim);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetAttack(bool bIsAttack);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 

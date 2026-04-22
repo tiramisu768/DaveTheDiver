@@ -308,6 +308,13 @@ void AMyRobo::EndRangedAim()
 	}
 }
 
+void AMyRobo::Server_StartFiring_Implementation(const FVector& FireDirection)
+{
+	if (!HasAuthority()) return;
+
+	StartFiring(FireDirection);
+}
+
 void AMyRobo::StartFiring(const FVector& FireDirection)
 {
 	if (GetWorld())
@@ -917,7 +924,7 @@ void AMyRobo::BeginPlay()
 	}
 }
 
-void AMyRobo::DrawAimWidget()
+void AMyRobo::DrawAimWidget_Implementation()
 {
 	if (MainController->IsLocalController() == false) return;
 
@@ -926,7 +933,7 @@ void AMyRobo::DrawAimWidget()
 		FVector TraceStart, TraceDir;
 		if (MainController->DeprojectAimToWorld(TraceStart, TraceDir))
 		{
-			StartFiring(TraceDir);
+			Server_StartFiring(TraceDir);
 		}
 
 	}

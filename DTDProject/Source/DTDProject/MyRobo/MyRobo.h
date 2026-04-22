@@ -57,6 +57,9 @@ public:
 
 	void EndRangedAim();
 
+	UFUNCTION(Server,Reliable)
+	void Server_StartFiring(const FVector& FireDirection);
+
 	void StartFiring(const FVector& FireDirection);
 
 	void StopFiring();
@@ -105,6 +108,7 @@ public:
 
 	bool DeprojectAimToWorld(FVector& WorldPosition, FVector& WorldDirection);
 
+	UFUNCTION(Client,Reliable)
 	void DrawAimWidget();
 
 	UFUNCTION(Server,Reliable)

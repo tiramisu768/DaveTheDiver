@@ -9,6 +9,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -158,6 +159,75 @@ void AWeapon::StopFireMontage(ACharacter* OwnerCharacter)
 	}
 }
 
+void AWeapon::Server_SpawnBullet_Implementation(const FVector& Direction)
+{
+	if (HasAuthority())
+	{
+		Multicast_SpawnProjectileAtMuzzle(Direction);
+	}
+}
+
+void AWeapon::Multicast_SpawnProjectileAtMuzzle_Implementation(const FVector& Direction)
+{
+	if (!WeaponStats)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SpawnProjectileAtMuzzle: WeaponStats null on %s"), *GetName());
+		return;
+	}
+
+	// 발사 가능 여부(쿨다운/탄약 등)
+	if (!CanFire())
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("SpawnProjectileAtMuzzle: CanFire() false on %s"), *GetName());
+		return;
+	}
+
+	// 탄약 소모 (AnimNotify 경로에서도 탄약을 소비해야 함)
+	if (!ConsumeAmmo(WeaponStats->AmmoPerShot))
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("SpawnProjectileAtMuzzle: ConsumeAmmo failed on %s"), *GetName());
+		return;
+	}
+
+	// 실제 스폰
+	if (!WeaponStats->BulletData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SpawnProjectileAtMuzzle: BulletData null for weapon Row '%s'"), *RowName.ToString());
+		StartCooldown();
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	FVector SpawnLocation = GetMuzzleLocation();
+	FRotator SpawnRotation = Direction.Rotation();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.Instigator = Cast<APawn>(GetOwner());
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	ABullet* SpawnedBullet = World->SpawnActor<ABullet>(WeaponStats->BulletData, SpawnLocation, SpawnRotation, SpawnParams);
+
+	if (SpawnedBullet)
+	{
+		if (WeaponStats->ProjectileSpeed > 0.f)
+		{
+			const float LifeSpan = WeaponStats->Range / WeaponStats->ProjectileSpeed;
+			SpawnedBullet->SetLifeSpan(LifeSpan);
+		}
+
+		if (UProjectileMovementComponent* ProjMove = SpawnedBullet->FindComponentByClass<UProjectileMovementComponent>())
+		{
+			ProjMove->InitialSpeed = WeaponStats->ProjectileSpeed;
+			ProjMove->MaxSpeed = WeaponStats->ProjectileSpeed;
+			SpawnedBullet->Damage = WeaponStats->Damage;
+		}
+	}
+	StartCooldown();
+}
+
 void AWeapon::SpawnProjectileAtMuzzle(const FVector& Direction)
 {
 	if (!WeaponStats)
@@ -247,6 +317,7 @@ void AWeapon::TryFire(ACharacter* OwnerCharacter, const FVector& FireDirection)
 	}
 
 	SpawnProjectileAtMuzzle(FireDirection);
+	//Server_SpawnBullet(FireDirection);
 
 	StartCooldown();
 }

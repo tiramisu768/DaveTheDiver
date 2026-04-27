@@ -33,6 +33,13 @@ public:
 	void StopFire(ACharacter* OwnerCharacter);
 	void PlayFireMontage(ACharacter* OwnerCharacter);
 	void StopFireMontage(ACharacter* OwnerCharacter);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnBullet(const FVector& Direction);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnProjectileAtMuzzle(const FVector& Direction);
+
 	void SpawnProjectileAtMuzzle(const FVector& Direction);
 	virtual void TryFire(ACharacter* OwnerCharacter, const FVector& FireDirection = FVector::ZeroVector);
 	void ReloadToMax();

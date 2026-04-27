@@ -454,7 +454,7 @@ void AMyRobo::FireProjectile()
 
 	//DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + FireDirection * 10000.f, FColor::Green, false, 2.0f, 0, 1.f);
 
-	ActiveRangedWeapon->SpawnProjectileAtMuzzle(FireDirection);
+	ActiveRangedWeapon->Server_SpawnBullet(FireDirection);
 }
 //원거리 무기 교체
 void AMyRobo::SwitchActiveRangedWeapon()
@@ -866,6 +866,7 @@ void AMyRobo::BeginPlay()
 		MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultMeleeWeaponClass, SpawnParams);
 		if(MeleeWeapon)
 		{
+			MeleeWeapon->SetOwner(this);
 			MeleeWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::
 				SnapToTargetNotIncludingScale, 
 				MeleeWeaponSocketName);
@@ -884,6 +885,7 @@ void AMyRobo::BeginPlay()
 		HarpoonWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultHarpoonWeaponClass, SpawnParams);
 		if (HarpoonWeapon)
 		{
+			HarpoonWeapon->SetOwner(this);
 			HarpoonWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, RangedWeaponSocketName);
 			HarpoonWeapon->RowName = TEXT("Harpoon");
 			HarpoonWeapon->PostInitializeComponents();
@@ -900,6 +902,7 @@ void AMyRobo::BeginPlay()
 		GunWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultGunWeaponClass, SpawnParams);
 		if (GunWeapon)
 		{
+			GunWeapon->SetOwner(this);
 			GunWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, RangedWeaponSocketName);
 			GunWeapon->RowName = TEXT("Gun");
 			GunWeapon->PostInitializeComponents();
@@ -912,6 +915,7 @@ void AMyRobo::BeginPlay()
 	}
 
 	ActiveRangedWeapon = HarpoonWeapon;
+	ActiveRangedWeapon->SetOwner(this);
 	CurrentWeaponState = EWeaponState::Unarmed;
 
 
